@@ -1,0 +1,9 @@
+  Function:  elipstr
+      Desc:  Insert elipsis (...) into middle of fixed with string.
+          : 
+          :  NOTE: uses tput if width not specified thus requires terminal.
+          : 
+  Synopsis:  elipstr "string" [maxwidth]
+          : 
+   Example:  elipstr "the quick brown fox jumped over." 15
+       Url: file:///usr/share/e.bash/e.d/string/elipstr.bash

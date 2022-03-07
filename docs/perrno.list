@@ -1,0 +1,214 @@
+OS  0:  Success
+OS  1:  Operation not permitted
+OS  2:  No such file or directory
+OS  3:  No such process
+OS  4:  Interrupted system call
+OS  5:  Input/output error
+OS  6:  No such device or address
+OS  7:  Argument list too long
+OS  8:  Exec format error
+OS  9:  Bad file descriptor
+OS 10:  No child processes
+OS 11:  Resource temporarily unavailable
+OS 12:  Cannot allocate memory
+OS 13:  Permission denied
+OS 14:  Bad address
+OS 15:  Block device required
+OS 16:  Device or resource busy
+OS 17:  File exists
+OS 18:  Invalid cross-device link
+OS 19:  No such device
+OS 20:  Not a directory
+OS 21:  Is a directory
+OS 22:  Invalid argument
+OS 23:  Too many open files in system
+OS 24:  Too many open files
+OS 25:  Inappropriate ioctl for device
+OS 26:  Text file busy
+OS 27:  File too large
+OS 28:  No space left on device
+OS 29:  Illegal seek
+OS 30:  Read-only file system
+OS 31:  Too many links
+OS 32:  Broken pipe
+OS 33:  Numerical argument out of domain
+OS 34:  Numerical result out of range
+OS 35:  Resource deadlock avoided
+OS 36:  File name too long
+OS 37:  No locks available
+OS 38:  Function not implemented
+OS 39:  Directory not empty
+OS 40:  Too many levels of symbolic links
+OS 42:  No message of desired type
+OS 43:  Identifier removed
+OS 44:  Channel number out of range
+OS 45:  Level 2 not synchronized
+OS 46:  Level 3 halted
+OS 47:  Level 3 reset
+OS 48:  Link number out of range
+OS 49:  Protocol driver not attached
+OS 50:  No CSI structure available
+OS 51:  Level 2 halted
+OS 52:  Invalid exchange
+OS 53:  Invalid request descriptor
+OS 54:  Exchange full
+OS 55:  No anode
+OS 56:  Invalid request code
+OS 57:  Invalid slot
+OS 59:  Bad font file format
+OS 60:  Device not a stream
+OS 61:  No data available
+OS 62:  Timer expired
+OS 63:  Out of streams resources
+OS 64:  Machine is not on the network
+OS 65:  Package not installed
+OS 66:  Object is remote
+OS 67:  Link has been severed
+OS 68:  Advertise error
+OS 69:  Srmount error
+OS 70:  Communication error on send
+OS 71:  Protocol error
+OS 72:  Multihop attempted
+OS 73:  RFS specific error
+OS 74:  Bad message
+OS 75:  Value too large for defined data type
+OS 76:  Name not unique on network
+OS 77:  File descriptor in bad state
+OS 78:  Remote address changed
+OS 79:  Can not access a needed shared library
+OS 80:  Accessing a corrupted shared library
+OS 81:  .lib section in a.out corrupted
+OS 82:  Attempting to link in too many shared libraries
+OS 83:  Cannot exec a shared library directly
+OS 84:  Invalid or incomplete multibyte or wide character
+OS 85:  Interrupted system call should be restarted
+OS 86:  Streams pipe error
+OS 87:  Too many users
+OS 88:  Socket operation on non-socket
+OS 89:  Destination address required
+OS 90:  Message too long
+OS 91:  Protocol wrong type for socket
+OS 92:  Protocol not available
+OS 93:  Protocol not supported
+OS 94:  Socket type not supported
+OS 95:  Operation not supported
+OS 96:  Protocol family not supported
+OS 97:  Address family not supported by protocol
+OS 98:  Address already in use
+OS 99:  Cannot assign requested address
+OS 100: Network is down
+OS 101: Network is unreachable
+OS 102: Network dropped connection on reset
+OS 103: Software caused connection abort
+OS 104: Connection reset by peer
+OS 105: No buffer space available
+OS 106: Transport endpoint is already connected
+OS 107: Transport endpoint is not connected
+OS 108: Cannot send after transport endpoint shutdown
+OS 109: Too many references: cannot splice
+OS 110: Connection timed out
+OS 111: Connection refused
+OS 112: Host is down
+OS 113: No route to host
+OS 114: Operation already in progress
+OS 115: Operation now in progress
+OS 116: Stale file handle
+OS 117: Structure needs cleaning
+OS 118: Not a XENIX named type file
+OS 119: No XENIX semaphores available
+OS 120: Is a named type file
+MySQL 120: Didn't find key on read or update
+OS 121: Remote I/O error
+MySQL 121: Duplicate key on write or update
+OS 122: Disk quota exceeded
+MySQL 122: Internal (unspecified) error in handler
+OS 123: No medium found
+MySQL 123: Someone has changed the row since it was read (while the table was locked to prevent it)
+OS 124: Wrong medium type
+MySQL 124: Wrong index given to function
+OS 125: Operation canceled
+MySQL 125: Undefined handler error 125
+OS 126: Required key not available
+MySQL 126: Index file is crashed
+OS 127: Key has expired
+MySQL 127: Record file is crashed
+OS 128: Key has been revoked
+MySQL 128: Out of memory in engine
+OS 129: Key was rejected by service
+MySQL 129: Undefined handler error 129
+OS 130: Owner died
+MySQL 130: Incorrect file format
+OS 131: State not recoverable
+MySQL 131: Command not supported by database
+OS 132: Operation not possible due to RF-kill
+MySQL 132: Old database file
+OS 133: Memory page has hardware error
+MySQL 133: No record read before update
+MySQL 134: Record was already deleted (or record file crashed)
+MySQL 135: No more room in record file
+MySQL 136: No more room in index file
+MySQL 137: No more records (read after end of file)
+MySQL 138: Unsupported extension used for table
+MySQL 139: Too big row
+MySQL 140: Wrong create options
+MySQL 141: Duplicate unique key or constraint on write or update
+MySQL 142: Unknown character set used in table
+MySQL 143: Conflicting table definitions in sub-tables of MERGE table
+MySQL 144: Table is crashed and last repair failed
+MySQL 145: Table was marked as crashed and should be repaired
+MySQL 146: Lock timed out; Retry transaction
+MySQL 147: Lock table is full; Restart program with a larger locktable
+MySQL 148: Updates are not allowed under a read only transactions
+MySQL 149: Lock deadlock; Retry transaction
+MySQL 150: Foreign key constraint is incorrectly formed
+MySQL 151: Cannot add a child row
+MySQL 152: Cannot delete a parent row
+MySQL 153: No savepoint with that name
+MySQL 154: Non unique key block size
+MySQL 155: The table does not exist in engine
+MySQL 156: The table already existed in storage engine
+MySQL 157: Could not connect to storage engine
+MySQL 158: Unexpected null pointer found when using spatial index
+MySQL 159: The table changed in storage engine
+MySQL 160: There's no partition in table for the given value
+MySQL 161: Row-based binlogging of row failed
+MySQL 162: Index needed in foreign key constraint
+MySQL 163: Upholding foreign key constraints would lead to a duplicate key error in some other table
+MySQL 164: Table needs to be upgraded before it can be used
+MySQL 165: Table is read only
+MySQL 166: Failed to get next auto increment value
+MySQL 167: Failed to set row auto increment value
+MySQL 168: Unknown (generic) error from engine
+MySQL 169: Record is the same
+MySQL 170: It is not possible to log this statement
+MySQL 171: The event was corrupt, leading to illegal data being read
+MySQL 172: The table is of a new format not supported by this version
+MySQL 173: The event could not be processed no other hanlder error happened
+MySQL 174: Got a fatal error during initialzaction of handler
+MySQL 175: File to short; Expected more data in file
+MySQL 176: Read page with wrong checksum
+MySQL 177: Too many active concurrent transactions
+MySQL 178: Record not matching the given partition set
+MySQL 179: Index column length exceeds limit
+MySQL 180: Index corrupted
+MySQL 181: Undo record too big
+MySQL 182: Invalid InnoDB FTS Doc ID
+MySQL 183: Table is being used in foreign key check
+MySQL 184: Tablespace already exists
+MySQL 185: Too many columns
+MySQL 186: Row in wrong partition
+MySQL 187: InnoDB is in read only mode
+MySQL 188: FTS query exceeds result cache memory limit
+MySQL 189: Temporary file write failure
+MySQL 190: Operation not allowed when innodb_forced_recovery > 0
+MySQL 191: Too many words in a FTS phrase or proximity search
+MySQL 192: Foreign key cascade delete/update exceeds max depth
+MySQL 193: Required Create option missing
+MySQL 194: Out of memory in storage engine
+MySQL 195: Table corrupted
+MySQL 196: Query interrupted
+MySQL 197: Tablespace cannot be accessed
+MySQL 198: Tablespace is not empty
+MySQL 199: Incorrect file name
+MySQL 200: Operation is not allowed
+MySQL 201: Compute generate value failed

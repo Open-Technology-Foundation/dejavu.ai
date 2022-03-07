@@ -1,0 +1,11 @@
+  Function:  msg.color.set msg.color
+      Desc:  Turn on/off colorized output from msg.* functions.
+          : 
+  Synopsis:  msg.color.set [on|1][off|0][auto]
+          :  curstatus=$(msg.color.set)
+   Example: 
+          :  oldstatus=$(msg.color.set)
+          :  msg.color.set off
+          :  # do stuff... #
+          :  msg.color.set $oldstatus
+       Url: file:///usr/share/e.bash/e.bash

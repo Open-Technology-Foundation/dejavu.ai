@@ -1,0 +1,32 @@
+#!/bin/bash
+#shellcheck disable=SC2119
+usage() {
+	cat <<-eot
+	Function: post_slug
+	Desc    : Produce a URL-friendly slug string.
+	        :
+	        : String is lowercased, and non-ASCII chars replaced with 
+	        : ASCII-equivalent.
+	        :
+	        : All non-alnum chars are replaced with {replacestr} (default '-')
+	        : 
+	        : Multiple occurances of {replacestr} are reduced to one, and 
+	        : leading and trailing {replacestr} chars removed.
+	        :
+	Synopsis: myslug=$(post_slug \"str\" \[\"replacestr\"\])
+	        :   replstr   is optional, defaults to '-'
+	        :
+	Example : post_slug 'A title, with  Ŝŧřãņġę  cHaracters ()'
+	        : # ^ returns "a-title-with-strange-characters" 
+	        :
+	        : post_slug ' A title, with  Ŝŧřãņġę  cHaracters ()" '_'
+	        : # ^ returns: "a_title_with_strange_characters"
+	        :
+	Depends : iconv
+	eot
+	exit 0
+}
+. e || exit
+[[ $1 == '-h' || $1 == '--help' ]] && usage
+$PRG "$@"
+#fin

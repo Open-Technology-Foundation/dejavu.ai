@@ -1,0 +1,17 @@
+   Program:  lsd
+   Version:  1.0
+      Desc:  Display directory tree. Wrapper script for 'tree'.
+          : 
+  Synopsis:  lsd [Options] [pathspec ...] [--|--tree ...]
+          :  pathspec      If not specified, {pathspec} defaults to
+          :                current directory.
+          : 
+   Options:  -l num        Traverse maximum num levels. Def. 1, 0=420.
+          :  --ls          Output file with 'ls' type listing.
+          :  -n|--nocolor  Don't use color.
+          :  -C|--color    Use color. (Default if terminal.)
+          :  --|--tree     Rest of arguments/options pass to 'tree'.
+          :                (See 'tree --help' for additional options.)
+          : 
+   Depends:  tree
+       Url: file:///usr/share/e.bash/scripts/lsd

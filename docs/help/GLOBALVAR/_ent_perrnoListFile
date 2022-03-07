@@ -1,0 +1,7 @@
+ Globalvar:  _ent_perrnoListFile
+      Desc:  '_ent_perrnoListFile'
+          : 
+   Example:  _ent_perrnoListFile
+          : 
+  See_also: 
+       Url: file:///usr/share/e.bash/e.bash

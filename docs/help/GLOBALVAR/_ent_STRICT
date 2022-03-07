@@ -1,0 +1,7 @@
+ Globalvar:  _ent_STRICT
+      Desc:  '_ent_STRICT'
+          : 
+   Example:  _ent_STRICT
+          : 
+  See_also:  strict.set is.strict
+       Url: file:///usr/share/e.bash/e.bash

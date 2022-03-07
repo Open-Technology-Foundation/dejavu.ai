@@ -1,0 +1,4 @@
+  Function:  exit_if_not_root
+      Desc:  If not root user, print failure message and exit script.
+  Synopsis:  exit_if_not_root
+       Url: file:///usr/share/e.bash/e.bash

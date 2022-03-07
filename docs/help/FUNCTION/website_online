@@ -1,0 +1,5 @@
+  Function:  website_online
+      Desc:  Return true if all website/s are available and online (200 || 301).
+  Synopsis:  website_online "website"...
+   Example:  website_online 'okusi.id' 'okusiassociates.com' && echo 'Online'
+       Url: file:///usr/share/e.bash/e.d/sys/website_online.bash

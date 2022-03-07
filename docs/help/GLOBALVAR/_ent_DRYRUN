@@ -1,0 +1,7 @@
+ Globalvar:  _ent_DRYRUN
+      Desc:  '_ent_DRYRUN'
+          : 
+   Example:  _ent_DRYRUN
+          : 
+  See_also: 
+       Url: file:///usr/share/e.bash/e.bash

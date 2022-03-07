@@ -1,0 +1,14 @@
+  Function:  int2hr
+      Desc:  Convert integer to human-readable string, using SI (base 1000)
+          :  or IEC (1024) for conversion.
+          : 
+  Synopsis:  int2hr number [si|iec] [number [si|iec]]...
+          :    number   is any integer.
+          : 
+   Options:  si|iec   number format (si: 1k=1000, iec: 1K=1024)
+          :           Default format is 'si'.
+          : 
+   Example:  1) int2hr 1000 si 1000 iec 1024 si 1024 iec
+          :  2) int2hr 10382 iec 872929292929 si
+   Depends:  numfmt
+       Url: file:///usr/share/e.bash/e.d/sys/hr2int.bash

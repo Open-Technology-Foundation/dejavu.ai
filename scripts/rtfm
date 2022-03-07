@@ -1,0 +1,143 @@
+#!/bin/bash
+#shellcheck disable=SC2154,SC1090
+#@ Program : rtfm
+#@ Desc    : Read The Fucking Manuals.
+#@         : 
+#@         : Searches for command help, first using
+#@         :     builtin help 
+#@         : then
+#@         :     /usr/bin/man
+#@         : then 
+#@         :     $ENTITIES/e.help 
+#@         : then 
+#@         :     /usr/bin/info.
+#@         : 
+#@         : This program is usefully aliased to 'man':
+#@         : 
+#@         :     alias man='/usr/local/bin/rtfm'
+#@         :
+#@ Synopsis: rtfm [Options] command...
+#@         : Where 'command' is one or a list of commands for which help
+#@         : is requested.
+#@         :
+#@ Options : -m|--man        Search 'man' only.
+#@         : -H|--Help       Search 'help' only.
+#@         : -i|--info       Search 'info' only.
+#@         : -e|--e.bash     Search 'e.bash' only.
+#@         : -E|--allowedit  Prompt to edit source if e.bash file.
+#@:
+#@         : All other options, apart from -m -H -i -E, are passed to 'man' 
+#@         : (eg, -k, -K, dll)
+#@:
+#@ Examples: rtfm rsync
+#@         : rtfm \"xselect\" msg.err
+#@         : rtfm declare
+#@         : rtfm msg.yn rsync msg.err coreutils declare
+#@         :
+#@ Depends : e.bash man info
+set -e
+source e.bash.min || exit
+msg.color.set auto
+version.set '0.9'
+#msg.prefix.set 'rtfm'
+
+declare -a builtins=( job_spec \(\( \. : alias bg bind break builtin caller case cd command compgen complete compopt continue coproc declare dirs disown echo enable eval exec exit export false fc fg for for function getopts hash help history if jobs kill let local logout mapfile popd printf pushd pwd read readarray readonly return select set shift shopt source suspend test time times trap true type typeset ulimit umask unalias unset until variables wait while )
+declare DoMan=1 DoHelp=1 DoInfo=1 DoE=1
+declare -i EEdit=0 Prompt=1
+
+main() {
+	set +e
+	local opts=''
+	(($#)) || set -- --help
+	while (($#)); do case $1 in
+		-m|--man)		DoMan=1; DoHelp=0; DoInfo=0; DoE=0 ;;
+		-H|--Help)	DoMan=0; DoHelp=1; DoInfo=0; DoE=0 ;;
+		-i|--info)	DoMan=0; DoHelp=0; DoInfo=1; DoE=0 ;;
+		-E|--allowedit)
+								EEdit=1
+								DoMan=0; DoHelp=0; DoInfo=0; DoE=1 ;;
+		-e|--e.bash)
+								DoMan=0; DoHelp=0; DoInfo=0; DoE=1 ;;
+		-N|--noprompt)
+								Prompt=0 ;;
+		-V|--version)
+								echo "$PRG vs $(version.set)"; return 0 ;;
+		-h|--help)	_e_usage "${_ent_0}" rtfm; return 0 ;;
+		-[he]*)			#shellcheck disable=SC2046 # expand aggregated short options
+								set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}" ;;
+		-*)					opts+="$1 " ;;
+		*)					rtfm_main "$1" "$opts"
+								opts='' ;;
+	esac; shift; done
+}
+
+rtfm_main() { 
+	local program="${1:-}" opts="${2:-}"
+	local sourcefile
+
+	# help
+	((DoHelp)) && {
+		in_array "$program" "${builtins[@]}" && {
+			builtin help -m "$program" 2>/dev/null |less -FXSR
+			return 0 
+		}
+	}
+
+	# man 
+	((DoMan)) && { 
+		#shellcheck disable=SC2086	
+		/usr/bin/man $opts "$program" 2>/dev/null && return 0;
+	}
+	
+	# e.bash	
+	((DoE)) && {
+	local -a files=()
+	mapfile -t files < \
+			<(find -L "$ENTITIES"/docs/help/{FUNCTION,PROGRAM,SCRIPT,GLOBALVAR,ABOUT,LICENCE,REFERENCE} \
+					-name "$program" -type f 2>/dev/null)
+	if (( (${#files[@]} + DoMan+DoInfo+DoHelp) == 0 )); then
+		mapfile -t files < \
+				<(find -L "$ENTITIES"/docs/help/{FUNCTION,PROGRAM,SCRIPT,GLOBALVAR,ABOUT,LICENCE,REFERENCE} \
+						-name "*${program}*" -type f 2>/dev/null)
+	fi
+	if ((${#files[@]})); then
+		if ((${#files[@]} == 1)); then
+			less -FXS "${files[0]}"
+			if ((EEdit)); then
+				sourcefile=$(grep -im1 "\s*Url\s*:\s*[[:alnum:]/]" "${files[0]}")
+				sourcefile=$(trim "${sourcefile#*([[:blank:]])*[UrlRL]*([[:blank:]]):*([[:blank:]])}")  
+				sourcefile="${sourcefile#file:}"; sourcefile="${sourcefile##*(\/)}"
+				if ((Prompt)); then
+					msg.yn --warning "      Edit: /$sourcefile? " || { >&2 echo; return 0; }
+				fi
+				${EDITOR:-/bin/nano} "/$sourcefile"
+			fi
+			return 0
+		fi
+		while true; do
+			xselect -v program -p 'Select e.bash Help File:' "${files[@]}"
+			[[ ${program:0:1} == '!' ]] && return 0
+			less -FXSR "$program"
+		done
+	fi
+	}
+
+	# info
+	((DoInfo)) & {
+		if /usr/bin/info "$program" 2>/dev/null | grep -m1 -qs "$program"; then
+			/usr/bin/info "$program" 2>/dev/null |less -FXSR
+			return 0 
+		fi
+	}	
+
+	# Give up.
+	msg.err "'$program' not found."
+
+	# search?
+
+	return 1
+}
+
+
+main "$@"
+#fin

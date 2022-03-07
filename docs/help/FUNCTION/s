@@ -1,0 +1,8 @@
+  Function:  s
+      Desc:  Print 's' if number is not 1.
+  Synopsis:  s number
+          : 
+   Example:  num=30; echo "$num file$(s $num) counted."
+          :  num=1;  echo "$num file$(s $num) counted."
+          : 
+       Url: file:///usr/share/e.bash/e.d/string/s.bash

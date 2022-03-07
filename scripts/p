@@ -1,0 +1,247 @@
+#!/bin/bash
+#@ Script  : $PRG
+#@ Desc    : Edit/SyntaxCheck/ShellCheck/Execute for bash and php scripts.
+#@         : 
+#@         : Bash/php scripts without .sh/.bash/.php extensions are 
+#@         : autodetected from the header.
+#@         : 
+#@         : Uses EDITOR (currently '$EDITOR').
+#@         : 
+#@ Synopsis: $PRG [Options] filename
+#@         : Where 'filename' is the file to edit.
+#@         :
+#@ Options : -l row  Position at row on entry to editor.
+#@         : -s      Execute shellcheck after editing.
+#@         : +s      Don't execute shellcheck after editing (default).
+#@         : -x      Execute script after editing (asks first).
+#@         : +x      Don't execute script after editing (default).
+#@         : 
+#@ Requires: shellcheck
+#@         : 
+#shellcheck source=/lib/include/e.bash/e.bash.min
+#source "${ENTITIES:-/lib/include/e.bash}"/e.bash.min || { echo >&2 "$(basename "$0"): Could not open e.bash!"; exit 2; }
+source e.bash.min || { echo >&2 "$(basename "$0"): Could not open e.bash!"; exit 2; }
+	strict.set on
+
+	#on.exit.set on
+	on.exit 'xcleanup $?'
+	
+	# shellcheck disable=SC2154
+	version.set "$_ent_VERSION"
+	msg.verbose.set on
+	msg.color.set on
+	# shellcheck disable=SC2154
+	msg.usetag.set off
+	msg.prefix.set 'p'
+	
+	# global vars	
+	# if by some odd chance e.bash has not already set EDITOR (it should have)
+	if [[ -z "$EDITOR" ]]; then
+		EDITOR="$(command -v joe)" #mefirst
+		[[ -n "$EDITOR" ]] && EDITOR+=' -tab 2 --wordwrap --autoindent'
+		[[ -z "$EDITOR" ]] &&	EDITOR="$(command -v nano)"
+		[[ -z "$EDITOR" ]] &&	EDITOR="$(command -v vi)"
+		[[ -z "$EDITOR" ]] && { msg.err "Envvar EDITOR not set!"; exit 1; }
+	fi
+	export EDITOR
+	
+	declare -x TmpFile="/tmp/$PRG-$$-$RANDOM"
+
+	declare CH9=$'\t'
+
+	declare -i shellcheck=0 syntaxcheck=1 execute=0
+
+main() {
+	local File='' ftype='' ext sx
+	local -i line=0 syntaxerr=0
+	local -a cmd=()
+	while (($#)); do case "$1" in
+		-l|--line)				shift; line=$((${1:-1})) ;;
+		+[[:digit:]*])		line=${1:1} ;;
+		-n|--syntaxcheck)	syntaxcheck=1 ;;
+		+n|-+syntaxcheck)	syntaxcheck=0 ;;
+		-s|--shellcheck)	shellcheck=1 ;;
+		+s|-+shellcheck)	shellcheck=0 ;;
+		-x|--execute)			execute=1 ;;
+		+x|-+execute)			execute=0 ;;
+		-v|--verbose|+q)	msg.verbose.set on ;;
+		-q|--quiet|+v)		msg.verbose.set off ;;
+		-V|--version)			echo "$PRG ${_ent_VERSION}"; return 0;;
+		-h|--help)				_e_usage; return 0 ;;
+		-[lnsxvqVh]*)			#shellcheck disable=SC2046 # expand aggregated short - options
+											set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+		+[nsxvq]*)				#shellcheck disable=SC2046 # expand aggregated short + options
+											set -- '' $(printf -- "+%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+		-*)								msg.err "Bad option '$1'"; return 22 ;;
+		*)								cmd+=( "$1" ) ;;
+	esac; shift; done
+	(( ${#cmd[@]} == 1 )) || { _e_usage; return 1; }
+	
+	File=$(readlink -f "${cmd[0]}") || File="${cmd[0]}"
+	[[ $(basename "$File") == "$(basename "$0")" ]] && msg.die "Not a good idea."
+	[[ $File == "/lib/include/e.bash"* ]] && msg.die "Not a good idea to edit files in this directory."
+		
+	# File not exist!
+	if [[ ! -f "$File" ]]; then
+		# look for likely executable script
+		sx=$(readlink -f "$(command -v "$(basename "$File")")") || true
+		#shellcheck disable=SC2015
+		is.binary "$sx" && msg.die "[$sx] is a binary file." || true
+		if [[ -z $sx ]]; then
+			xselect -v sx -m "Create [$(basename "$File")]" "Locate [$(basename "$File")]" 'Exit'
+			[[ $sx == '!0' ]] && return 1; [[ $sx == '!q' ]] && msg.die ''
+			File=$(str_str "$sx" '[' ']')
+			if [[ "${sx:0:6}" == 'Create' ]]; then
+				xselect -v ftype -m bash php other Exit
+				[[ $ftype == '!0' ]] && return 1; [[ $ftype == '!q' ]] && msg.die
+				if [[ $ftype == 'bash' ]]; then
+					local templ
+					xselect -v templ -f "$ENTITIES/docs/templates/"*.bash -m Exit
+					[[ $templ == '!0' ]] && return 1; [[ $templ == '!q' ]] && msg.die
+					[[ -f "$templ" ]] && { cp "$templ" "$File" && chmod 666 "$File" && chown "$USER" "$File"; }
+				elif [[ $ftype == 'other' ]]; then
+					ftype='text'
+				fi
+			else
+				# locate or create
+				sx=$(basename "$File")
+				mapfile -t arr < <(locate -b "\\$sx")
+				#arr=( $(locate -b "\\$sx") )
+				arr+=( "Create: ${File}" )
+			 	select File in "${arr[@]}"; do 
+					[[ 'q0' == *"$REPLY"* ]] && return 1; [[ -z $File ]] && continue
+					break
+			 	done
+			 	[[ ${File:0:8} == 'Create: ' ]] && File="${File:8}"
+			fi
+		else
+			msg.warn -n "Edit executable [$sx]? (yN) "
+			read -r -n 1 yn; echo
+			[[ ${yn,} == 'y' ]] || exit 1
+			File="$sx"
+		fi
+	fi
+
+	if [[ -z $ftype ]]; then	
+		ext="${File##*.}"
+		if 		[[ $ext == 'php' ]];	then 
+			ftype='php'
+			shellcheck=0
+		elif 	[[ $ext == 'sh'	|| $ext == 'bash' ]]; then 
+			ftype='sh'
+		else
+			ftype=$(textfiletype -t "$File")
+	#		[[ $ftype == 'text' || -z $ftype ]] && ftype='sh'
+			[[ $ext == 'sh'	|| $ext == 'bash' ]] && ftype='sh' 
+		fi
+	fi
+		
+	# Edit it.
+	# shellcheck disable=2046
+	$EDITOR $( ((line)) && echo "+${line}" ) "$File"
+
+	[[ ! -f $File ]] && return 1
+	# has File changed type?
+	if [[ $ftype == 'text' || -z $ftype ]]; then
+		if [[ -n $File ]]; then
+			h=$(head -n 1 "$File")
+			if [[ $h =~ ^\#\!.*/bash.* ]]; then
+				ftype='sh'
+			elif [[ $h =~ ^\#\!.*/php.* || ${h:0:2} == '<?' || ${h:0:5} == '<?php' ]]; then
+				ftype='php'
+			fi
+		fi
+	fi
+
+	# syntax check
+	if ((syntaxcheck)); then
+		syntaxerr=0	
+		if [[ "${ftype}" == 'php' ]]; then
+			msg.info "$(php -l "${File}" 2>&1 | tee "$TmpFile")"
+			hd="$(head -n1 "$TmpFile")"
+			if [[ "${hd:0:9}" != 'No syntax' ]]; then
+				syntaxerr=1
+				l=$(trim "${hd##*on line }")
+				if [[ -z "$l" ]]; then line=0
+													else line=$(( l ))
+				fi
+			fi
+		else
+			if [[ $ftype == 'sh' || $ftype == 'bash' ]]; then
+				msg.info "$(bash -n "${File}" 2>&1 | tee "$TmpFile")bash syntax OK"
+				hd="$(head -n1 "$TmpFile")"
+				if [[ -n $hd ]]; then
+					syntaxerr=1
+					l="${hd##*: line }"
+					l=${l//${CH9}/ }
+					l=$(trim "${l%%:*}")
+					[[ -z "$l" ]] && line=0 || line=$l
+				fi
+			fi
+		fi
+		if ((syntaxerr)); then
+			if msg.yn --warning "Re-edit $File [$line]?"; then
+				# shellcheck disable=SC2046
+				exec "$PRGDIR/$PRG" "$File" --line "$line" $( ((execute)) && echo '-x' )
+				exit
+			fi
+		fi
+	fi
+	
+	## shellcheck
+	if ((shellcheck)) && [[ $ftype == 'sh' || $ftype == 'bash' ]] ; then
+		if [[ -f "$File" ]]; then
+			local -- scdisable
+			# look for #! shellcheck flag for global disables
+			scdisable="$( grep -m 1 '^#\![[:blank:]]*shellcheck[[:blank:]]*disable=' "$File" 2>/dev/null || true)"
+			if [[ -n $scdisable ]]; then
+				scdisable=${scdisable#*=}
+				scdisable=${scdisable//,/ }
+				scdisable="--exclude ${scdisable// /,}"
+			fi
+			# shellcheck disable=SC2086
+			if ! $(command -v shellcheck) --shell=bash ${scdisable} \
+					-o avoid-nullary-conditions \
+					--external-sources \
+					--source-path=$ENTITIES \
+					-x "$File"; then
+				if msg.yn --warning "Re-edit [$File]?"; then
+					# shellcheck disable=SC2046
+					exec "$PRGDIR/$PRG" "$File" --line "${line:-1}" -s $( ((execute)) && echo '-x' )
+					exit
+				fi
+			fi
+			msg.info "shellcheck OK"
+		fi
+	fi
+
+	if ((execute && !syntaxerr)); then
+		if msg.yn "Execute $File?"; then
+			if [[ $ftype == 'php' ]]; then
+				$(command -v php) "$File"
+			elif [[ $ftype == 'sh' ]]; then
+				$(command -v bash) "$File"
+			fi
+		fi
+	fi
+}
+
+
+xcleanup() {
+	local -i exitcode=${1:-$?}
+	[[ -n "$1" ]] && exitcode=$(($1))
+	rm -f "$TmpFile:-jUnK"
+	exit $exitcode
+}
+
+_e_usage() {
+	less -FX < <(
+		while read -r; do
+			printf '%-10s:%s\n' "${REPLY%%:*}" "$(eval "echo \"${REPLY#*:}\"")"
+		done < <(grep '^#[X@][[:blank:][:alnum:]._-]*:'  "${_ent_0:-$0}" \
+								|sed 's/^#[X@][[:blank:]]*//; s/\t/  /g;')
+	)
+}
+
+main "$@"
+#fin

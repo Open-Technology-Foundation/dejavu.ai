@@ -1,0 +1,80 @@
+#!/bin/bash
+#@ Script  : $PRG
+#@ Desc    : Show all e.bash functions and variables.
+#@ Synopsis: $PRG [Options]
+#@ Options : -a|--all    Show e.bash functions and variables.    
+#@         : -f|--funcs  Show e.bash functions.
+#@         : -v|--vars   Show e.bash variables.
+#@         : If no options specified, show varibles.
+#shellcheck source=e.bash.min
+source e.bash.min || exit
+	# shellcheck disable=2154
+	version.set "$_ent_VERSION"
+	msg.verbose.set on
+	on.exit.set on
+	strict.set on
+	msg.prefix.set "$PRG"
+
+	declare -i ShowFuncs=0 ShowVars=0	
+	
+	declare -x nonentities=" CH9 CLNTEMPFILES CR EDITOR IFS LF OLDIFS PRG PRGDIR _ent_TABSET _ent_TABWIDTH _slog_count _slog_file _slog_prefix color0 coloralert colorcrit colorcritical colordebug coloremerg colorerr colorerror colorinfo colornotice colorpanic colorreset colorwarn colorwarning perrnoListFile "
+	declare -x legacyfunctions
+
+main() {
+	local -a funcs=() vars=()
+	local func
+	(($#)) || set -- --vars
+	while (($#)); do case "$1" in
+		-a|--all)				ShowFuncs=1; ShowVars=1 ;;
+		-f|--funcs|functions)
+										ShowFuncs=1 ;;
+		-v|--vars|variables)
+										ShowVars=1 ;;
+		-V|--version)		version.set; echo; return 0 ;;
+		-h|--help)			_e_usage; return 0 ;;
+		-[fvqVh]*)			#shellcheck disable=SC2046 # expand aggregated short options
+										set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+		-?)							msg.die -e 22 "Invalid option '$1'" ;;
+		*)							msg.die -e 22 "Invalid argument '$1'" ;;
+	esac; shift; done
+	((ShowFuncs+ShowVars)) || { _e_usage; return 1; }	
+
+	if ((ShowFuncs)); then
+		legacyfunctions="$(echo ' '; grep '.*().*#X[[:blank:]]*legacy[[:blank:]]X#' "$PRGDIR"/e.bash | while read -r l;do echo -n "${l%\(\)[[:blank:]]*} "; done)" || return 1
+		cmd='source '"$PRGDIR"'/e.bash new || exit; set |/bin/grep "()" |/bin/grep -v "=" |/bin/grep "^[a-zA-Z][a-zA-Z0-9_.]*[[:blank:]]*\(\)" | /bin/grep -v "^$"'
+		funcs=( "$(env -i bash --norc -c "$cmd")" )
+		( for func in ${funcs[*]}; do
+				func=${func//\(\)/}; func=${func// /};
+				[[ -z $func ]] && continue
+				if [[ ! "$legacyfunctions" == *\ $func\ * ]]; then
+					echo "$func"
+				fi
+			done 
+		) | sort -u
+	fi
+	
+	if ((ShowVars)); then		
+		#vars=( "$( env -i bash --norc -c "source $PRGDIR/e.bash new; declare -p | grep 'declare[[:blank:]]*[aAfFgilnprtux-]*[[:blank:]]*[a-zA-Z0-9_]*=' -o | cut -d' ' -f3" )" )
+		declare -a vars
+		mapfile -t vars < <(
+		env bash --norc -c "source $PRGDIR/e.bash new; declare -p | grep 'declare[[:blank:]]*[aAfFgilnprtux-]*[[:blank:]]*[a-zA-Z0-9_.]*=' -o | cut -d' ' -f3" | grep "CH9=\\|CR=\\|EDITOR=\\|ENTITIES=\\|IFS=\\|LF=\\|LOG_\\|OIFS=\\|OLDIFS=\\|PRG=\\|PRGDIR=\\|TIME_STYLE=\\|TMPDIR=\\|_ent_\\|_e_\\|color\\|io_" | LC_ALL=C sort)
+		printf '%s\n' "${vars[@]%=*}"
+
+		## shellcheck disable=SC2068
+		#( for var in ${vars[*]}; do
+		#		var=${var%%=*}
+		#		var=$(echo "$var" | cut -d' ' -f3)
+		#		[[ -z $var ]] && continue
+		#		if [[ $var == _ent_* || $var == _e_* ]]; then
+		#			#echo "$var"
+		#			declare -p "$var"
+		#		else
+		#			[[ ! "${nonentities}" == *\ $var\ * ]] && echo "$var"
+		#		fi
+		#	done 
+		#) | sort -u
+	fi
+}
+
+main "$@"
+#fin

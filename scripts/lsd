@@ -1,0 +1,56 @@
+#!/bin/bash 
+#!shellcheck disable=SC1091,SC2086
+#@ Program : lsd
+#@ Version : $(version.set)
+#@ Desc    : Display directory tree. Wrapper script for 'tree'. 
+#@:
+#@ Synopsis: lsd [Options] [pathspec ...] [--|--tree ...]  
+#@         : pathspec      If not specified, {pathspec} defaults to 
+#@         :               current directory.
+#@:
+#@ Options : -l num        Traverse maximum num levels. Def. 1, 0=420.
+#@         : --ls          Output file with 'ls' type listing.
+#@         : -n|--nocolor  Don't use color.
+#@         : -C|--color    Use color. (Default if terminal.)
+#@         : --|--tree     Rest of arguments/options pass to 'tree'.
+#@         :               (See 'tree --help' for additional options.)
+#@:
+#@ Depends : tree
+source e.bash.min || exit
+	on.exit.set on
+	strict.set on
+	version.set 1.0
+	msg.verbose.set on
+	msg.color.set auto
+
+lsd_main() {
+	local -i Level=1
+	local ls=''
+	declare -a cmd=()
+	while (($#)); do case "$1" in
+		--ls|-ls)				ls='-pugsD --timefmt=%y-%m-%dT%R' ;;
+		-m|--maxdepth|-L|-l|--levels|--level)	
+										shift; Level=${1:-420} ;;
+		-n|--nocolor)		msg.color.set off; cmd+=('-n') ;;
+		-C|--color)			msg.color.set on;	 cmd+=('-C') ;;
+		-V|--version)		echo "$PRG vs $(version.set)"; exit 0 ;;
+		-h|--help)			_e_usage "${_ent_0:-$0}" 'lsd'; return 0 ;;
+		--|--tree)			shift; cmd+=( "$@" ); break ;;
+		-[mlLnCVh]*)		#shellcheck disable=SC2046 # expand aggregated short options
+										set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}" ;;
+		*)							cmd+=( "$1" ) ;;
+	esac; shift; done
+	(( ${#cmd[@]} )) || cmd=( '.' )
+	
+	while [ ! -x "$(command -v tree)" ]; do
+		msg.yn "$PRG: The 'tree' program has not been installed. Install now?" \
+				|| msg.die "$PRG: tree is not installed."
+		msg.info "$PRG: Installing tree program..." ""
+		apt-get -qq install tree || msg.die "$PRG: Could not install tree."
+	done
+
+	$(command -v tree) -d -L "$Level" $ls --dirsfirst "${cmd[@]}"
+}
+
+lsd_main "$@"
+#fin

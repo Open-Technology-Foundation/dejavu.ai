@@ -1,0 +1,15 @@
+ Globalvar:  _ent_EDITOR
+      Desc:  Defines/validates default EDITOR envvar.
+          : 
+          :  Sets value of EDITOR *if* EDITOR is unset/empty.
+          :    1. first priority is SUDO_EDITOR
+          :    2. then SELECTED_EDITOR
+          :    3. then try sourcing $HOME/.selected_editor
+          :    4. test for /etc/alternatives/editor
+          : 
+          :  If none of the above, EDITOR defaults to _ent_EDITOR
+          :  The first argument is tested to see if it is executable.
+          :  If it is not, then EDITOR defaults back to _ent_EDITOR.
+          : 
+  See_also:  EDITOR SUDO_EDITOR SELECTED_EDITOR _ent_EDITOR
+       Url: file:///usr/share/e.bash/e.d/editor.set.bash

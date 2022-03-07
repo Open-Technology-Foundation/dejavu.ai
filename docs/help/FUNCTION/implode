@@ -1,0 +1,9 @@
+  Function:  implode
+      Desc:  Convert array[@] into delimited string.
+          :  Default delimiter is ','
+          : 
+  Synopsis:  implode [-d "delimiter"] "${array[@]}"
+          :    -d  if specified must preceed array.
+          : 
+   Example:  str=$(implode -d '|' "${files[@]}")
+       Url: file:///usr/share/e.bash/e.d/string/impode.bash

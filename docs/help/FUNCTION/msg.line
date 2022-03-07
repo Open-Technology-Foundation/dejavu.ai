@@ -1,0 +1,20 @@
+  Function:  msg.line
+      Desc:  Print a line of replicated characters (default underline)
+          :  from current cursor position to end of screen.
+  Synopsis:  msg.line [repchar [iterations]]
+          :    repchar     Default repchar is '_'.
+          :    iterations  Default iterations is number of screen
+          :                columns minus 1.
+          : 
+          :  If msg.verbose.set is off, return without processing
+          :  further arguments.
+          :  If msg.color.set is enabled, use color.
+          :  If msg.prefix is set, print prefix before string.
+          :  If msg.tab.set is enabled, print tabs.
+          : 
+   Example:  msg.line
+          :  msg.line '+'
+          :  msg.line '=' 42
+          : 
+  See_also:  msg* msg.verbose.set msg.color.set msg.tab.set msg.prefix.set
+       Url: file:///usr/share/e.bash/e.bash

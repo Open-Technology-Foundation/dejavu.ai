@@ -1,0 +1,54 @@
+#!/bin/bash
+#@ Script  : tme
+#@ Version : ${_ent_VERSION:-}
+#@ Desc    : Simplified replacement for 'time' command with
+#@         : report output in the format:
+#@         :     #!tme: myprog took 999 seconds (00:16:39)
+#@         : 
+#@         : Output is to stderr.
+#@         : 
+#@ Synopsis: tme program ...
+#@         : Where 'program' is the program to execute, along 
+#@         : with its parameters.
+#@         : 
+#@ Examples: tme rsync -avl /dev/zero /dev/null
+#@         : tme ssh server0 updatedb
+#@         : 
+	declare PRG _e_PRG; PRG=$(basename "$0")
+	declare -i _e_TME=0 _e_error=0 _e_secs=0
+
+usage() {
+	less -FXSR < <(
+		while read -r; do
+			printf '%-9s:%s\n' "${REPLY%%:*}" "$(eval "echo \"${REPLY#*:}\"")"
+		done < <(grep '^#[X@][[:blank:][:alnum:]._-]*:'  "${_ent_0:-$0}" \
+								|sed 's/^#[X@][[:blank:]]*//; s/\t/  /g; s/\"/\\\\"/g;')
+	)
+}
+(($# == 0)) || [[ ${1:-} == '-h' ]] || [[ ${1:-} == '--help' ]] && { usage; exit 0; }
+
+tme_exit() {
+	_e_secs=$(($(date +%s) - _e_TME))
+	_e_error=${1:-0}
+	>&2 echo
+	(( _e_error == 4)) && >&2 echo '** Aborted with Ctrl-C'
+	>&2 date -d@"$((_e_secs-111600))" +"#!$PRG: $_e_PRG took $_e_secs seconds (%H:%M:%S)"
+	((SHLVL)) && exit "$_e_error"
+	return "$_e_error"
+}
+
+	trap '{ tme_exit 4; }' INT
+
+	_e_PRG=${1:-}
+	if [[ ${_e_PRG} =~ ^ok[[:digit:]]$ || ${_e_PRG} =~ ^[db]ash$ ]]; then
+		_e_PRG+=" ${2:-}"
+	fi
+		
+	_e_TME=$(date +%s)
+
+	"$@"
+
+	tme_exit $?
+
+#fin
+	

@@ -1,0 +1,25 @@
+#!/bin/bash
+#shellcheck disable=SC2119
+usage() {
+	cat <<-eot
+	Function: hr2int
+	Desc    : Return integer from human-readable number text.
+	        : b)ytes  k)ilobytes m)egabytes g)igabytes t)erabytes p)etabytes
+	        :
+	        : Capitalise to use multiples of 1000 (S.I.) instead of 1024.
+	        : 
+	Synopsis: hr2int integer[bkmgtp] [integer[bkmgtp]]...
+	        :
+	Examples: 1) hr2int 34M
+	        : 2) hr2int 34m
+	        : 3) hr2int 34000000
+	        :
+	Requires: numfmt
+	See Also: hr2int (function) int2hr (function/script)
+	eot
+	exit 0
+}
+. e || exit
+[[ $1 == '-h' || $1 == '--help' ]] && usage
+$PRG "$@"
+#fin

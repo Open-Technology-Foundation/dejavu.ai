@@ -1,0 +1,77 @@
+#!/bin/bash
+#!shellcheck disable=SC2249
+#@ Program : mysqlhelp
+#@ Version : $(version.set)
+#@ Desc    : Show 'mysql -c help contents' as a selection menu.
+#@         : 
+#@ Synopsis: mysqlhelp [Options] [searchTopic]
+#@         : 'searchTopic' defaults to 'contents'.
+#@         :
+#@ Options : -v|--verbose   Msg verbose on. (default)
+#@         : -q|--quiet     Msg verbose off.
+#@         : -V|--version   Print version.
+#@ Requires: mysql
+#@ See Also: mysql
+source e.bash.min || exit
+	strict.set on
+	on.exit cleanup
+	version.set '1.0'
+	msg.color.set auto
+	msg.prefix.set "$PRG"
+	msg.usetag.set off
+
+main() {
+	local SearchStr
+	local -a PrevSearchStr=( 'contents' ) Lines=()
+	local -a args=()
+	while (($#)); do case "$1" in
+		-v|--verbose)		msg.verbose.set on ;;
+		-q|--quiet)			msg.verbose.set off ;;
+		-V|--version)		version.set; return 0 ;;
+		-h|--help)			_e_usage "${_ent_0:-$0}" mysqlhelp; return 0 ;;
+		-[vqVh]*)				#shellcheck disable=SC2046 # de-aggregate aggregated short options
+										set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+		-?|--*)					msg.die --errno 22 "Invalid option '$1'" ;;
+		*)							args+=( "$1" ) ;;
+	esac; shift; done
+	if ((${#args[@]})); then
+		SearchStr="${args[*]}"
+	else
+		SearchStr='contents'
+	fi
+	while true; do
+		mapfile -t Lines < <(mysql -e "help $SearchStr"); (( ${#Lines[@]} )) || msg.die "'$SearchStr' is empty"
+		if [[ ${Lines[0]} == *"Name:"* ]]; then
+			( printf '%s\n' "MySQL Help" "${Lines[@]}" ) |less -FXSR
+			SearchStr=${PrevSearchStr[-1]}
+			unset 'PrevSearchStr[-1]'
+		else
+			mapfile -d $'\n' -t Lines < <(printf '%s\n' "${Lines[@]}" | sed 's/^[[:blank:]]*//' | grep -v "^$\|You asked for")
+			msg.line '-'
+			[[ ! -v PrevSearchStr ]] && local -a PrevSearchStr=( 'contents' );
+			(( ${#PrevSearchStr[@]} )) && [[ ${PrevSearchStr[-1]} != "$SearchStr" ]] && PrevSearchStr+=( "$SearchStr" )
+			xselect -v SearchStr \
+					-p "/$(printf '%s' "${PrevSearchStr[@]/%/\/}";) Select: " \
+					-m "${Lines[@]}" \
+					-e '0b^tq' \
+					-H 'Navigation Keys: 0|b=back 1 level; ^|t=top level; q=quit'
+			case $SearchStr in
+				(\!0|\!b)	if ((${#PrevSearchStr[@]} > 1)); then
+										SearchStr=${PrevSearchStr[-2]} 
+										unset 'PrevSearchStr[-1]'
+									else
+										SearchStr=${PrevSearchStr[0]} 
+									fi 
+									;;
+				(\!^|\!t)	SearchStr='contents' 
+									PrevSearchStr=( 'contents' ) 
+									;;
+				(\!q)			true; break 
+									;;
+			esac
+		fi
+	done
+}
+
+main "$@"
+#fin

@@ -1,0 +1,22 @@
+  Function:  on.exit.exec
+      Desc:  Sets a function that must be called on exit from the program.
+          :  The 'cleanup' and 'on.exit.set' functions are enabled, and
+          :  the specified function will be called just before script exit
+          :  (signal EXIT).
+          : 
+          :  Default on.exit.exec is null.
+          : 
+          :  Note that exit trapping is enabled whenever a function
+          :  is passed.  See also on.exit.set.
+          : 
+  Synopsis:  on.exit.exec exitfunction
+          : 
+   Example:  exitroutine() {
+          :    rm -rf "/tmp/tempdir"
+          :    >&2 echo 'Bye.'
+          :  }
+          :  on.exit.exec 'exitroutine'
+          :  ...
+          : 
+  See_also:  cleanup on.exit.set on.exit.function
+       Url: file:///usr/share/e.bash/e.d/sys/on.exit.bash

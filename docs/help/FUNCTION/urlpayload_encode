@@ -1,0 +1,3 @@
+  Function:  urlpayload_encode
+  Synopsis:  urlpayload_encode "payload_string"
+       Url: file:///usr/share/e.bash/e.d/sys/zippayload.bash

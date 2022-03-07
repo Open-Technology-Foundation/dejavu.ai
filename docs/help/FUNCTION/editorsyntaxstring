@@ -1,0 +1,5 @@
+  Function:  editorsyntaxstring
+      Desc:  Return full path and arguments to edit a text file.
+          :  Only editors 'joe' and 'nano' are supported at the moment.
+  Synopsis:  editorsyntaxstring filetype filename
+       Url: file:///usr/share/e.bash/e.d/files/textfiletype.bash

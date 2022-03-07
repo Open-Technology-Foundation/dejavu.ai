@@ -1,0 +1,6 @@
+ Globalvar:  colorreset colordebug colorinfo colornotice colorwarning colorerr colorcrit coloralert coloremerg
+      Desc:  Colors used by e.bash msg.* functions.
+          :  emerg alert crit err warning notice info debug
+          :  panic (dep=emerg) err (dep=error) warning (dep=warn)
+  See_also: 
+       Url: file:///usr/share/e.bash/e.bash

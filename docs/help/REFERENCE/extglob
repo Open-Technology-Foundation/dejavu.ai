@@ -1,0 +1,8 @@
+ Reference:  extglob globstar
+      Desc:  E.bash makes extensive use of globs.
+          :  Thus 'shopt -s extglob globstar' is executed every time
+          :  e.bash is sourced to ensure all functions operate
+          :  correctly.
+          : 
+          : 
+       Url: file:///usr/share/e.bash/e.bash

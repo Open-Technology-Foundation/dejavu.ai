@@ -1,0 +1,16 @@
+#!/bin/bash
+#shellcheck disable=SC2119
+usage() {
+	cat <<-eot
+	Script  : calcfp 
+	Desc    : Simple 'bc' wrapper for floating point expressions. 
+	Synopsis: calcfp numericExpression
+	Requires: bc
+	See Also: calcfp (function)
+	eot
+	exit 0
+}
+. e || exit
+[[ $1 == '-h' || $1 == '--help' ]] && usage
+$PRG "$@"
+#fin

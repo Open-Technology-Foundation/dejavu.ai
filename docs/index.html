@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <meta name="Author" content="Made by 'tree'">
+ <meta name="GENERATOR" content="$Version: $ tree v1.7.0 (c) 1996 - 2014 by Steve Baker, Thomas Moore, Francesc Rocher, Florian Sesser, Kyosuke Tokoro $">
+ <title>entities.bash help files</title>
+ <style type="text/css">
+  <!-- 
+  BODY { font-family : ariel, monospace, sans-serif; }
+  P { font-weight: normal; font-family : ariel, monospace, sans-serif; color: black; background-color: transparent;}
+  B { font-weight: normal; color: black; background-color: transparent;}
+  A:visited { font-weight : normal; text-decoration : none; background-color : transparent; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  A:link    { font-weight : normal; text-decoration : none; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  A:hover   { color : #000000; font-weight : normal; text-decoration : underline; background-color : yellow; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  A:active  { color : #000000; font-weight: normal; background-color : transparent; margin : 0px 0px 0px 0px; padding : 0px 0px 0px 0px; display: inline; }
+  .VERSION { font-size: small; font-family : arial, sans-serif; }
+  .NORM  { color: black;  background-color: transparent;}
+  .FIFO  { color: purple; background-color: transparent;}
+  .CHAR  { color: yellow; background-color: transparent;}
+  .DIR   { color: blue;   background-color: transparent;}
+  .BLOCK { color: yellow; background-color: transparent;}
+  .LINK  { color: aqua;   background-color: transparent;}
+  .SOCK  { color: fuchsia;background-color: transparent;}
+  .EXEC  { color: green;  background-color: transparent;}
+ </style>
+</head>
+<body>
+	<h1>entities.bash help files</h1><p>
+	<a href="help/">help/</a><br>
+	├── <a href="help//ask.yn">ask.yn</a><br>
+	├── <a href="help//breakp">breakp</a><br>
+	├── <a href="help//CH9">CH9</a><br>
+	├── <a href="help//check.dependencies">check.dependencies</a><br>
+	├── <a href="help//cleanbakfiles">cleanbakfiles</a><br>
+	├── <a href="help//cleanup">cleanup</a><br>
+	├── <a href="help//cln">cln</a><br>
+	├── <a href="help//color0">color0</a><br>
+	├── <a href="help//coloralert">coloralert</a><br>
+	├── <a href="help//colorcrit">colorcrit</a><br>
+	├── <a href="help//colorcritical">colorcritical</a><br>
+	├── <a href="help//colordebug">colordebug</a><br>
+	├── <a href="help//coloremerg">coloremerg</a><br>
+	├── <a href="help//coloremergency">coloremergency</a><br>
+	├── <a href="help//colorerr">colorerr</a><br>
+	├── <a href="help//colorerror">colorerror</a><br>
+	├── <a href="help//colorinfo">colorinfo</a><br>
+	├── <a href="help//colornotice">colornotice</a><br>
+	├── <a href="help//colorpanic">colorpanic</a><br>
+	├── <a href="help//colorreset">colorreset</a><br>
+	├── <a href="help//color.set">color.set</a><br>
+	├── <a href="help//colorwarn">colorwarn</a><br>
+	├── <a href="help//colorwarning">colorwarning</a><br>
+	├── <a href="help//CR">CR</a><br>
+	├── <a href="help//debug.set">debug.set</a><br>
+	├── <a href="help//dryrun.set">dryrun.set</a><br>
+	├── <a href="help//__entities__">__entities__</a><br>
+	├── <a href="help//_entities_">_entities_</a><br>
+	├── <a href="help//entities.bash">entities.bash</a><br>
+	├── <a href="help//entities.help">entities.help</a><br>
+	├── <a href="help//_ent_VERSION">_ent_VERSION</a><br>
+	├── <a href="help//exit_if_already_running">exit_if_already_running</a><br>
+	├── <a href="help//exit_if_not_root">exit_if_not_root</a><br>
+	├── <a href="help//File/">File</a><br>
+	│   └── <a href="help//File/IncludeModules">IncludeModules</a><br>
+	├── <a href="help//Function/">Function</a><br>
+	│   ├── <a href="help//Function/askyn">ask.yn</a><br>
+	│   ├── <a href="help//Function/breakp">breakp</a><br>
+	│   ├── <a href="help//Function/check.dependencies">check.dependencies</a><br>
+	│   ├── <a href="help//Function/cleanbakfiles">cleanbakfiles</a><br>
+	│   ├── <a href="help//Function/cleanup">cleanup</a><br>
+	│   ├── <a href="help//Function/cln">cln</a><br>
+	│   ├── <a href="help//Function/color.set">color.set</a><br>
+	│   ├── <a href="help//Function/debug.set">debug.set</a><br>
+	│   ├── <a href="help//Function/dryrun.set">dryrun.set</a><br>
+	│   ├── <a href="help//Function/entities.help">entities.help</a><br>
+	│   ├── <a href="help//Function/exit_if_already_running">exit_if_already_running</a><br>
+	│   ├── <a href="help//Function/exit_if_not_root">exit_if_not_root</a><br>
+	│   ├── <a href="help//Function/is_interactive">is_interactive</a><br>
+	│   ├── <a href="help//Function/is_tty">is_tty</a><br>
+	│   ├── <a href="help//Function/lockfile">lockfile</a><br>
+	│   ├── <a href="help//Function/lockfiles">lockfiles</a><br>
+	│   ├── <a href="help//Function/lockfiles.add">lockfiles.add</a><br>
+	│   ├── <a href="help//Function/lockfiles.delete">lockfiles.delete</a><br>
+	│   ├── <a href="help//Function/lockfiles.delete.all">lockfiles.delete.all</a><br>
+	│   ├── <a href="help//Function/lockfiles.timeout">lockfiles.timeout</a><br>
+	│   ├── <a href="help//Function/ltrim">ltrim</a><br>
+	│   ├── <a href="help//Function/msg">msg</a><br>
+	│   ├── <a href="help//Function/msgcrit">msgcrit</a><br>
+	│   ├── <a href="help//Function/msgdie">msgdie</a><br>
+	│   ├── <a href="help//Function/msgerr">msgerr</a><br>
+	│   ├── <a href="help//Function/msginfo">msginfo</a><br>
+	│   ├── <a href="help//Function/msgline">msgline</a><br>
+	│   ├── <a href="help//Function/msgsys">msgsys</a><br>
+	│   ├── <a href="help//Function/msgwarn">msgwarn</a><br>
+	│   ├── <a href="help//Function/__msgx">__msgx</a><br>
+	│   ├── <a href="help//Function/onoff">onoff</a><br>
+	│   ├── <a href="help//Function/rtrim">rtrim</a><br>
+	│   ├── <a href="help//Function/slog">slog</a><br>
+	│   ├── <a href="help//Function/slog.file">slog.file</a><br>
+	│   ├── <a href="help//Function/slog.prefix">slog.prefix</a><br>
+	│   ├── <a href="help//Function/slog.prefix.eval">slog.prefix.eval</a><br>
+	│   ├── <a href="help//Function/slog.truncate">slog.truncate</a><br>
+	│   ├── <a href="help//Function/strict.set">strict.set</a><br>
+	│   ├── <a href="help//Function/str_str">str_str</a><br>
+	│   ├── <a href="help//Function/synopsis">synopsis</a><br>
+	│   ├── <a href="help//Function/tab.set">tab.set</a><br>
+	│   ├── <a href="help//Function/tab.width">tab.width</a><br>
+	│   ├── <a href="help//Function/trap.function">trap.function</a><br>
+	│   ├── <a href="help//Function/trap.set">trap.set</a><br>
+	│   ├── <a href="help//Function/trim">trim</a><br>
+	│   ├── <a href="help//Function/verbose.set">verbose.set</a><br>
+	│   └── <a href="help//Function/version.set">version.set</a><br>
+	├── <a href="help//Global/">Global</a><br>
+	│   ├── <a href="help//Global/CH9">CH9</a><br>
+	│   ├── <a href="help//Global/color0">color0</a><br>
+	│   ├── <a href="help//Global/coloralert">coloralert</a><br>
+	│   ├── <a href="help//Global/colorcrit">colorcrit</a><br>
+	│   ├── <a href="help//Global/colorcritical">colorcritical</a><br>
+	│   ├── <a href="help//Global/colordebug">colordebug</a><br>
+	│   ├── <a href="help//Global/coloremerg">coloremerg</a><br>
+	│   ├── <a href="help//Global/coloremergency">coloremergency</a><br>
+	│   ├── <a href="help//Global/colorerr">colorerr</a><br>
+	│   ├── <a href="help//Global/colorerror">colorerror</a><br>
+	│   ├── <a href="help//Global/colorinfo">colorinfo</a><br>
+	│   ├── <a href="help//Global/colornotice">colornotice</a><br>
+	│   ├── <a href="help//Global/colorpanic">colorpanic</a><br>
+	│   ├── <a href="help//Global/colorreset">colorreset</a><br>
+	│   ├── <a href="help//Global/colorwarn">colorwarn</a><br>
+	│   ├── <a href="help//Global/colorwarning">colorwarning</a><br>
+	│   ├── <a href="help//Global/CR">CR</a><br>
+	│   ├── <a href="help//Global/__entities__">__entities__</a><br>
+	│   ├── <a href="help//Global/_entities_">_entities_</a><br>
+	│   ├── <a href="help//Global/_ent_VERSION">_ent_VERSION</a><br>
+	│   ├── <a href="help//Global/GlobalCharVars">GlobalCharVars</a><br>
+	│   ├── <a href="help//Global/IFS">IFS</a><br>
+	│   ├── <a href="help//Global/LF">LF</a><br>
+	│   └── <a href="help//Global/OLDIFS">OLDIFS</a><br>
+	├── <a href="help//GlobalCharVars">GlobalCharVars</a><br>
+	├── <a href="help//IFS">IFS</a><br>
+	├── <a href="help//IncludeModules">IncludeModules</a><br>
+	├── <a href="help//Intro/">Intro</a><br>
+	│   └── <a href="help//Intro/entities.bash">entities.bash</a><br>
+	├── <a href="help//is_interactive">is_interactive</a><br>
+	├── <a href="help//is_tty">is_tty</a><br>
+	├── <a href="help//LF">LF</a><br>
+	├── <a href="help//lockfile">lockfile</a><br>
+	├── <a href="help//lockfiles">lockfiles</a><br>
+	├── <a href="help//lockfiles.add">lockfiles.add</a><br>
+	├── <a href="help//lockfiles.delete">lockfiles.delete</a><br>
+	├── <a href="help//lockfiles.delete.all">lockfiles.delete.all</a><br>
+	├── <a href="help//lockfiles.timeout">lockfiles.timeout</a><br>
+	├── <a href="help//ltrim">ltrim</a><br>
+	├── <a href="help//msg">msg</a><br>
+	├── <a href="help//msgcrit">msgcrit</a><br>
+	├── <a href="help//msgdie">msgdie</a><br>
+	├── <a href="help//msgerr">msgerr</a><br>
+	├── <a href="help//msginfo">msginfo</a><br>
+	├── <a href="help//msgline">msgline</a><br>
+	├── <a href="help//msgsys">msgsys</a><br>
+	├── <a href="help//msgwarn">msgwarn</a><br>
+	├── <a href="help//__msgx">__msgx</a><br>
+	├── <a href="help//OLDIFS">OLDIFS</a><br>
+	├── <a href="help//onoff">onoff</a><br>
+	├── <a href="help//rtrim">rtrim</a><br>
+	├── <a href="help//slog">slog</a><br>
+	├── <a href="help//slog.file">slog.file</a><br>
+	├── <a href="help//slog.prefix">slog.prefix</a><br>
+	├── <a href="help//slog.prefix.eval">slog.prefix.eval</a><br>
+	├── <a href="help//slog.truncate">slog.truncate</a><br>
+	├── <a href="help//strict.set">strict.set</a><br>
+	├── <a href="help//str_str">str_str</a><br>
+	├── <a href="help//synopsis">synopsis</a><br>
+	├── <a href="help//tab.set">tab.set</a><br>
+	├── <a href="help//tab.width">tab.width</a><br>
+	├── <a href="help//trap.function">trap.function</a><br>
+	├── <a href="help//trap.set">trap.set</a><br>
+	├── <a href="help//trim">trim</a><br>
+	├── <a href="help//verbose.set">verbose.set</a><br>
+	└── <a href="help//version.set">version.set</a><br>
+	<br><br>
+	</p>
+	<p>
+
+4 directories, 146 files
+	<br><br>
+	</p>
+	<hr>
+	<p class="VERSION">
+		 tree v1.7.0 © 1996 - 2014 by Steve Baker and Thomas Moore <br>
+		 HTML output hacked and copyleft © 1998 by Francesc Rocher <br>
+		 JSON output hacked and copyleft © 2014 by Florian Sesser <br>
+		 Charsets / OS/2 support © 2001 by Kyosuke Tokoro
+	</p>
+</body>
+</html>

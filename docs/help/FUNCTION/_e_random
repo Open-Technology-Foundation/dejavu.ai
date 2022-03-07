@@ -1,0 +1,13 @@
+  Function:  _e_random
+      Desc:  Return random string of characters/numbers/symbols.
+          :  Can be used to generate random passwords.
+          : 
+          :  ${CharSet@A}
+          : 
+  Synopsis:  $PRG [Options]
+   Options:  -n|--numchars num  Number of chars to return. Default $NumChars.
+          : 
+   Example:  newpw=$(_e_random -n 16)
+          : 
+   Depends:  /dev/urandom
+       Url: file:///usr/share/e.bash/e.d/string/random.bash

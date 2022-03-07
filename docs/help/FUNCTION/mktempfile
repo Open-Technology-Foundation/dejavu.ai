@@ -1,0 +1,27 @@
+  Function:  mktempfile
+      Desc:  Make a temporary file.
+          : 
+          :  Template format is:
+          :     /{TMPDIR}/{subdir}/filename.ext
+          : 
+          :  If TMPDIR not specified in environment, defaults to '/tmp'.
+          :  (See: tmpdir.set)
+          : 
+          :  TMPDIR is currently $(tmpdir.set)
+          : 
+  Synopsis:  mktempfile [subdir [filename_base [file_ext]]]
+          :  If subdir not specified, defaults to current value of $PRG.
+          : 
+          :  If filename_base not specified, defaults to current value of
+          :  $PRG.
+          : 
+          :  If file_ext not specified, defaults to '.tmp'. Leading '.' is
+          :  optional.
+          : 
+          :  Return value of '' means failure.
+          :  Filename always echoed to stdout.
+          : 
+   Example:  mytmpfile=$(mktempfile "$PRG" "logs-$(date +%F%T)" log)
+          : 
+  See_also:  tmpdir.set
+       Url: file:///usr/share/e.bash/e.d/files/mktempfile.bash

@@ -1,0 +1,8 @@
+  Function:  exit_if_already_running
+      Desc:  If there is an instance of the script already being run on the
+          :  server, then throw an error message and exit 1 immediately.
+          :  This function is mostly used at the very
+          :  beginning of a script.
+  Synopsis:  exit_if_already_running
+   Example:  exit_if_already_running
+       Url: file:///usr/share/e.bash/e.d/sys/exit_if_already_running.bash

@@ -1,0 +1,6 @@
+    Script:  calcfp
+      Desc:  Simple 'bc' wrapper for floating point expressions.
+  Synopsis:  calcfp numericExpression
+   Depends:  bc
+  See_also:  calcfp (function)
+       Url: file:///usr/share/e.bash/scripts/calcfp

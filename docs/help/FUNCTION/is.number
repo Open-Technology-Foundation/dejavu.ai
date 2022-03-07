@@ -1,0 +1,9 @@
+  Function:  is.number
+      Desc:  Is parameter a number? Return true/false
+  Synopsis:  is.number "numstr"
+          : 
+   Example:  is.number "420"  && echo "$1 is number"  # returns true
+          :  is.number "4.20" && echo "$1 is number"  # returns true
+          :  is.number "4Z20" && echo "$1 is number"  # returns false
+          : 
+       Url: file:///usr/share/e.bash/e.d/string/is.number.bash

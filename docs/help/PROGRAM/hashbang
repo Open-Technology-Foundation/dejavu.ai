@@ -1,0 +1,41 @@
+   Program:  hashbang
+   Version:  1.0
+      Desc:  Use 'find', and optionally 'grep', to search directory for
+          :  files identified as programming scripts, ignoring all other
+          :  files.
+          : 
+          :  Script identification is by hashbang (default type 'bashx')
+          :  or filename extension.
+          : 
+          :  declare -x hb_EXCLUDE='.old .bak help/ cctv/ ~'
+          :  declare -x hb_PRUNE='/gudang /.gudang /dev /help /docs/help /cctv /.git'
+          : 
+  Synopsis:  hashbang [Options] ["startdir"]
+          :  startdir  Directory to start searching (default '.')
+          : 
+   Options:  -s|--search str    Grep file for str.
+          :  -b|--hashbang type File type to search (def. bashx)
+          :                     Accepted types are:
+          :                     bashx (*default, bash+dash+sh), all, bash,
+          :                     dash, sh, php, python, perl
+          :  -X|--hb-exclude    Exclude using envvar hb_EXCLUDE (default).
+          :  -Y|--no-hb-exclude Do not use hb-exclude.
+          :  -e|--exclude expr  Add expr to hb_EXCLUDE. Enables -X
+          :  -P|--prune dir     Add dir to hb_PRUNE. Enables -X
+          :  -f|--padfix str    Spacer for pre/suffix (def. ' ').
+          :  -p|--prefix pref   Prefix found files with 'prefix'.
+          :  -x|--suffix suff   Suffix found files with 'suffix'.
+          :  -l|--nolf          No line feed at end of filename.
+          :  -v|--verbose       Output additional info as comment line (#).
+          :  --|--grep          Pass remaining parameters to grep.
+          : 
+   Example:  #1) Find bash scripts with string containing a matching grep pattern
+          :  hashbang -s '^whereisit'
+          : 
+          :  #2) Find all bash scripts containing the string 'OKROOT',
+          :  #   append prefix of 'p -s' (p is the e.bash script editor)
+          :  hashbang -s "OKROOT" -p "p -s"
+          : 
+          :  #3) Find all script files (bash,sh,php,perl,etc) in /usr/bin
+          :  hashbang -b all /usr/bin
+       Url: file:///usr/share/e.bash/scripts/hashbang

@@ -1,0 +1,16 @@
+    Script:  tme
+   Version:  0.998.420.47.omicron-981
+      Desc:  Simplified replacement for 'time' command with
+          :  report output in the format:
+          :      #!tme: myprog took 999 seconds (00:16:39)
+          : 
+          :  Output is to stderr.
+          : 
+  Synopsis:  tme program ...
+          :  Where 'program' is the program to execute, along
+          :  with its parameters.
+          : 
+   Example:  tme rsync -avl /dev/zero /dev/null
+          :  tme ssh server0 updatedb
+          : 
+       Url: file:///usr/share/e.bash/scripts/tme

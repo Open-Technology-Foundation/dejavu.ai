@@ -1,0 +1,15 @@
+ Globalvar:  CR CH9 LF OLDIFS IFS
+      Desc:  Constant global char values.
+          :  NOTE: IFS is 'normalised' on every 'new' execution of
+          :        e.bash. OLDIFS retains the existing IFS.
+          : 
+  Synopsis:  CR=$'\r' CH9=$'\t' LF=$'\n' OLDIFS="$IFS" IFS=$' \t\n'
+          : 
+          :  OLDIFS=$IFS    # captures existing IFS before assigning
+          :                  # 'standard' IFS.
+          :  IFS=$' \\t\\n' # standard IFS
+          : 
+   Example:  str="$LF$CH9This is a line.$LF$CH9This is another line."
+          :  echo -e "$str"
+          : 
+       Url: file:///usr/share/e.bash/e.bash

@@ -1,0 +1,19 @@
+    Script:  readlinkx
+   Version:  1.0
+      Desc:  Return fully qualified, canonical name of *executable* file
+          :  in current PATH.
+          : 
+  Synopsis:  readlinkx filename...
+          :  Where 'filename' is the basename of executable file to search
+          :  for in the current PATH.
+          : 
+   Options:  -v|--verbose  Output error messages.
+          :  -q|--quiet    Suppress error messages.
+          : 
+   Example:  readlinkx dff
+          : 
+          :  readlinkx nano joe vi
+          : 
+   Depends:  e.bash readlink
+  See_also:  whichx
+       Url: file:///usr/share/e.bash/scripts/readlinkx

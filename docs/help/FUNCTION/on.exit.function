@@ -1,0 +1,12 @@
+  Function:  on.exit.function
+      Desc:  Sets the function defined that on.exit will call upon either
+          :  EXIT signals.
+          :    OR
+          :  Returns current value of the function.
+          : 
+          :  Default function is '{ cleanup $? ${LINENO:-0}; }'
+          : 
+  Synopsis:  on.exit.function ['trap_function']
+          : 
+  See_also:  on.exit on.exit.set cleanup
+       Url: file:///usr/share/e.bash/e.d/sys/on.exit.bash

@@ -1,0 +1,9 @@
+  Function:  strposv strrposv
+      Desc:  Assign value to variable of the position of 'needle' with in haystack.
+  Synopsis:  strposv var haystack needle
+          :  strrposv var haystack needle
+          : 
+   Example:  declare -i ispos; strposv ispos "this is a haystack" "is"
+          : 
+  See_also:  get.element get.elements
+       Url: file:///usr/share/e.bash/e.d/string/strpos.bash

@@ -1,0 +1,8 @@
+  Function:  pause
+      Desc:  Pause script, with optional message and timeout.
+          :  Wait for one keypress, or until timeout (default 86400).
+          : 
+  Synopsis:  pause [-t timeout] [message_str]...
+          :    -t timeout   Timeout in seconds; default 86400.
+          :    message_str  If not specified, defaults to '*Pause*'.
+       Url: file:///usr/share/e.bash/e.d/sys/pause.bash

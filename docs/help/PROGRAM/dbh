@@ -1,0 +1,41 @@
+   Program:  dbh
+   Version:  1.0
+      Desc:  MySQL helper script to quickly view data/structure/info.
+          :  Fast in, fast out.
+          : 
+          :  Navigation Keys:
+          :    ?  mysql help
+          :    0  back 1 level
+          :    q  exit
+          : 
+  Synopsis:  dbh [Options] [database [table [command]]]
+          :    database  Database name.
+          :    table     Table name.
+          :    command   Valid commands are:
+          :                columns
+          :                select_fields
+          :                sql_command
+          :                sql_prompt
+          :                structure
+          : 
+   Options:  -p|--profile  Specify MySQL profile [eg, /root/.my3.cnf].
+          :  -x|--exit     Exit after executing command (if specified).
+          :  -V|--version  Print version.
+          :  -h|--help     This help.
+          : 
+          :  To back out of a menu, enter 0. To exit, enter q. For mysql
+          :  help, enter ?.
+          : 
+   Example:  # 0. go direct to database selection menu.
+          :  dbh
+          : 
+          :  # 1. open db Users, then to table selection.
+          :  dbh Users
+          : 
+          :  # 2. open table Users:user and show column names.
+          :  dbh Users users columns
+          : 
+          :  # 3. open mysql with profile, open Essays:essays
+          :  dbh -p /root/my3.cnf Essays essays
+          : 
+       Url: file:///usr/share/e.bash/scripts/dbh

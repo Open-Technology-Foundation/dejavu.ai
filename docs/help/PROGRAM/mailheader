@@ -1,0 +1,15 @@
+   Program:  mailheader
+      Desc:  Program to extract the *header portion* of an email message
+          :  file up to the first blank line. CR are ignored and not output.
+          : 
+          :  NOTE: A space/tab char in the first postiion of a line is
+          :  concatenated onto the previous line. This may have implications
+          :  in certain circumstances.
+          : 
+          :  Max size of mail header returned is 100k. Max line length is 4k.
+          : 
+  Synopsis:  mailheader ["mailfile"]
+          :    mailfile  A mail file from which to extract header.  If not
+          :              specified, defaults to stdin.
+  See_also:  mailhead.c
+       Url: file:///usr/share/e.bash/scripts/mailheader.c

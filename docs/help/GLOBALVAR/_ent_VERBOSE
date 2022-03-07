@@ -1,0 +1,7 @@
+ Globalvar:  _ent_VERBOSE
+      Desc:  '_ent_VERBOSE'
+          : 
+   Example:  _ent_VERBOSE
+          : 
+  See_also:  msg.verbose.set
+       Url: file:///usr/share/e.bash/e.bash

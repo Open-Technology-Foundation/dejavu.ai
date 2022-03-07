@@ -1,0 +1,27 @@
+  Function:  on.exit
+      Desc:  Sets an additional function that the on.exit cleanup function
+          :  will call just before exiting a script (signal EXIT).
+          :    OR
+          :  Returns current value of the on.exit function.
+          : 
+          :  Default on.exit function is null, meaning no additional
+          :  function will be executed.
+          : 
+          :  Note that exit trapping is enabled whenever a function
+          :  is passed.  See also on.exit.set.
+          : 
+          :  errno ($?) is automatically passed as $1, and this
+          :  should be preferred to $?.
+          : 
+  Synopsis:  on.exit [exitfunction]
+          : 
+   Example:  exitroutine() {
+          :    rm -rf "/tmp/tempdir"
+          :    >&2 echo 'Bye.'
+          :    return "${1:-$?}"
+          :  }
+          :  on.exit 'exitroutine'
+          :  ...
+          : 
+  See_also:  cleanup on.exit.set on.exit.function
+       Url: file:///usr/share/e.bash/e.d/sys/on.exit.bash

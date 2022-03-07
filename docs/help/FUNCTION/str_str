@@ -1,0 +1,9 @@
+  Function:  str_str
+      Desc:  Return the string that occurs between two match strings.
+          : 
+  Synopsis:  str_str "string" "matchbegin" "matchend"
+          : 
+   Example:  # This will return 'test'
+          :  param=$(str_str "this is a [[test]] of str_str" '[[' ']]'
+          : 
+       Url: file:///usr/share/e.bash/e.d/string/str_str.bash

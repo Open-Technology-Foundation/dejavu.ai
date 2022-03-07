@@ -1,0 +1,11 @@
+  Function:  msg.yn
+      Desc:  Ask y/n question,d return 0/1
+  Synopsis:  msg.yn [--warning|--err|--info|--notice|--debug] [prompt]
+          : 
+          :  NOTE: If msg.verbose.set is off (disabled), or there is no
+          :  tty, msg.yn will *always* return 0, without printing the
+          :  prompt or waiting for a response.
+          : 
+   Example:  msg.yn 'Continue?' || msg.die 'Not Continuing.'
+          : 
+       Url: file:///usr/share/e.bash/e.bash

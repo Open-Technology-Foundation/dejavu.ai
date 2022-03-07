@@ -1,0 +1,256 @@
+#!/bin/bash
+#! shellcheck disable=SC2154,SC1090
+#@ Program : dbh
+#@ Version : $(version.set)
+#@ Desc    : MySQL helper script to quickly view data/structure/info.
+#@         : Fast in, fast out.
+#@         :   
+#@         : Navigation Keys: 
+#@         :   ?  mysql help
+#@         :   0  back 1 level
+#@         :   q  exit
+#@         :   
+#@ Synopsis: $PRG [Options] [database [table [command]]]
+#@         :   database  Database name.
+#@         :   table     Table name.
+#@         :   command   Valid commands are:
+#@         :               columns
+#@         :               select_fields 
+#@         :               sql_command 
+#@         :               sql_prompt 
+#@         :               structure
+#@         : 
+#@ Options : -p|--profile  Specify MySQL profile [eg, /root/.my3.cnf].
+#@         : -x|--exit     Exit after executing command (if specified).
+#@         : -V|--version  Print version.
+#@         : -h|--help     This help.
+#@         :   
+#@         : To back out of a menu, enter 0. To exit, enter q. For mysql 
+#@         : help, enter ?.
+#@         : 
+#@ Examples: # 0. go direct to database selection menu.
+#@         : $PRG
+#@         : 
+#@         : # 1. open db Users, then to table selection.
+#@         : $PRG Users
+#@         : 
+#@         : # 2. open table Users:user and show column names.
+#@         : $PRG Users users columns 
+#@         : 
+#@         : # 3. open mysql with profile, open Essays:essays 
+#@         : $PRG -p /root/my3.cnf Essays essays
+#@         : 
+source e.bash.min || exit 2
+	version.set "1.0"
+	msg.verbose.set on
+	on.exit.set on
+	strict.set on
+	
+	declare -xg Profile='' Database='' DataTable='' DataCommand=''
+	declare -i ExitAfterCmd=0
+	
+	declare -xrg Profile_Default=/root/.my.cnf
+	 
+main() {
+	msg.prefix.set "$PRG"
+	msg.prefix.separator.set '> '
+	while (($#)); do case "$1" in
+		-p|--profile)	shift; Profile="${1:-}";;
+		-x|--exit)		ExitAfterCmd=1;;
+		-v|--verbose)	msg.verbose.set on;;
+		-q|--quiet)		msg.verbose.set off;;
+		-V|--version)	echo "$PRG vs $(version.set)"; return 0;;
+		-h|--help)		_e_usage; return 0;;
+		-[pxvqVh]*)		#shellcheck disable=SC2046 # expand aggregated short options
+									set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+		-?|--*)				msg.err "Invalid option '$1'"; return 22;;
+		*)						if   [[ -z $Database ]]; 	  then Database="$1"
+									elif [[ -z $DataTable ]];   then DataTable="$1";
+									elif [[ -z $DataCommand ]]; then DataCommand="$1";
+									else
+										msg.err "Too many parameters '$1'"
+										return 22
+									fi
+									;;
+	esac; shift; done
+	[[ -z $DataCommand && -n $DataTable ]] && DataCommand='columns'
+	[[ -z $Profile ]] && Profile=$Profile_Default
+	[[ -f $Profile ]] || { msg.err "Profile '$Profile' not found."; return 2; }
+
+	msg.tab.width 8
+	tabs 8			# for the select builtin
+	msg.info "Using profile '$Profile'"
+	msg.info "Select 0 to backup up, q to quit."		
+	while ((1)); do
+		msg.prefix.set "$PRG"
+		[[ -n $Database ]] || select_database
+		[[ -z $Database ]] && break;
+		while ((1)); do
+			[[ -n $DataTable ]] || select_table
+			[[ -z $DataTable ]] && break
+			while ((1)); do
+				[[ -n $DataCommand ]] || select_command
+				[[ -z $DataCommand ]] && break
+				if ! type -t "do_${DataCommand}" &>/dev/null; then
+					msg.err "Command $DataCommand not found."
+				else
+					"do_${DataCommand}" || true
+					((ExitAfterCmd)) && exit
+				fi
+				DataCommand=''
+			done
+			DataTable=''
+		done
+		Database=''
+		ExitAfterCmd=0
+	done
+}
+
+select_database() {
+	local v='' REPLY PS3
+	msg.prefix.set ++ 'Databases'
+	PS3="$(msg.prefix.set)Select Database: "
+	echo
+	tabs 8
+	select v in $(mysql --defaults-file="$Profile" --no-auto-rehash -Nse 'show databases;' | sort -i); do 
+		[[ $REPLY == '?' ]] && { mysqlhelp; continue; }
+		[[ $REPLY == 'q' ]] && exit 0
+		[[ $REPLY == '0' ]] && { v=''; break; }
+		[[ -z $v ]] && continue
+		break
+	done
+	Database="$v"
+	msg.prefix.set --
+}
+
+select_table() {
+	local v='' REPLY PS3
+	msg.prefix.set ++ "$Database"
+	PS3="$(msg.prefix.set)Select Table: "
+	echo
+	tabs 8
+	select v in $(mysql --defaults-file=$Profile --no-auto-rehash -Nse "use $Database; show tables;" | sort -i); do 
+		[[ $REPLY == '?' ]] && { mysqlhelp; continue; }
+		[[ $REPLY == 'q' ]] && exit 0
+		[[ $REPLY == '0' ]] && { v=''; break; }
+		[[ -z $v ]] && continue
+		break
+	done
+	DataTable="$v"
+	msg.prefix.set --
+}
+
+select_command() {
+	local v REPLY PS3 sx
+	sx=$(mysql --defaults-file=$Profile --no-auto-rehash \
+						-Nse "SELECT count(*) FROM $Database.$DataTable")  || perror $?
+	msg -n "[$sx] rows in [$Database.$DataTable]"
+	msg.prefix.set ++ "$Database:$DataTable"
+	PS3="$(msg.prefix.set)Select Command: "
+	local -a cmds
+	cmds=(	'show_structure' 
+					'show_columns'
+					'select_fields'
+					'sql_command'
+					'sql_prompt' 
+					''
+			 )
+	tabs 8
+#	echo
+	select v in "${cmds[@]}"; do 
+		[[ $REPLY == '?' ]] && { mysqlhelp; continue; }
+		[[ $REPLY == 'q' ]] && exit 0
+		[[ $REPLY == '0' ]] && { v=''; break; }
+		[[ -z $v ]] && continue
+		break
+	done
+	DataCommand="${v// /_}"
+	msg.prefix.set --
+}
+
+do_show_structure() { do_structure "$@"; }
+do_structure() {
+	mysql --defaults-file=$Profile --prompt="$(msg.prefix.set)" --no-auto-rehash  "$Database" -e "show columns from $DataTable" || perror $?
+	return 0
+}
+
+do_sql_command() {
+	local cmd='' PS3
+	msg.prefix.set ++ "$Database:$DataTable"
+	PS3="$(msg.prefix.set)mysql> "
+	while((1)); do
+		read -e -r -p "$PS3" cmd
+		[[ -z $cmd || $cmd == '0' || $cmd == 'q' ]] && break
+		[[ $cmd == '?' ]] && { mysqlhelp; continue; }
+		mysql --defaults-file=$Profile --no-auto-rehash "$Database" -e "$cmd" || perror $?
+	done
+	msg.prefix.set --
+	return 0
+}
+
+do_sql_prompt() {
+	msg.prefix.set '++' "$Database"
+	(mysql --defaults-file=$Profile --no-auto-rehash --prompt="$(msg.prefix.set)mysql> " "$Database"	|| perror $?) || true
+	msg.prefix.set --
+	return 0
+}
+
+do_select_fields() {
+	local mselect='*' mwhere='' mlimit='100' morder='' PS3
+	msg.prefix.set ++ "$Database:$DataTable"
+	PS3="$(msg.prefix.set)Select: "
+	while((1)); do
+		PS3="$(msg.prefix.set)SELECT: "
+		read -i "$mselect" -e -r -p "$PS3" mselect
+		[[ $mselect == 'q' ]] && exit 0; [[ -z $mselect || $mselect == '0' ]] && break
+		PS3="$(msg.prefix.set)WHERE: "
+		read -i "$mwhere" -e -r -p "$PS3" mwhere
+		[[ $mselect == 'q' ]] && exit 0; [[ -z $mselect || $mselect == '0' ]] && break
+		PS3="$(msg.prefix.set)ORDER: "
+		read -i "$morder" -e -r -p "$PS3" morder
+		[[ $mselect == 'q' ]] && exit 0; [[ -z $mselect || $mselect == '0' ]] && break
+		PS3="$(msg.prefix.set)LIMIT: "
+		read -i "$mlimit" -e -r -p "$PS3" mlimit
+		[[ $mselect == 'q' ]] && exit 0; [[ -z $mselect || $mselect == '0' ]] && break
+		(	selectstr="SELECT $mselect FROM $DataTable 								\
+								$([[ -n $mwhere ]] && echo "WHERE $mwhere") 		\
+								$([[ -n $morder ]] && echo "ORDER BY $morder")  \
+								$([[ -n $mlimit ]] && echo "LIMIT $mlimit")"
+			msg "$(remsp2 -b "$selectstr")"
+			mysql --defaults-file=$Profile --no-auto-rehash "$Database" -e "$selectstr" || perror $?
+		) || true
+	done
+	PS3=''
+	msg.prefix.set --
+	tabs 8
+	return 0
+}
+
+do_show_columns() { do_columns "$@"; }
+do_fields() { do_columns "$@"; }
+do_columns() {
+	local -a flds
+	local fld
+	local db="$Database" table="$DataTable" 
+	if (($#)); then
+		db="$1"
+		shift
+		(($#)) && table="$1"
+	fi
+	msg.prefix.set ++ "$db:$table"
+	msg.info 'Fields: '
+	mapfile -t flds < <(mysql --defaults-file=$Profile -Nse "use information_schema; 
+							SELECT concat(COLUMN_NAME,'~',replace(COLUMN_TYPE,' ','~')) FROM COLUMNS 
+									WHERE TABLE_SCHEMA='$db' AND TABLE_NAME='$table';")
+#	flds=( $(mysql --defaults-file=$Profile -Nse "use information_schema; 
+#							SELECT concat(COLUMN_NAME,'~',replace(COLUMN_TYPE,' ','~')) FROM COLUMNS 
+#									WHERE TABLE_SCHEMA='$db' AND TABLE_NAME='$table';") )
+	for fld in "${flds[@]}"; do
+		echo -n "[${fld//\~/ }]  "
+	done
+	echo
+	msg.prefix.set --
+}
+
+main "$@"
+#fin

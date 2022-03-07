@@ -1,0 +1,7 @@
+ Globalvar:  _ent_SCRIPT_VERSION
+      Desc:  '_ent_SCRIPT_VERSION'
+          : 
+   Example:  _ent_SCRIPT_VERSION
+          : 
+  See_also: 
+       Url: file:///usr/share/e.bash/e.bash

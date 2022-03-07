@@ -1,0 +1,58 @@
+#!/bin/bash
+main() {
+	local -g VersionFile=/tmp/ver
+
+	declare -xg _ent_VERSION='0.998.420.35.omicron-972'
+
+	echo "$_ent_VERSION"
+	_e_increment_version_build
+	echo "$_ent_VERSION"
+}
+
+_e_increment_version_build() {
+	[[ -z ${_ent_VERSION:-} ]] && { >&2 echo "Version has not been set. See '$VersionFile'"; return 1; }
+	local verstring dayssince
+	local -a arr arr1
+	#shellcheck disable=SC2206
+	arr=( ${_ent_VERSION//./ } )
+	((${#arr[@]} < 4)) && { >&2 echo "Bad Version number '$_ent_VERSION@A'"; return 1; } 
+	# patch=420
+	arr[2]=420
+	# increment build
+	arr[3]=$((arr[3]+1))
+	dayssince=$(( ($(date +%s) - $(date +%s -d '2019-06-21'))/86400 ))
+	#shellcheck disable=SC2206
+	arr1=( ${arr[4]//-/ } )
+	(( dayssince > ${arr1[1]:-0} )) && arr[3]=0
+	# release-days
+	arr[4]="${arr1[0]}-$dayssince"
+				
+	verstring=${arr[*]}; verstring=${verstring// /.}
+
+	cat >"$VersionFile" <<-etx
+		#!/bin/bash
+		#@ Global  : _ent_VERSION
+		#@ Version : ${verstring}
+		#@ Desc    : Return version/build for this version of e.bash.
+		#@         :
+		#@         : Returns string in the form:
+		#@         :   majorver.minorver.420.build.release[-dayssince]
+		#@         :
+		#@         : Where:
+		#@         :   majorver   ${arr[0]}
+		#@         :   minorver   ${arr[1]}
+		#@         :   420        Constant.
+		#@         :   build      Build number.
+		#@         :   release    Release name.
+		#@         :   dayssince  Days since 2019-06-21.
+		#@         :
+		#@ See Also: _ent_SCRIPT_VERSION version.set
+		declare -xg _ent_VERSION='${verstring}'
+		#fin
+	etx
+	#shellcheck source=/usr/share/e.bash/e.d/e.version.bash
+	source "$VersionFile" || exit 2
+	return 0
+}
+
+main "$@"

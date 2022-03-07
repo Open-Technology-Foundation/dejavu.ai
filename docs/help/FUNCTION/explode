@@ -1,0 +1,8 @@
+  Function:  explode
+      Desc:  Convert delimited string into array.
+          : 
+          :  For most cases, this would be better done inline:
+          :    IFS=',' array=( "${cdstring" )
+  Synopsis:  explode "delimiter" "${array[@]}"
+   Example:  str=( $(explode '|' "${files[@]}") )
+       Url: file:///usr/share/e.bash/e.d/string/explode.bash

@@ -1,0 +1,15 @@
+  Function:  hr2int
+      Desc:  Return integer from human-readable number text.
+          :  b)ytes  k)ilobytes m)egabytes g)igabytes t)erabytes p)etabytes
+          : 
+          :  Capitalise to use multiples of 1000 (S.I.) instead of 1024.
+          : 
+  Synopsis:  hr2int integer[bkmgtp] [integer[bkmgtp]]...
+          : 
+   Example:  1) hr2int 34M
+          :  2) hr2int 34m
+          :  3) hr2int 34000000
+          : 
+   Depends:  numfmt
+  See_also:  hr2int (function) int2hr (function/script)
+       Url: file:///usr/share/e.bash/scripts/hr2int
