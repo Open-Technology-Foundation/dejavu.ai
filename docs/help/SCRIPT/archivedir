@@ -1,5 +1,5 @@
     Script:  archivedir
-   Version:  0.998.420.48.omicron-981
+   Version:  0.998.420.49.omicron-991
       Desc: 
           :  Create zip archive of a directory, and store in directory
           :  called [.]{DirNameBase}.old.
