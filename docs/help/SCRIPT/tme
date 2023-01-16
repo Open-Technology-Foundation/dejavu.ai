@@ -1,5 +1,5 @@
     Script:  tme
-   Version:  0.998.420.49.omicron-991
+   Version:  0.998.420.50.omicron-991
       Desc:  Simplified replacement for 'time' command with
           :  report output in the format:
           :      #!tme: myprog took 999 seconds (00:16:39)

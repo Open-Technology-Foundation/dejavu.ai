@@ -28,7 +28,7 @@
 #@         : -x|--suffix suff   Suffix found files with 'suffix'.
 #@         : -l|--nolf          No line feed at end of filename.
 #@         : -v|--verbose       Output additional info as comment line (#).
-#@         : --|--grep          Pass remaining parameters to grep.
+#@         : --|--grep          Pass all remaining parameters to grep.
 #@         : 
 #@ Examples: #1) Find bash scripts with string containing a matching grep pattern 
 #@         : hashbang -s '^whereisit' 
@@ -68,10 +68,12 @@
 	declare Prefix='' Suffix='' Padfix=' '
 	declare LF=$'\n'
 	declare -gx hb_EXCLUDE
-	[[ -z "${hb_EXCLUDE:-}" ]] \
-			&& hb_EXCLUDE='.old .bak help/ cctv/ ~'
+#	[[ -z "${hb_EXCLUDE:-}" ]] \
+#			&& hb_EXCLUDE='.old .bak help/ cctv/ ~'
+	: "${hb_EXCLUDE:=.old .bak help/ cctv/ \~}"
 	declare -gx hb_PRUNE
-	[[ -z ${hb_PRUNE:-} ]] && hb_PRUNE='/gudang /.gudang /dev /help /docs/help /cctv /.git' 
+#	[[ -z ${hb_PRUNE:-} ]] && hb_PRUNE='/gudang /.gudang /dev /help /docs/help /cctv /.git' 
+	: "${hb_PRUNE:=/gudang /.gudang /dev /help /docs/help /cctv /.git}"
 	declare Binaries='\( -not -name "*.png" -not -name "*.jpg" -not -name "*.htm" -not -name "*.TTF" \)'
 	declare -i FileCount=0
 			
@@ -127,8 +129,8 @@ _hashbang() {
 		PruneEx="${PruneEx#+([[:blank:]])}"; PruneEx="${PruneEx%+([[:blank:]])}" # trim blanks from front and back
 		PruneEx="${PruneEx//+([[:blank:]])/ }" # remove all double occurances of blanks
 	fi
-	[[ -z $PruneEx ]] && PruneEx='.foobar'
-	
+#	[[ -z $PruneEx ]] && PruneEx='.foobar'
+	: "${PruneEx:=.foobar}"
 	local -a xDirs
 	mapfile -t xDirs < <(
 			find -O2 $FindSymLinks "$DirStart" -maxdepth "$MaxDepth" -type d 2>/dev/null | grep -v "${PruneEx// /\\|}"

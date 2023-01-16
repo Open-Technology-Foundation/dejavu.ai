@@ -1,6 +1,6 @@
 #!/bin/bash
 #@ Global  : _ent_VERSION
-#@ Version : 0.998.420.50.omicron-991
+#@ Version : 0.998.420.51.omicron-1305
 #@ Desc    : Return version/build for this version of e.bash.
 #@         :
 #@         : Returns string in the form:
@@ -15,5 +15,5 @@
 #@         :   dayssince  Days since 2019-06-21.
 #@         :
 #@ See Also: _ent_SCRIPT_VERSION version.set
-declare -xg _ent_VERSION='0.998.420.50.omicron-991'
+declare -xg _ent_VERSION='0.998.420.51.omicron-1305'
 #fin

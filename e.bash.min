@@ -527,7 +527,7 @@ e.location() {
 	echo "${ENTITIES@A};${PATH@A}"
 }
 declare -fx e.location
-declare -xg _ent_VERSION='0.998.420.50.omicron-991'
+declare -xg _ent_VERSION='0.998.420.51.omicron-1305'
 chgConfigVar() {
 	local Profile=${1:-} key
 	shift

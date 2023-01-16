@@ -107,7 +107,7 @@ main() {
 	# make the zip file
 	zipfile="${OldArchiveDir}/${ArchiveBase}.$(date +%s).zip"
 	msg "Creating Archive '$zipfile'" "with zip options ${ZipOpts[*]}"
-	zip --symlinks "${ZipOpts[@]}" -r "$zipfile" "${ArchiveDir}/" >/dev/null || msg.die "Error in zip '$zipfile'"
+	zip --symlinks "${ZipOpts[@]}" -r "$zipfile" "${ArchiveDir}/" --exclude "${ArchiveDir}/${OldArchiveDir}/*" >/dev/null || msg.die "Error in zip '$zipfile'"
 	chmod 644 "$zipfile"
 
 	# shellcheck disable=SC2012

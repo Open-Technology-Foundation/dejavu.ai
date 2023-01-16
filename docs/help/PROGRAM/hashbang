@@ -7,7 +7,7 @@
           :  Script identification is by hashbang (default type 'bashx')
           :  or filename extension.
           : 
-          :  declare -x hb_EXCLUDE='.old .bak help/ cctv/ ~'
+          :  declare -x hb_EXCLUDE='.old .bak help/ cctv/ \~'
           :  declare -x hb_PRUNE='/gudang /.gudang /dev /help /docs/help /cctv /.git'
           : 
   Synopsis:  hashbang [Options] ["startdir"]
@@ -27,7 +27,7 @@
           :  -x|--suffix suff   Suffix found files with 'suffix'.
           :  -l|--nolf          No line feed at end of filename.
           :  -v|--verbose       Output additional info as comment line (#).
-          :  --|--grep          Pass remaining parameters to grep.
+          :  --|--grep          Pass all remaining parameters to grep.
           : 
    Example:  #1) Find bash scripts with string containing a matching grep pattern
           :  hashbang -s '^whereisit'

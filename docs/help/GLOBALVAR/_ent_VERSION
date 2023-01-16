@@ -1,5 +1,5 @@
  Globalvar:  _ent_VERSION
-   Version:  0.998.420.49.omicron-991
+   Version:  0.998.420.50.omicron-991
       Desc:  Return version/build for this version of e.bash.
           : 
           :  Returns string in the form:
