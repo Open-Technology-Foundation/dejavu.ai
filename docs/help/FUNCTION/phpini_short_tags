@@ -1,4 +1,0 @@
-  Function:  phpini_short_tags
-      Desc:  Modify php.ini short_open_tag to 'yes' in both cli and apache2.
-  Synopsis:  phpini_short_tags
-       Url: file:///usr/share/e.bash/e.d/sys/phpini_short_tags.bash

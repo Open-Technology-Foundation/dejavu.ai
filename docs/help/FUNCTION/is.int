@@ -1,9 +1,0 @@
-  Function:  is.int
-      Desc:  Is parameter an integer? Return true/false
-  Synopsis:  is.int "numstr"
-          : 
-   Example:  is.int "420"  && echo "is int"  # returns true
-          :  is.int "4.20" && echo "is int"  # returns false
-          :  is.int "4Z20" && echo "is int"  # returns false
-          : 
-       Url: file:///usr/share/e.bash/e.d/string/is.number.bash

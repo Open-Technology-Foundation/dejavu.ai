@@ -1,6 +1,0 @@
-  Function:  is.tty
-      Desc:  return 0 if tty available, otherwise 1.
-  Synopsis:  is.tty
-   Example:  is.tty && msg.yn "Continue?"
-   Depends:  tty
-       Url: file:///usr/share/e.bash/e.d/sys/is.tty.bash

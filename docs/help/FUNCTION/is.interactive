@@ -1,6 +1,0 @@
-  Function:  is.interactive
-      Desc:  return 0 if tty available, otherwise 1.
-          :  !!! this function requires attention
-  Synopsis:  is.interactive [report|noreport*]
-   Example:  is.interactive && msg.yn "Continue?"
-       Url: file:///usr/share/e.bash/e.d/sys/is.interactive.bash

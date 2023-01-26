@@ -1,0 +1,111 @@
+#!/bin/bash
+#!shellcheck disable=SC0000
+set -e
+_ent_0=$(readlink -fn -- "$0") || _ent_0=''
+PRG=${_ent_0##*/} 
+PRGDIR=${_ent_0%/*}
+PRGNAME="DéjàVu"
+Version=0.8
+
+dejavu_help() {
+cat <<-EOT
+	Name    : $PRGNAME vs $Version
+	Script  : $PRG
+	Desc    : Installation Script for $PRGNAME
+	Synopsis: $PRG [Options]
+	Options : -v|--verbose   Verbose on (default)
+	        : -q|--quiet     Verbose off
+	        : -V|--version   Print version.
+	Requires: python 3, pip, openai API key
+	See Also: https://openai.com
+EOT
+}
+
+main() {
+	if ((UID)); then
+		if [[ " $(id -Gn) " != *" sudo "* ]]; then
+			echo 2> "Installation of $PRGNAME requires root access."
+			exit
+		fi
+	fi
+	
+	local -a args=() 
+	local verbose_=1 quiet_='q'
+	while (($#)); do case "$1" in
+		-v|--verbose)		verbose_=1; quiet_='q' ;;
+		-q|--quiet)			verbose_=0; quiet_='qqq' ;;
+		-V|--version)		echo "$PRGNAME vs $Version"; return 0 ;;
+		-h|--help)			dejavu_help; return 0 ;;
+		-[vqVh]*)				#shellcheck disable=SC2046 # de-aggregate aggregated short options
+										set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+		-?|--*)					echo 2> "Invalid option '$1'" ;;
+		*)							args+=( "$1" ) ;;
+	esac; shift; done
+
+	((verbose_)) && { echo "$PRGNAME vs $Version"; echo ''; }
+		
+	key="$OPENAI_API_KEY"
+	if [[ -z $key ]] || ((verbose_)); then
+		read -rep "Your openai API Key: " -i "$key" key
+		if [[ $key == '' ]]; then
+			echo 2> "You will require an API key from openai.com to run $PRG"
+			exit
+		fi 
+		echo
+	fi
+	OPENAI_API_KEY="$key"
+
+	key="$OPENAI_ORGANIZATION_ID"
+	if ((verbose_)); then
+		read -rep "Your openai Organization ID (if required): " -i "$key" key
+		if [[ $key == '' ]]; then
+			echo 2> "You will require an API key from openai.com to run $PRG"
+			exit
+		fi 
+		echo
+	fi
+	OPENAI_ORGANIZATION_ID="$key"
+
+	sudo apt install -"$quiet_" python3 pip git
+	sudo pip install -"$quiet_" --upgrade --no-color pip
+	sudo pip install -"$quiet_" --upgrade --no-color openai
+
+	sudo mkdir -p /usr/share/dejavu.ai
+	sudo chmod 775 /usr/share/dejavu.ai
+	sudo cp -p "$PRGDIR"/*.dejavu.txt /usr/share/dejavu.ai/
+	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" /usr/share/dejavu.ai/
+	
+	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
+	sudo chmod 775 "/usr/local/bin/dejavu"
+
+	# ~/.bashrc /etc/bash.bashrc
+	local tmpfile file
+	for file in "$HOME/.bashrc" /etc/bash.bashrc; do
+		((verbose_)) && echo "Modifying '$file'"
+		[[ ! -f "$file" ]] && continue
+		
+		tmpfile="/tmp/$PRG-$RANDOM"
+		grep -v '^[[:blank:]]*OPENAI_API_KEY=\|^[[:blank:]]*OPENAI_ORGANIZATION_ID=\|^[[:blank:]]*export OPENAI_' "$file" \
+				>"$tmpfile"
+		(	echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" 
+			echo "export OPENAI_API_KEY"
+			if [[ -n $OPENAI_ORGANIZATION_ID ]]; then
+				echo "OPENAI_ORGANIZATION_ID=\"$OPENAI_ORGANIZATION_ID\""
+				echo "export OPENAI_ORGANIZATION_ID" 
+			fi	
+		) >>"$tmpfile"
+		sudo chmod --reference="$file" "$tmpfile"
+		sudo chown --reference="$file" "$tmpfile"
+		#sudo cp -p "$file" "${file}~"	|| { echo 2> "Could not backup '$file' to '${file}~'!"; exit 1; }
+		sudo mv --backup "$tmpfile" "$file"			|| { echo 2> "'$tmpfile' could not be moved to '$file'!"; exit 1; }
+	done
+		
+	if ((verbose_)); then
+		echo
+		echo "$PRGNAME installed."
+		echo "To run, enter 'dejavu'"
+	fi
+}
+
+main "$@"
+#fin

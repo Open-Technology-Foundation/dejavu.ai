@@ -1,7 +1,0 @@
-  Function:  convertCfg2php
-      Desc:  Convert bash configuration file to php format.
-  Synopsis:  convertCfg2php [bash_infile [php_outfile_name]]
-          :  if bash_infile is not specified, default to stdin.
-          :  if php_outfile_name is not specified, default to stdout.
-   Example:  convertCfg2php $OKSYSADMIN.sh $OKSYSADMIN.php
-       Url: file:///usr/share/e.bash/e.d/files/convertCfg2php.bash

@@ -1,4 +1,0 @@
-  Function:  urlencode
-      Desc:  URL-encode a string.
-  Synopsis:  urlencode "string"
-       Url: file:///usr/share/e.bash/e.d/sys/urlencode.bash

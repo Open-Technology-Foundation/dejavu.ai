@@ -1,4 +1,0 @@
-  Function:  calcfp
-      Desc:  Simple [bc] wrapper. Requires /usr/bin/bc
-  Synopsis:  calcfp numericExpression
-       Url: file:///usr/share/e.bash/e.d/sys/calcfp.bash

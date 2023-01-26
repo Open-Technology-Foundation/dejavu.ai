@@ -1,0 +1,375 @@
+#!/usr/bin/python3
+import sys
+import os
+import re
+import readline
+#Fore.RED,Back.GREEN,Style.DIM,Style.RESET_ALL
+from colorama import init, Fore, Back, Style
+init()
+import atexit
+import time
+import textwrap
+import shutil
+import json
+import openai
+
+HomeDir=os.path.expanduser('~')
+ScriptName = os.path.basename(sys.argv[0])
+UserHome=HomeDir+'/.'+ScriptName 
+UserSysName = os.getenv('USER')
+if UserSysName == '': UserSysName = os.getenv('USER_NAME')
+ScriptDir = '/usr/share/dejavu.ai'
+os.makedirs(UserHome, exist_ok=True)
+
+def printerr(msg):
+  print(Fore.RED + '! ' + msg + Style.RESET_ALL)
+def printinfo(msg, suffix='# '):
+  print(Style.DIM + suffix + msg + Style.RESET_ALL)
+def file_get_contents(filepath):
+    with open(filepath, 'r', encoding='utf-8') as infile:
+        return infile.read()
+def file_put_contents(filename, string, mode='w'):
+    with open(filename, mode) as f:
+        f.write(string)
+
+
+if len(sys.argv) > 1: 
+  TrainingFile = sys.argv[1]
+else: 
+  TrainingFile = UserHome+'/training.dejavu.txt'
+  if not os.path.exists(TrainingFile):
+    string = file_get_contents(ScriptDir+'/training.dejavu.txt')
+    match = re.search(r'USER_NAME=(\w+)', string)
+    if match:
+        string = re.sub(r'USER_NAME=\w+', 'USER_NAME='+UserSysName.upper(), string)
+    file_put_contents(UserHome+'/training.dejavu.txt', string)
+
+if not os.path.exists(TrainingFile):
+  if os.path.exists(UserHome+'/'+TrainingFile):
+    TrainingFile = UserHome+'/'+TrainingFile
+  elif os.path.exists(UserHome+'/'+TrainingFile+'.dejavu.txt'):
+    TrainingFile = UserHome+'/'+TrainingFile+'.dejavu.txt'
+  else:
+    printerr('DéjàVu training file "' + TrainingFile + '" does not exist!')
+    exit()
+TrainingFileName = os.path.basename(TrainingFile)
+
+# generic functions
+def is_numeric(string):
+  try:
+    float(string)
+    return True
+  except ValueError: return False
+
+def int_list(input_string, minVal, maxVal, revSort=False):
+  range_list = []
+  try:
+    numlist = input_string.split(',')
+    for numC in numlist:
+      if numC.strip() == '': continue
+      if '-' in numC:
+        stnum, endnum = numC.split('-')
+        if stnum == '':   stnum = int(minVal)
+        if endnum == '':  endnum   = int(maxVal)
+        stnum, endnum = int(stnum), int(endnum)
+        if stnum < minVal or endnum > maxVal: 
+          printerr('Error out of range'+str(stnum)+'-'+str(endnum))
+          continue
+        range_list += range(stnum, endnum+1)
+      else:
+        if int(numC) < minVal or int(numC) > maxVal: continue
+        range_list.append(int(numC))
+  except: 
+    printerr('Exception error in int_list.')
+    return False
+  if len(range_list) == 0: return False
+  range_list = list(set(range_list))
+  range_list.sort()
+  if revSort: return range_list[::-1]
+  else:       return range_list
+
+# readline() history
+historyFile = UserHome+'/'+TrainingFileName.replace('.txt', '.history')
+try:
+    readline.read_history_file(historyFile)
+    readline.set_history_length(200)
+except FileNotFoundError:
+    file_put_contents(historyFile, '')
+atexit.register(readline.write_history_file, historyFile)
+
+try:  openai.api_key = os.environ['OPENAI_API_KEY']
+except KeyError:
+  printerr('Environment variable OPENAI_API_KEY is not defined '+str(KeyError))
+  printinfo('Go to https://beta.openai.com/account/api-keys for your own API key.')
+  printinfo(':~$ export OPENAI_API_KEY="your_key"')
+  printinfo('If you set up your openai account as an organization, you will also have to set OPENAI_ORGANIZATION_ID')
+  printinfo(':~$ export OPENAI_ORGANIZATION_ID="your_organization"')
+  printinfo('Both these environment variables should be set in your ~/.bashrc file.')
+  exit()
+try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
+except: openai.organization = ''
+
+# open up the Training file
+value_list = []
+with open(TrainingFile, 'r') as f:
+  lines = f.readlines()
+  params = {}
+  inprompt = False
+  for line in lines:
+    if line.strip() == '' and not inprompt: continue
+    if line[0] == '#': continue
+    if inprompt:
+      if line == 'endprompt\n':
+        inprompt = False
+        value = ''.join(value_list)
+        params[key] = value.strip()
+        continue
+      value_list.append(line)
+      continue
+    try:
+      key, value = line.split('=')
+    except:
+      printerr('Error: ['+line+'] does not contain =')
+      exit()
+    # if the key is 'prompt', the value is multiline
+    if key == 'prompt':
+      inprompt = True;
+      value_list = []
+      continue
+    params[key] = value.strip()
+
+# assign each parameter to a global variable
+engine      = params['engine']
+temperature = float(params['temperature'])
+top_p       = float(params['top_p'])
+tokens      = float(params['tokens'])
+freq_pen    = float(params['freq_pen'])
+pres_pen    = float(params['pres_pen'])
+AI_NAME     = params['AI_NAME']
+USER_NAME   = params['USER_NAME']
+prompt      = params['prompt'].replace('<<AI_NAME>>', AI_NAME, -1).replace('<<USER_NAME>>', USER_NAME, -1)
+Prompt      = prompt
+stop        = [ AI_NAME+':', USER_NAME+':' ]
+
+conversation= []
+text_block  = ''
+
+
+def gpt3_completion(prompt, engine='text-davinci-003', temperature=0.7, top_p=1.0, tokens=400, freq_pen=0.0, pres_pen=0.0, stop=['HAL:', 'BIKSU:']):
+    prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
+    sx = len(prompt)
+    tokens = max(16, int(4096 - (sx/3.5) - 100))
+    try:
+      response = openai.Completion.create(
+        engine=engine,
+        prompt=prompt,
+        temperature=temperature,
+        max_tokens=tokens,
+        top_p=top_p,
+        frequency_penalty=freq_pen,
+        presence_penalty=pres_pen,
+        stop=stop,
+        timeout=90)
+    except:
+      printerr('GPT-3 experienced an error: '+str(e))
+      return ''
+    text = response['choices'][0]['text'].strip()
+    return text
+
+def cmdhelp():
+  printinfo('Valid system commands are:')
+  printinfo('  !status')
+  printinfo('  !list [0-0]')
+  printinfo('  !delete [0-0]')
+  printinfo('  !prompt')
+  printinfo('  !summarize [prompt|conv|all]')
+  printinfo('  !save [file]')
+  printinfo('  !temperature [0]')
+  printinfo('  !exit')
+
+def cmdstatus(all=False):
+  printinfo('DéjàVu GPT-3 Discourse  |  Enter ! for help.')
+  printinfo(' Training File: ' + TrainingFile)
+  if all: 
+    printinfo('  History File: ' + historyFile)
+    sx = len(prompt)
+    printinfo('     AI Engine: ' + engine)
+    printinfo(' Prompt Length: ' +str(sx))
+    printinfo('   Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
+    printinfo('   Temperature: ' + str(temperature))
+    printinfo('     Frequency: ' + str(freq_pen))
+    printinfo('      Presence: ' + str(pres_pen))
+  printinfo('     Your Name: ' + USER_NAME)
+  printinfo('       AI Name: ' + AI_NAME)
+
+def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr=AI_NAME, USs='<<USER_NAME>>', USr=USER_NAME):
+  newp = Prompt
+  newp = newp.replace('<<BLOCK>>', conversationText)
+  newp = newp.replace(AIs, AIr, -1)
+  newp = newp.replace(USs, USr, -1)
+  return newp.strip() + '\n'
+
+def orderly_exit():
+  print('\n')
+  printinfo('Exiting '+ScriptName+' '+TrainingFile)
+  sys.exit()
+
+if __name__ == '__main__':
+  cmdstatus()
+  conversation = list()
+  while True:
+    Columns = shutil.get_terminal_size().columns - 1
+    try: 
+      user_input = input('\n'+USER_NAME+': ')
+    except KeyboardInterrupt: orderly_exit()
+    if user_input.strip() == '': continue
+
+    if user_input[0] == '!':
+      cmd = user_input[1:]
+      tok = cmd.split()
+      # help
+      if(len(tok) == 0):
+        cmdhelp(); continue
+      elif tok[0] == 'help' or tok[0] == '?':
+        cmdhelp(); continue
+
+      # status
+      elif tok[0] == 'status':
+        cmdstatus(True); continue
+
+      # temperature
+      elif tok[0:4] == 'temp':
+        if len(tok) > 1:
+          if is_numeric(tok[1]):
+            sx = float(tok[1])
+            temperature = max(0.0, min(1.0, sx))
+        printinfo('Temperature is now '+str(temperature))
+        continue
+
+      # list [0-0]
+      elif tok[0] == 'list':
+        rnge = '0-99999' if len(tok) < 2 else tok[1]
+        try:
+          if '-' in rnge:
+            start, end = rnge.split('-')
+            start = 1 if start == '' else start
+            end = 99999 if end == '' else end
+            start = int(start); end = int(end)
+          else:
+            start = int(rnge); end = int(start)
+        except ValueError:
+          printerr('Invalid value in range ' + rnge)
+          continue
+        start = max(int(start), 1)
+        end = min(int(end), len(conversation))
+        i = int(start)
+        while i <= end:
+          text = '\n' + str(i) + '. ' + conversation[i-1]
+          for line in text.splitlines(): 
+            printinfo(textwrap.fill(line, width=Columns), '')
+          i += 1
+        continue
+
+      # delete [0-0]
+      elif tok[0] == 'delete':
+        if len(tok) < 2: continue
+        rnge = int_list(tok[1], 1, len(conversation), True)
+        if not rnge: 
+          printerr('Invalid range ' + tok[1])
+          continue
+        i = int(0)
+        for r in rnge:
+          del conversation[r-1]
+          i += 1
+        printinfo(str(i) +' entries deleted')
+        continue
+
+      # prompt display
+      elif tok[0] == 'prompt':
+        printinfo(PromptReplace(''), '')
+        continue
+
+      # summarise
+      elif tok[0] == 'summarize' or tok[0] == 'summarise':
+        if len(tok) < 2: what = 'conv'
+        else: what = tok[1]
+        if what[0:6] == 'prompt':
+          user_input = PromptReplace('') \
+              +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+        elif what[0:4] == 'conv':
+          user_input = text_block \
+              +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+        elif what == 'all':
+          user_input = PromptReplace(text_block) \
+              +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+        else:
+          printerr('Invalid option. Valid options for summarize are prompt|conv|all.')
+          continue
+
+      # save [file]
+      elif tok[0] == 'save':
+        #cmdstatus()
+        if len(tok) < 2: filename = TrainingFile
+        else: filename = tok[1]
+        if os.path.exists(filename):
+          try:
+            user_input = input('\n'+filename+' exists. Overwrite? (y/n) ')
+            if user_input != 'y': continue
+          except KeyboardInterrupt: continue
+        else:
+          if not '.dejavu.txt' in filename:
+            filename += '.dejavu.txt'
+          if not '/' in filename:
+            filename = UserHome + '/' + filename
+        p = 'engine='+engine+'\ntemperature='+str(temperature)+'\ntop_p='+str(top_p)+'\ntokens=4096'+'\nfreq_pen='+str(freq_pen)+'\npres_pen='+str(pres_pen)+'\nAI_NAME='+AI_NAME+'\nUSER_NAME='+USER_NAME+'\n'
+        try:
+          file_put_contents(filename, 
+            p+'prompt=\n' \
+             + PromptReplace('\n\n'.join(conversation),AI_NAME,'<<AI_NAME>>',USER_NAME,'<<USER_NAME>>') \
+             + '\n\n<<BLOCK>>\n\nendprompt\n')
+        except: 
+          printerr('Error writing to ' + filename)
+          continue
+        printinfo('Chat saved to ' + filename)  
+        continue
+
+      # import file
+      elif tok[0] == 'import':
+        #cmdstatus()
+        if len(tok) < 2: 
+          printerr('Text file to import must be specified.')
+          continue
+        filename = tok[1]
+        if not os.path.exists(filename):
+          printerr(filename+' does not exist.')
+          continue
+        printinfo('Importing from text file '+filename)  
+        user_input = file_get_contents(filename).strip()+'\n'
+
+      # exit
+      elif tok[0] == 'exit':
+        orderly_exit()
+
+      # invalid command
+      else:
+        printerr('Invalid command: !' + cmd.strip())
+        cmdhelp(); continue
+
+    conversation.append(USER_NAME+': %s' % user_input)
+    text_block = '\n'.join(conversation)
+    prompt = PromptReplace(text_block) + '\n' + AI_NAME +': '
+
+    try:
+      response = gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+    except:
+      printerr('GPT-3 experienced an error. Possibly overloaded.')
+      conversation.pop()
+      continue
+
+    text = '\n' + AI_NAME + ': ' + response
+    for line in text.splitlines(): 
+      print(textwrap.fill(line, width=Columns))
+
+    conversation.append(AI_NAME+': %s' % response)
+
+#end

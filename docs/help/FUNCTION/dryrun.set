@@ -1,8 +1,0 @@
-  Function:  dryrun.set is.dryrun
-      Desc:  General purpose global var for debugging.
-  Defaults:  0
-  Synopsis:  dryrun.set [[on|1] | [off|0]]
-          :  $(dryrun.set)
-   Example:  dryrun.set off
-          :  is.dryrun || doit.bash
-       Url: file:///usr/share/e.bash/e.bash

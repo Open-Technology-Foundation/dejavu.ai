@@ -1,7 +1,0 @@
- Globalvar:  _ent_COLOR
-      Desc:  '_ent_COLOR'
-          : 
-   Example:  _ent_COLOR
-          : 
-  See_also:  msg.color.set
-       Url: file:///usr/share/e.bash/e.bash

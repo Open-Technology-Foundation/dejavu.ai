@@ -1,6 +1,0 @@
-  Function:  is.root
-      Desc:  Return error if not root user. Uses whoami and EUID.
-  Synopsis:  is.root
-   Depends:  whoami
-   Example:  is.root || exit 1
-       Url: file:///usr/share/e.bash/e.d/sys/is.root.bash

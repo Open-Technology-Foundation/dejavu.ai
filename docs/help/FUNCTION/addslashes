@@ -1,5 +1,0 @@
-  Function:  addslashes
-      Desc:  Insert \\ backslash before every single and double quote char.
-  Synopsis:  addslashes
-   Example:  cat text1 | addslashes > text2
-       Url: file:///usr/share/e.bash/e.d/string/addslashes.bash

@@ -1,6 +1,0 @@
-  Function:  titlecase
-      Desc:  Upper case first letter of each word, lowercase the rest.
-  Synopsis:  titlecase "str" [...]
-   Example:  str="dharmA bUms"
-          :  titlecase "$str"
-       Url: file:///usr/share/e.bash/e.d/string/titlecase.bash

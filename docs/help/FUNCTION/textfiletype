@@ -1,5 +1,0 @@
-  Function:  textfiletype
-      Desc:  Return type of text.
-  Synopsis:  textfiletype [-t] filename
-          :    -t  Return type only without filename.
-       Url: file:///usr/share/e.bash/e.d/files/textfiletype.bash
