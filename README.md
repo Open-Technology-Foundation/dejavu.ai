@@ -28,3 +28,4 @@ dejavu [training_file]
 ```
 
 If no training_file is specified, it will default to ```training.dejavu.txt``` located in ```~/.dejavu/```
+
