@@ -1,5 +1,6 @@
 # dejavu.ai
 Bring GPT-3 directly to your terminal command-line with this light-weight python program!
+Dejavu web interface also available at ![https://okusiassociates.com/dejavu/]
 
 ## Requirements
 Typically only tested on Ubuntu Linux, but other platforms may require minor adjustments. You will need to obtain an API key from openAI in order to get started.
