@@ -85,7 +85,7 @@ while len(sys.argv) > 0:
     os.chdir(tempdir)
     subprocess.call(["git", "clone", REPOSITORY, tempdir])
     os.execvp([tempdir + '/' + ScriptName + '.install', \
-        "-{0}".format("v" if verbose_ else "q")])
+        "-{0}".format("v" if Verbose else "q")])
     exit()
   elif arg in ["-v", "--verbose"]:
     Verbose = 1
