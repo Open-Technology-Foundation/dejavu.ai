@@ -79,14 +79,12 @@ Verbose = True
 TrainingFile = ''
 while len(sys.argv) > 0:
   arg = sys.argv.pop(0)
-  if arg == "--pid":
-    if len(sys.argv) > 0:
-      print('pid')
-      #subprocess.call(["kill", "-9", sys.argv.pop()], stdout=open(os.devnull, "w") )
-  elif arg in ["-u", "--upgrade"]:
+  if arg in ["-u", "--upgrade"]:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
+    os.chdir(tempdir)
     subprocess.call(["git", "clone", REPOSITORY, tempdir])
-    subprocess.call([tempdir + "/" + ScriptName, "--pid", str(os.getpid()), "-{0}".format("v" if verbose_ else "q")])
+    os.execvp([tempdir + '/' + ScriptName + '.install', \
+        "-{0}".format("v" if verbose_ else "q")])
     exit()
   elif arg in ["-v", "--verbose"]:
     Verbose = 1

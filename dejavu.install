@@ -37,12 +37,9 @@ main() {
 	local -a args=() 
 	local verbose_=1 quiet_='' tempdir
 	while (($#)); do case "$1" in
-		--pid)					[[ -n "$2" ]] && kill -9 "$2" > /dev/null 2>&1 
-										shift
-										;;
 		-u|--upgrade)		tempdir="/tmp/$PRG-upgrade-$RANDOM"
 										git clone "$REPOSITORY" "$tempdir" || exit
-										"$tempdir/$PRG" --pid "$$" -"$( ((verbose_)) && echo 'v' || echo 'q')"
+										exec "$tempdir/$PRG" -"$( ((verbose_)) && echo 'v' || echo 'q')"
 										exit
 										;;
 		-v|--verbose)		verbose_=1; quiet_='' ;;
