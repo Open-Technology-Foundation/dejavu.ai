@@ -83,13 +83,11 @@ while len(sys.argv) > 0:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
     os.mkdir(tempdir)
     os.chdir(tempdir)
-    subprocess.call(["git", "clone", REPOSITORY, tempdir])
-
-    args = [ tempdir + '/' + ScriptName + '.install', "-{0}".format("v" if Verbose else "q") ]
-
-    os.execvp(tempdir + '/' + ScriptName + '.install', args)
-#    os.execvp(tempdir + '/' + ScriptName + '.install', \
-#        "-{0}".format("v" if Verbose else "q"))
+    qqq = "-{0}".format("v" if Verbose else "q")
+    subprocess.call(["git", "clone", qqq, REPOSITORY, tempdir])
+    cmd = tempdir + '/' + ScriptName + '.install'
+    args = [ cmd, qqq ]
+    os.execvp(cmd, args)
     exit()
   elif arg in ["-v", "--verbose"]:
     Verbose = 1
