@@ -12,11 +12,16 @@ import textwrap
 import shutil
 import json
 import openai
+import time
+import datetime
+import random
+import subprocess
 from colorama import init, Fore, Back, Style
 init()
 
+ScriptName = os.path.basename(sys.argv.pop(0))
+REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 HomeDir=os.path.expanduser('~')
-ScriptName = os.path.basename(sys.argv[0])
 UserHome=HomeDir+'/.'+ScriptName 
 UserSysName = os.getenv('USER')
 if UserSysName == '': UserSysName = os.getenv('USER_NAME')
@@ -70,15 +75,47 @@ def file_put_contents(filename, string, mode='w'):
         f.write(string)
 
 # Process command line and define TrainingFile to use
-if len(sys.argv) > 1: 
-  TrainingFile = sys.argv[1]
-else: 
+Verbose = True
+TrainingFile = ''
+while len(sys.argv) > 0:
+  arg = sys.argv.pop(0)
+  if arg == "--pid":
+    if len(sys.argv) > 0:
+      print('pid')
+      #subprocess.call(["kill", "-9", sys.argv.pop()], stdout=open(os.devnull, "w") )
+  elif arg in ["-u", "--upgrade"]:
+    tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
+    subprocess.call(["git", "clone", REPOSITORY, tempdir])
+    subprocess.call([tempdir + "/" + ScriptName, "--pid", str(os.getpid()), "-{0}".format("v" if verbose_ else "q")])
+    exit()
+  elif arg in ["-v", "--verbose"]:
+    Verbose = 1
+  elif arg in ["-q", "--quiet"]:
+    Verbose = 0
+  elif arg in ["-l", "--list"]:
+    for file in os.listdir(UserHome):
+      if file.endswith('.'+ScriptName+'.txt'):
+        filesize = os.stat(UserHome+'/'+file).st_size
+        modified_date = datetime.datetime.fromtimestamp(os.stat(UserHome+'/'+file).st_mtime)
+        print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], filesize/1024, modified_date.strftime('%Y-%m-%d %H:%M:%S')))
+    exit()
+  elif arg in ["-h", "--help"]:
+    print(ScriptName, '[-v|--verbose] [-q|--quiet] [-u|--upgrade] [TrainingFileName]');
+    exit()
+  else:
+    TrainingFile = arg
+
+# Training file validation and default
+#if len(sys.argv) > 1: 
+#  TrainingFile = sys.argv[1]
+#else: 
+if len(TrainingFile) == 0: 
   TrainingFile = UserHome+'/training.dejavu.txt'
   if not os.path.exists(TrainingFile):
     string = file_get_contents(ScriptDir+'/training.dejavu.txt')
     match = re.search(r'USER_NAME=(\w+)', string)
     if match:
-        string = re.sub(r'USER_NAME=\w+', 'USER_NAME='+UserSysName.upper(), string)
+      string = re.sub(r'USER_NAME=\w+', 'USER_NAME='+UserSysName.upper(), string)
     file_put_contents(UserHome+'/training.dejavu.txt', string)
 if not os.path.exists(TrainingFile):
   if os.path.exists(UserHome+'/'+TrainingFile):
@@ -217,12 +254,12 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr=AI_NAME, USs='<<USER_
 
 # Exit script nicely
 def orderly_exit():
-  print('\n')
-  printinfo('Exiting '+ScriptName+' '+TrainingFile)
+  print()
+  if Verbose: printinfo('Exiting '+ScriptName+' '+TrainingFile)
   sys.exit()
 
 if __name__ == '__main__':
-  cmdstatus()
+  if Verbose: cmdstatus()
   conversation = list()
   while True:
     Columns = shutil.get_terminal_size().columns - 1

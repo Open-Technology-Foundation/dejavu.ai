@@ -43,6 +43,7 @@ main() {
 		-u|--upgrade)		tempdir="/tmp/$PRG-upgrade-$RANDOM"
 										git clone "$REPOSITORY" "$tempdir" || exit
 										"$tempdir/$PRG" --pid "$$" -"$( ((verbose_)) && echo 'v' || echo 'q')"
+										exit
 										;;
 		-v|--verbose)		verbose_=1; quiet_='' ;;
 		-q|--quiet)			verbose_=0; quiet_='qq' ;;
