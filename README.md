@@ -1,9 +1,12 @@
-# dejavu.ai
-Bring GPT-3 directly to your terminal command-line with this light-weight python program!
-Dejavu web interface also available at ![https://okusiassociates.com/dejavu/]
+# DéjàVu GPT-3 Terminal
+Bring the power of GPT-3 directly to your terminal command-line.
+
+(The DéjàVu web interface is also available [here](https://okusiassociates.com/dejavu/).)
 
 ## Requirements
-Typically only tested on Ubuntu Linux, but other platforms may require minor adjustments. You will need to obtain an API key from openAI in order to get started.
+For the moment, DéjàVu GPT-3 Terminal has only been tested on Ubuntu Linux.  Other platforms may require minor adjustments. 
+
+You will need to obtain an API key from [openAI](https://openai.com) in order to run this program.
 
 ## Installation
 You should have copied down your openAI API key and organization ID (if applicable). Update your environment variables as follows:
@@ -17,9 +20,9 @@ export OPENAI_ORGANIZATION_ID='org-_your_org_id'
 
 Once that's done, you're ready to install DejaVu. 
 
-Run ```dejavu.install``` to get going. ```Python3``` and ```pip``` will be installed/updated during the installation. 
+Run ```dejavu.install``` to get going. The ```Python3``` and ```pip``` packages will be installed and/or updated during the installation. 
 
-The DejaVu executable will be found in ```/usr/local/bin/``` while all other files will be stored in ```/usr/share/dejavu.ai/```.
+The DejaVu executable is be found in ```/usr/local/bin/``` while all other files are stored in ```/usr/share/dejavu.ai/```.
 
 ## Execution
 When you're ready to launch the program, run:
@@ -30,3 +33,4 @@ dejavu [training_file]
 
 If no training_file is specified, it will default to ```training.dejavu.txt``` located in ```~/.dejavu/```
 
+Now start chatting!

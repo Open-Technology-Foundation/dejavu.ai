@@ -73,6 +73,8 @@ main() {
 	sudo mkdir -p /usr/share/dejavu.ai
 	sudo chmod 775 /usr/share/dejavu.ai
 	sudo cp -p "$PRGDIR"/*.dejavu.txt /usr/share/dejavu.ai/
+	sudo cp -p "$PRGDIR"/README.md /usr/share/dejavu.ai/
+	sudo cp -p "$PRGDIR"/LICENCE /usr/share/dejavu.ai/
 	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" /usr/share/dejavu.ai/
 	
 	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
