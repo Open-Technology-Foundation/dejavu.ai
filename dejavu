@@ -81,6 +81,7 @@ while len(sys.argv) > 0:
   arg = sys.argv.pop(0)
   if arg in ["-u", "--upgrade"]:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
+    os.mkdir(tempdir)
     os.chdir(tempdir)
     subprocess.call(["git", "clone", REPOSITORY, tempdir])
     os.execvp([tempdir + '/' + ScriptName + '.install', \
