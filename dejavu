@@ -284,7 +284,7 @@ if __name__ == '__main__':
         cmdstatus(True); continue
 
       # temperature
-      elif tok[0:4] == 'temp':
+      elif tok[0] == 'temperature':
         if len(tok) > 1:
           if is_numeric(tok[1]):
             sx = float(tok[1])
