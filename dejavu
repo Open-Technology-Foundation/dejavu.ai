@@ -23,10 +23,10 @@ ScriptName = os.path.basename(sys.argv.pop(0))
 REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 HomeDir=os.path.expanduser('~')
 UserHome=HomeDir+'/.'+ScriptName 
+os.makedirs(UserHome, exist_ok=True)
 UserSysName = os.getenv('USER')
 if UserSysName == '': UserSysName = os.getenv('USER_NAME')
 ScriptDir = '/usr/share/dejavu.ai'
-os.makedirs(UserHome, exist_ok=True)
 
 # generic functions
 def is_numeric(string):
@@ -75,6 +75,7 @@ def file_put_contents(filename, string, mode='w'):
         f.write(string)
 
 # Process command line and define TrainingFile to use
+Version = file_get_contents(ScriptDir+'/dejavu.version').strip()
 Verbose = True
 TrainingFile = ''
 while len(sys.argv) > 0:
@@ -88,6 +89,9 @@ while len(sys.argv) > 0:
     cmd = tempdir + '/' + ScriptName + '.install'
     args = [ cmd, qqq ]
     os.execvp(cmd, args)
+    exit()
+  elif arg in ["-V", "--version"]:
+    print(ScriptName+' vs '+Version)
     exit()
   elif arg in ["-v", "--verbose"]:
     Verbose = 1
@@ -230,7 +234,7 @@ def cmdhelp():
 
 # Print current parameters
 def cmdstatus(all=False):
-  printinfo('DéjàVu GPT-3 Terminal  |  Enter ! for help.')
+  printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   printinfo(' Training File: ' + TrainingFile)
   if all: 
     printinfo('  History File: ' + historyFile)
@@ -418,6 +422,7 @@ if __name__ == '__main__':
     text = '\n' + AI_NAME + ': ' + response
     for line in text.splitlines(): 
       print(textwrap.fill(line, width=Columns))
+
     # Add the response to the conversation
     conversation.append(AI_NAME+': %s' % response)
 
