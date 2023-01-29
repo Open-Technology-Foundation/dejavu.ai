@@ -1,19 +1,30 @@
 #!/bin/bash
 #!shellcheck disable=SC0000
+# DéjàVu GPT-3 Terminal Installation
+# Linux terminal interface for GPT-3
+# Gary Dean garydean@okusi.id
+# https://github.com/GaryDean/dejavu.ai.git
 set -e
 _ent_0=$(readlink -fn -- "$0") || _ent_0=''
 PRG=${_ent_0##*/} 
 PRGDIR=${_ent_0%/*}
 PRGNAME="DéjàVu"
-SHAREDIR=/usr/share/dejavu
+SHAREDIR=/usr/share/dejavu.ai
 REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
-Version=0.8
+Version=$(cat "$PRGDIR/dejavu.version")
 
 dejavu_help() {
 cat <<-EOT
-	Name    : $PRGNAME vs $Version
+	Name    : $PRGNAME vs $Version Installation
 	Script  : $PRG
 	Desc    : Installation Script for $PRGNAME GPT-3 Terminal
+	        : - Requires root/sudo to install.
+	        : - apt update and upgrade will be executed before
+	        :   installation of python 3, pip and git.
+	        : - ~/.bashrc and /etc/bash.bashrc will be modified
+	        :   to include openai environment variables. 
+	        : - program files are stored in $SHAREDIR
+	        : - executable dejavu is installed in /usr/local/bin/
 	Synopsis: $PRG [Options]
 	Options : -v|--verbose   Verbose on (default)
 	        : -q|--quiet     Verbose off. 
@@ -21,8 +32,8 @@ cat <<-EOT
 	        :                has already been set you will not 
 	        :                be prompted to input it.
 	        : -V|--version   Print version.
-	Requires: python 3, pip, openai API key
-	See Also: https://openai.com
+	Requires: python 3, pip, openai API key/s, root access
+	See Also: https://openai.com, $REPOSITORY
 EOT
 }
 
@@ -117,7 +128,7 @@ main() {
 		
 	if ((verbose_)); then
 		echo
-		echo "$PRGNAME installed."
+		echo "$PRGNAME is installed."
 		echo "To run, enter 'dejavu'"
 		echo 'Have fun!'
 	fi

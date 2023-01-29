@@ -2,6 +2,7 @@
 # DéjàVu GPT-3 Terminal
 # Linux terminal interface for GPT-3
 # Gary Dean garydean@okusi.id
+# https://github.com/GaryDean/dejavu.ai.git
 import sys
 import os
 import re
