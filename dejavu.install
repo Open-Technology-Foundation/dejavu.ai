@@ -12,6 +12,8 @@ PRGNAME="DéjàVu"
 SHAREDIR=/usr/share/dejavu.ai
 REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 Version=$(cat "$PRGDIR/dejavu.version")
+doApt=1
+doUpgrade=0
 
 dejavu_help() {
 cat <<-EOT
@@ -25,14 +27,16 @@ cat <<-EOT
 	        :   to include openai environment variables. 
 	        : - program files are stored in $SHAREDIR
 	        : - executable dejavu is installed in /usr/local/bin/
-	Synopsis: $PRG [Options]
+	Synopsis: $PRG [-vqaVh]
 	Options : -v|--verbose   Verbose on (default)
 	        : -q|--quiet     Verbose off. 
 	        :                If environment key OPENAI_API_KEY
 	        :                has already been set you will not 
 	        :                be prompted to input it.
-	        : -V|--version   Print version.
-	Requires: python 3, pip, openai API key/s, root access
+	        : -a|--no-apt    Do not execute apt during installation.
+	        : -u|--upgrade   Upgrade $PRGNAME from git repository.
+	        : -V|--version   Print $PRGNAME version.
+	Requires: python 3, pip, git, openai API key/s, root access
 	See Also: https://openai.com, $REPOSITORY
 EOT
 }
@@ -41,6 +45,7 @@ main() {
 	if ((UID)); then
 		if [[ " $(id -Gn) " != *" sudo "* ]]; then
 			echo 2> "Installation of $PRGNAME requires root access."
+			dejavu_help
 			exit
 		fi
 	fi
@@ -48,20 +53,28 @@ main() {
 	local -a args=() 
 	local verbose_=1 quiet_='' tempdir
 	while (($#)); do case "$1" in
-		-u|--upgrade)		tempdir="/tmp/$PRG-upgrade-$RANDOM"
-										git clone "$REPOSITORY" "$tempdir" || exit
-										exec "$tempdir/$PRG" -"$( ((verbose_)) && echo 'v' || echo 'q')"
-										exit
-										;;
+		-u|--upgrade|--update)
+										doUpgrade=1 ;;
+		-a|--no-apt)		doApt=0 ;;
 		-v|--verbose)		verbose_=1; quiet_='' ;;
 		-q|--quiet)			verbose_=0; quiet_='qq' ;;
 		-V|--version)		echo "$PRGNAME vs $Version"; return 0 ;;
 		-h|--help)			dejavu_help; return 0 ;;
-		-[vqVh]*)				#shellcheck disable=SC2046 # de-aggregate aggregated short options
+		-N|--no-op)			;;
+		-[uavqVhN]*)		#shellcheck disable=SC2046 # de-aggregate aggregated short options
 										set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
 		-?|--*)					echo 2> "Invalid option '$1'" ;;
-		*)							args+=( "$1" ) ;;
+		*)							echo 2> "Invalid argument '$1'" ;;
 	esac; shift; done
+
+	if ((doUpgrade)); then
+		tempdir="/tmp/$PRG-upgrade-$RANDOM"
+		git clone "$REPOSITORY" "$tempdir" || exit
+		exec "$tempdir/$PRG" \
+				-"$( ((verbose_)) && echo 'v' || echo 'q')" \
+				-"$( ((doApt)) && echo 'a' || echo 'N')"
+		exit
+	fi
 
 	((verbose_)) && { echo "$PRGNAME vs $Version"; echo ''; }
 		
@@ -87,8 +100,11 @@ main() {
 	fi
 	OPENAI_ORGANIZATION_ID="$key"
 
-	sudo apt update -q"$quiet_"
-	sudo apt install -q"$quiet_" python3 pip git
+	if ((doApt)); then
+		sudo apt update -q"$quiet_"
+		sudo apt upgrade -q"$quiet_"
+		sudo apt install -q"$quiet_" python3 pip git
+	fi
 	sudo pip install -q"$quiet_" --upgrade --no-color pip
 	sudo pip install -q"$quiet_" --upgrade --no-color openai
 
