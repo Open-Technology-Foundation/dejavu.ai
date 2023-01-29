@@ -87,6 +87,7 @@ main() {
 	sudo cp -p "$PRGDIR"/*.dejavu.txt "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/README.md "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/LICENCE "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" "$SHAREDIR"/
 	
 	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
