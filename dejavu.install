@@ -14,6 +14,7 @@ REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 Version=$(cat "$PRGDIR/dejavu.version")
 doApt=1
 doUpgrade=0
+hasSymLink=''
 
 dejavu_help() {
 cat <<-EOT
@@ -121,7 +122,9 @@ main() {
 	cd /usr/local/bin
 	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
 	sudo chmod 775 "/usr/local/bin/dejavu"
-  [[ -z "$(readlink -n -- dv)" ]] && sudo ln -s dejavu dv
+  [[ ! -f dv ]] && sudo ln -s dejavu dv
+  [[ "$(readlink -fn dv)" == /usr/local/bin/dejavu ]] \
+  		&& hasSymLink="(or 'dv' for short)"
 
 	# ~/.bashrc /etc/bash.bashrc
 	local tmpfile file
@@ -148,7 +151,7 @@ main() {
 	if ((verbose_)); then
 		echo
 		echo "$PRGNAME is installed."
-		echo "To run, enter 'dejavu' (or 'dv' for short)"
+		echo "To run, enter 'dejavu' $hasSymLink"
 		echo 'Have fun!'
 	fi
 }

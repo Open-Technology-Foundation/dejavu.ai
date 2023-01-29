@@ -20,7 +20,7 @@ import subprocess
 from colorama import init, Fore, Back, Style
 init()
 
-ScriptName = os.path.basename(sys.argv.pop(0))
+ScriptName = os.path.basename(os.readlink(sys.argv.pop(0)))
 REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 HomeDir=os.path.expanduser('~')
 UserHome=HomeDir+'/.'+ScriptName 
@@ -239,9 +239,9 @@ def cmdstatus(all=False):
   printinfo(' Training File: ' + TrainingFile)
   if all: 
     printinfo('  History File: ' + historyFile)
-    sx = len(prompt)
     printinfo('     AI Engine: ' + engine)
-    printinfo(' Prompt Length: ' +str(sx))
+    sx = len(prompt)
+    printinfo('   Tokens Used: ~' + str(int(sx/3.5)))
     printinfo('   Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
     printinfo('   Temperature: ' + str(temperature))
     printinfo('     Frequency: ' + str(freq_pen))
