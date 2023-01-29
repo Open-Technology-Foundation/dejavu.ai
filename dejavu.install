@@ -26,7 +26,8 @@ cat <<-EOT
 	        : - ~/.bashrc and /etc/bash.bashrc will be modified
 	        :   to include openai environment variables. 
 	        : - program files are stored in $SHAREDIR
-	        : - executable dejavu is installed in /usr/local/bin/
+	        : - executable 'dejavu' is installed in /usr/local/bin/
+	        : - a symlink 'dv' is created for 'dejavu'
 	Synopsis: $PRG [-vqaVh]
 	Options : -v|--verbose   Verbose on (default)
 	        : -q|--quiet     Verbose off. 
@@ -110,15 +111,17 @@ main() {
 
 	sudo mkdir -p "$SHAREDIR"
 	sudo chmod 775 "$SHAREDIR"
-
+	cd "$SHAREDIR"
 	sudo cp -p "$PRGDIR"/*.dejavu.txt "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/README.md "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/LICENCE "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" "$SHAREDIR"/
 	
+	cd /usr/local/bin
 	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
 	sudo chmod 775 "/usr/local/bin/dejavu"
+  [[ -z "$(readlink -n -- dv)" ]] && sudo ln -s dejavu dv
 
 	# ~/.bashrc /etc/bash.bashrc
 	local tmpfile file
@@ -145,7 +148,7 @@ main() {
 	if ((verbose_)); then
 		echo
 		echo "$PRGNAME is installed."
-		echo "To run, enter 'dejavu'"
+		echo "To run, enter 'dejavu' (or 'dv' for short)"
 		echo 'Have fun!'
 	fi
 }
