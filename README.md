@@ -1,6 +1,8 @@
 # DéjàVu - GPT-3 Terminal ChatBot
 Bring the power of GPT-3 directly to your terminal command-line.
 
+Remembers context and history. You may never Google search anything ever again ...
+
 (The DéjàVu web interface is also available [here](https://okusiassociates.com/dejavu/).)
 
 ## Requirements
