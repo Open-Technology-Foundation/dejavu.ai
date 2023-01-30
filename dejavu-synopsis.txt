@@ -1,0 +1,25 @@
+Name    : DéjàVu GPT-3 Terminal vs 0.9
+Script  : dejavu[|dv]
+Desc    : DéjàVu GPT-3 Terminal Chat program that remembers
+        : context.
+        :
+Synopsis: dejavu [-vquV] [TrainingFile]
+        : Where TrainingFile is a saved conversation file, or
+        : the name of a new conversation you wish to create.
+        :
+        : Training Files are located in ~/.dejavu/ with extension
+        : '.dejavu.txt'.
+        :
+        : The default Training File is training.dejavu.txt. This 
+        : can be edited to suit your own personality and requirements.
+        :
+Options : -v|--verbose   Verbose on (default)
+        : -q|--quiet     Verbose off. Start-up status 
+        :                messages will not appear.
+        : -l|--list      List conversation files.
+        : -u|--upgrade   Upgrade DéjàVu from git repository.
+        : -V|--version   Print DéjàVu version.
+        :
+Requires: python 3, pip, git, openai API key/s, root access
+        :
+See Also: https://openai.com, https://github.com/GaryDean/dejavu.ai.git

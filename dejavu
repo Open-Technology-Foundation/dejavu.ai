@@ -106,7 +106,8 @@ while len(sys.argv) > 0:
         print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], filesize/1024, modified_date.strftime('%Y-%m-%d %H:%M:%S')))
     exit()
   elif arg in ["-h", "--help"]:
-    print(ScriptName, '[-v|--verbose] [-q|--quiet] [-u|--upgrade] [TrainingFileName]');
+    subprocess.run(["less", ScriptDir+'/'+ScriptName+'-synopsis.txt'])
+#    print(file_get_contents(ScriptDir+'/'+ScriptName+'-synopsis.txt'))
     exit()
   else:
     TrainingFile = arg
