@@ -86,7 +86,7 @@ Verbose = True
 TrainingFile = ''
 while len(sys.argv) > 0:
   arg = sys.argv.pop(0)
-  if arg in ["-u", "--upgrade"]:
+  if arg in ["-u", "--upgrade", "--update"]:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
     os.mkdir(tempdir)
     os.chdir(tempdir)
@@ -276,7 +276,8 @@ if __name__ == '__main__':
   while True:
     Columns = shutil.get_terminal_size().columns - 1
     try: 
-      user_input = input('\n'+Fore.GREEN+USER_NAME+': ' + Style.RESET_ALL)
+      print(Fore.YELLOW+Style.BRIGHT + USER_NAME +':'+ Style.RESET_ALL)
+      user_input = input()
     except KeyboardInterrupt: orderly_exit()
     if user_input.strip() == '': continue
 
@@ -289,6 +290,14 @@ if __name__ == '__main__':
         cmdhelp(); continue
       elif tok[0] == 'help' or tok[0] == '?':
         cmdhelp(); continue
+
+      # exec
+      elif tok[0] == 'exec':
+        args = [ tok[2:] ]
+        try: os.system(tok[1:])
+#        try: subprocess.run([ tok[1], *args])
+        except: print('Error executing ', tok[1:])
+        continue
 
       # status
       elif tok[0] == 'status':
@@ -320,8 +329,15 @@ if __name__ == '__main__':
         start = max(int(start), 1)
         end = min(int(end), len(conversation))
         i = int(start)
+        printinfo('List Conversation')
         while i <= end:
-          text = '\n' + str(i) + '. ' + conversation[i-1]
+          text = conversation[i-1]
+          if text[0:len(USER_NAME)+2] == USER_NAME+': ':
+            print(str(i)+'. '+Fore.YELLOW+Style.DIM + USER_NAME +':'+ Style.RESET_ALL)
+            text = text[len(USER_NAME)+2:]
+          elif text[0:len(AI_NAME)+2] == AI_NAME+': ':
+            print(str(i)+'. '+Fore.GREEN+Style.DIM + AI_NAME +':'+ Style.RESET_ALL)
+            text = text[len(AI_NAME)+2:] +'\n\n'
           for line in text.splitlines(): 
             printinfo(textwrap.fill(line, width=Columns), '')
           i += 1
@@ -426,11 +442,8 @@ if __name__ == '__main__':
       continue
 
     # Print the response from GPT-3
-    text = '\n' + AI_NAME + ': ' + response
-    for line in text.splitlines(): 
-      line = line.replace(AI_NAME+': ', Fore.GREEN + AI_NAME+': ' + Style.RESET_ALL)
-      line = line.replace(USER_NAME+': ', Fore.GREEN + USER_NAME+': ' + Style.RESET_ALL)
-
+    print(Fore.GREEN + AI_NAME +':'+ Style.RESET_ALL)
+    for line in response.splitlines(): 
       print(textwrap.fill(line, width=Columns))
 
     # Add the response to the conversation
