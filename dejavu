@@ -276,7 +276,7 @@ if __name__ == '__main__':
   while True:
     Columns = shutil.get_terminal_size().columns - 1
     try: 
-      user_input = input('\n'+USER_NAME+': ')
+      user_input = input('\n'+Fore.GREEN+USER_NAME+': ' + Style.RESET_ALL)
     except KeyboardInterrupt: orderly_exit()
     if user_input.strip() == '': continue
 
@@ -428,8 +428,8 @@ if __name__ == '__main__':
     # Print the response from GPT-3
     text = '\n' + AI_NAME + ': ' + response
     for line in text.splitlines(): 
-      line = line.replace(AI_NAME+': ', Fore.RED + AI_NAME+': ' + Style.RESET_ALL)
-      line = line.replace(USER_NAME+': ', Fore.RED + USER_NAME+': ' + Style.RESET_ALL)
+      line = line.replace(AI_NAME+': ', Fore.GREEN + AI_NAME+': ' + Style.RESET_ALL)
+      line = line.replace(USER_NAME+': ', Fore.GREEN + USER_NAME+': ' + Style.RESET_ALL)
 
       print(textwrap.fill(line, width=Columns))
 
