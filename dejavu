@@ -11,6 +11,7 @@ import atexit
 import time
 import textwrap
 import shutil
+import shlex
 import json
 import openai
 import time
@@ -293,10 +294,8 @@ if __name__ == '__main__':
 
       # exec
       elif tok[0] == 'exec':
-        args = [ tok[2:] ]
-        try: os.system(tok[1:])
-#        try: subprocess.run([ tok[1], *args])
-        except: print('Error executing ', tok[1:])
+        try: subprocess.run(' '.join(tok[1:]), shell=True, executable='/bin/bash')
+        except: printerr('#!#')
         continue
 
       # status
