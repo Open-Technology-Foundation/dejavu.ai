@@ -28,7 +28,8 @@ cat <<-EOT
 	        :   to include openai environment variables. 
 	        : - program files are stored in $SHAREDIR
 	        : - executable 'dejavu' is installed in /usr/local/bin/
-	        : - a symlink 'dv' is created for 'dejavu'
+	        : - a symlink 'dv' is created for 'dejavu' in
+	        :   /usr/local/bin if file does not already exist.
 	Synopsis: $PRG [-vqaVh]
 	Options : -v|--verbose   Verbose on (default)
 	        : -q|--quiet     Verbose off. 
@@ -152,6 +153,7 @@ main() {
 		echo
 		echo "$PRGNAME is installed."
 		echo "To run, enter 'dejavu' $hasSymLink"
+		echo "Want to help develop $PRGNAME? Go here: $REPOSITORY"
 		echo 'Have fun!'
 	fi
 }
