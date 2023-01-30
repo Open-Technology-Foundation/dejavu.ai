@@ -56,9 +56,9 @@ Training Files are located in ~/.dejavu/ with extension '.dejavu.txt'.
 The default Training File is training.dejavu.txt. This can/should be edited to suit your own personality and requirements.
 
 	Options : -v|--verbose   Verbose on (default)
-          : -q|--quiet     Verbose off. Start-up status 
-          :                messages will not appear.
-          : -l|--list      List conversation files.
-          : -u|--upgrade   Upgrade DéjàVu from git repository.
-          : -V|--version   Print DéjàVu version.
+	        : -q|--quiet     Verbose off. Start-up status 
+	        :                messages will not appear.
+	        : -l|--list      List conversation files.
+	        : -u|--upgrade   Upgrade DéjàVu from git repository.
+	        : -V|--version   Print DéjàVu version.
 

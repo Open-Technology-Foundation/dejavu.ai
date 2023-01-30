@@ -20,7 +20,12 @@ import subprocess
 from colorama import init, Fore, Back, Style
 init()
 
-ScriptName = os.path.basename(os.readlink(sys.argv.pop(0)))
+ScriptName = sys.argv.pop(0)
+try: 
+  realfile = os.readlink(ScriptName)
+except:
+  realfile = ScriptName
+ScriptName = os.path.basename(realfile)
 REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 HomeDir=os.path.expanduser('~')
 UserHome=HomeDir+'/.'+ScriptName 
@@ -423,6 +428,9 @@ if __name__ == '__main__':
     # Print the response from GPT-3
     text = '\n' + AI_NAME + ': ' + response
     for line in text.splitlines(): 
+      line = line.replace(AI_NAME+': ', Fore.RED + AI_NAME+': ' + Style.RESET_ALL)
+      line = line.replace(USER_NAME+': ', Fore.RED + USER_NAME+': ' + Style.RESET_ALL)
+
       print(textwrap.fill(line, width=Columns))
 
     # Add the response to the conversation
