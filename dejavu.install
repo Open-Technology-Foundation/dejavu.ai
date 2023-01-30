@@ -40,7 +40,7 @@ cat <<-EOT
 	        : -u|--upgrade   Upgrade $PRGNAME from git repository.
 	        : -V|--version   Print $PRGNAME version.
 	Requires: python 3, pip, git, openai API key/s, root access
-	See Also: https://openai.com, $REPOSITORY
+	See Also: https://openai.com/api/, $REPOSITORY
 EOT
 }
 

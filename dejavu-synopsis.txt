@@ -26,7 +26,7 @@ Options : -v|--verbose   Verbose on (default)
         :
 Requires: python 3, pip, git, openai API key/s, root access
         :
-See Also: https://openai.com
+See Also: https://openai.com/api/
         : https://github.com/GaryDean/dejavu.ai.git
         : https://okusiassociates.com/dejavu/
        

@@ -1,4 +1,4 @@
-# DéjàVu GPT-3 Terminal
+# DéjàVu - GPT-3 Terminal ChatBot
 Bring the power of GPT-3 directly to your terminal command-line.
 
 (The DéjàVu web interface is also available [here](https://okusiassociates.com/dejavu/).)
@@ -6,7 +6,7 @@ Bring the power of GPT-3 directly to your terminal command-line.
 ## Requirements
 For the moment, ```DéjàVu GPT-3 Terminal``` has only been tested on Ubuntu Linux.  Other platforms may require minor adjustments. 
 
-You will need to obtain an API key from [openAI](https://openai.com) in order to run this program.
+You will need to obtain an API key from [openAI](https://openai.com/api/) in order to run this program.
 
 ## Installation
 You should have copied down your openAI API key and organization ID (if applicable). Update your environment variables as follows:
