@@ -3,21 +3,25 @@
 # Linux terminal interface for GPT-3
 # Gary Dean garydean@okusi.id
 # https://github.com/GaryDean/dejavu.ai.git
-import sys
-import os
-import re
-import readline
 import atexit
-import time
-import textwrap
-import shutil
-import shlex
+import datetime
 import json
 import openai
-import time
-import datetime
+import os
 import random
+import re
+import readline
+import shutil
 import subprocess
+import sys
+import textwrap
+import time
+
+# for dejavu -c
+from pynput.keyboard import Key, Controller
+keyboard = Controller()
+kbTypeAhead = ''
+
 from colorama import init, Fore, Back, Style
 init()
 
@@ -70,7 +74,7 @@ def int_list(input_string, minVal, maxVal, revSort=False):
   else:       return range_list
 
 def printerr(msg):
-  print(Fore.RED + '! ' + msg + Style.RESET_ALL)
+  print(Fore.RED + '! ' + msg + Style.RESET_ALL, file=sys.stderr)
 def printinfo(msg, suffix='# '):
   print(Style.DIM + suffix + msg + Style.RESET_ALL)
 
@@ -82,11 +86,13 @@ def file_put_contents(filename, string, mode='w'):
         f.write(string)
 
 # Process command line and define TrainingFile to use
+cmdExit = 0
 Version = file_get_contents(ScriptDir+'/dejavu.version').strip()
 Verbose = True
 TrainingFile = ''
 while len(sys.argv) > 0:
-  arg = sys.argv.pop(0)
+  arg = sys.argv.pop(0).strip()
+  if not arg: continue
   if arg in ["-u", "--upgrade", "--update"]:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
     os.mkdir(tempdir)
@@ -98,8 +104,7 @@ while len(sys.argv) > 0:
     os.execvp(cmd, args)
     exit()
   elif arg in ["-V", "--version"]:
-    print(ScriptName+' vs '+Version)
-    exit()
+    print(ScriptName+' vs '+Version); exit()
   elif arg in ["-v", "--verbose"]:
     Verbose = 1
   elif arg in ["-q", "--quiet"]:
@@ -111,10 +116,25 @@ while len(sys.argv) > 0:
         modified_date = datetime.datetime.fromtimestamp(os.stat(UserHome+'/'+file).st_mtime)
         print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], filesize/1024, modified_date.strftime('%Y-%m-%d %H:%M:%S')))
     exit()
-  elif arg in ["-h", "--help"]:
+
+  elif arg in ["-c", "--command"]:
+    if len(sys.argv) > 0:
+      kbTypeAhead = sys.argv.pop(0)+'\n'
+
+  elif arg in ["-x", "--exit"]:
+      Verbose = 0
+      cmdExit = 1
+
+  elif arg in ["-h", "-?", "--help"]:
     subprocess.run(["less", ScriptDir+'/'+ScriptName+'-synopsis.txt'])
-#    print(file_get_contents(ScriptDir+'/'+ScriptName+'-synopsis.txt'))
     exit()
+  # de-aggregate aggregated short options
+  elif re.match(r'^-[cvqVh]', arg):
+      sys.argv = [''] + ['-%s' % c for c in arg[1:]] + sys.argv
+  elif re.match(r'^--', arg):
+      printerr('Invalid option '+ arg)
+  elif arg[0:1] == '-':
+      printerr('Invalid option '+ arg)
   else:
     TrainingFile = arg
 
@@ -278,13 +298,14 @@ if __name__ == '__main__':
     Columns = shutil.get_terminal_size().columns - 1
     try: 
       print(Fore.YELLOW+Style.BRIGHT + USER_NAME +':'+ Style.RESET_ALL)
-      user_input = input()
+      if kbTypeAhead: keyboard.type(kbTypeAhead)
+      userInput = input(); kbTypeAhead = ''
     except KeyboardInterrupt: orderly_exit()
-    if user_input.strip() == '': continue
+    if userInput.strip() == '': continue
 
     # Process commands
-    if user_input[0] == '!':
-      cmd = user_input[1:].strip()
+    if userInput[0] == '!':
+      cmd = userInput[1:].strip()
       tok = cmd.split()
       # help
       if(len(tok) == 0):
@@ -366,13 +387,13 @@ if __name__ == '__main__':
         if len(tok) < 2: what = 'conv'
         else: what = tok[1]
         if what[0:6] == 'prompt':
-          user_input = PromptReplace('') \
+          userInput = PromptReplace('') \
               +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         elif what[0:4] == 'conv':
-          user_input = text_block \
+          userInput = text_block \
               +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         elif what == 'all':
-          user_input = PromptReplace(text_block) \
+          userInput = PromptReplace(text_block) \
               +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         else:
           printerr('Invalid option. Valid options for summarize are prompt|conv|all.')
@@ -384,8 +405,8 @@ if __name__ == '__main__':
         else: filename = tok[1]
         if os.path.exists(filename):
           try:
-            user_input = input('\n'+filename+' exists. Overwrite? (y/n) ')
-            if user_input != 'y': continue
+            userInput = input('\n'+filename+' exists. Overwrite? (y/n) ')
+            if userInput != 'y': continue
           except KeyboardInterrupt: continue
         else:
           if not '.dejavu.txt' in filename:
@@ -415,7 +436,7 @@ if __name__ == '__main__':
           printerr(filename+' does not exist.')
           continue
         printinfo('Importing from text file '+filename)  
-        user_input = file_get_contents(filename).strip()+'\n'
+        userInput = file_get_contents(filename).strip()+'\n'
 
       # exit
       elif tok[0] == 'exit':
@@ -427,7 +448,7 @@ if __name__ == '__main__':
         cmdhelp(); continue
 
     # Prepend username to user input 
-    conversation.append(USER_NAME+': %s' % user_input)
+    conversation.append(USER_NAME+': %s' % userInput)
     # Aggregate the entire conversation 
     text_block = '\n'.join(conversation)
     prompt = PromptReplace(text_block) + '\n' + AI_NAME +': '
@@ -447,5 +468,9 @@ if __name__ == '__main__':
 
     # Add the response to the conversation
     conversation.append(AI_NAME+': %s' % response)
+
+    #for devaju -c 'cmd'
+    if cmdExit:
+      exit()
 
 #end

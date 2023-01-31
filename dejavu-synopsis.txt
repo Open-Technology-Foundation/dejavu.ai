@@ -5,22 +5,25 @@ Script  : dejavu[|dv]
 Desc    : DéjàVu GPT-3 Terminal Chat program that remembers
         : context.
         :
-Synopsis: dejavu [-vquV] [TrainingFile]
+Synopsis: dejavu [-vqlxuV] [-c cmd] [TrainingFile]
         :
         : Where TrainingFile is a saved conversation file, or
         : the name of a new conversation you wish to create.
-        :
-        : Training Files are located in ~/.dejavu/ with extension
-        : '.dejavu.txt'.
         :
         : The default Training File is training.dejavu.txt. This 
         : can/should be edited to suit your own personality and 
         : requirements.
         :
+        : Training Files are located in ~/.dejavu/ with extension
+        : '.dejavu.txt'.
+        :
 Options : -v|--verbose   Verbose on (default)
         : -q|--quiet     Verbose off. Start-up status 
         :                messages will not appear.
         : -l|--list      List conversation files in ~/.dejavu.
+        : -c|--command 'cmd'
+        :                Execute 'cmd' on entry to DéjàVu.
+        : -x|--exit      Immediately exit DéjàVu after first command.
         : -u|--upgrade   Upgrade DéjàVu from git repository.
         : -V|--version   Print DéjàVu version.
         :

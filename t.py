@@ -1,13 +1,12 @@
-import pyperclip
+from pynput.keyboard import Key, Controller
 
-def intercept_paste(text):
-    # Intercept the pressing of the Shift-Ctrl-v key
-    if pyperclip.paste() == 'shift-ctrl-v':
-        # Change the contents of the paste buffer
-        pyperclip.copy(text.replace('new', 'old'))
-        # Paste the changed contents
-        pyperclip.paste()
+keyboard = Controller()
 
-# Call the function
-intercept_paste('This is the new paste buffer contents')
-tt=input(":")
+# Insert the string
+#keyboard.type('This is the string you want to insert')
+#SYSADMIN:
+#add an input() statement
+#TECHLEAD:
+input_string = input('Please enter a string: ')
+keyboard.type(input_string+'\n\n')
+input('input: ')

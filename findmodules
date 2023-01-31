@@ -1,0 +1,27 @@
+#!/bin/bash
+#!shellcheck disable=SC0000
+#@ Script:Function:GlobalX:Global:Local: 
+#@ Desc    : 
+#@ Synopsis: 
+#@ Options :
+#@ Examples: 
+#@ Depends :
+#@ See Also:
+X() {
+	std=( 'OS' 'Math' 'Sys' 'Re' 'Time' 'Random' 'JSON' 'String' 'Argparse' 'Datetime' 'Collections' 'Socket' 'Threading' 'Logging' 'Pipes' 'Subprocess' 'Csv' 'Zipfile' 'Tkinter' 'Urllib' )
+
+	while (($#)); do
+		if [[ " ${std[*],,} " != *"${1,,}"* ]]; then
+#  	  echo "$1 found"
+#		else
+			echo "$1 not found"
+		#		python3 -c "import $1" 2>/dev/null || echo "$1!"
+		fi
+		shift	
+	done
+		
+}
+X atexit datetime json openai os random re readline shutil subprocess sys textwrap time pynput colorama 
+
+#pip install -U atexit colorama openai pynput readline shutil subprocess textwrap
+
