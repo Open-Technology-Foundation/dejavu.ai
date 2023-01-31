@@ -1,7 +1,7 @@
 # DéjàVu - GPT-3 Terminal ChatBot
 Bring the power of GPT-3 directly to your terminal command-line.
 
-Remembers context and history. You may never Google search anything ever again ...
+Remembers context and history. You may never Google search anything ever again :) ...
 
 (The DéjàVu web interface is also available [here](https://okusiassociates.com/dejavu/).)
 
@@ -45,17 +45,17 @@ Once that's done, you're ready to install DejaVu.
 When you've installed the program, run:
 
 ```
-dejavu [training_file]
+dejavu [conversation_file]
 ```
 
-If no training_file is specified, it will default to ```training.dejavu.txt``` located in ```~/.dejavu/```
+If no conversation_file is specified, it will default to ```conversation.dejavu.txt``` located in ```~/.dejavu/```
 
-### Synopsis: dejavu \[-vquV\] \[TrainingFile\]
-TrainingFile is a saved conversation file, or the name of a new conversation you wish to create.
+### Synopsis: dejavu \[-vquV\] \[ConvFile\]
+```ConvFile``` is a saved conversation file, or the name of a new conversation you wish to create.
  
-Training Files are located in ~/.dejavu/ with extension '.dejavu.txt'.
+Conversation Files are located in ```~/.dejavu/``` with extension ```.dejavu.txt```.
 
-The default Training File is training.dejavu.txt. This can/should be edited to suit your own personality and requirements.
+The default Conversation File is ```conversation.dejavu.txt```. This can/should be edited to suit your own personality and requirements.
 
 	Options : -v|--verbose   Verbose on (default)
 	        : -q|--quiet     Verbose off. Start-up status 

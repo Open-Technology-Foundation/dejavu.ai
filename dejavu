@@ -16,12 +16,10 @@ import subprocess
 import sys
 import textwrap
 import time
-
 # for dejavu -c
 from pynput.keyboard import Key, Controller
 keyboard = Controller()
 kbTypeAhead = ''
-
 from colorama import init, Fore, Back, Style
 init()
 
@@ -85,11 +83,11 @@ def file_put_contents(filename, string, mode='w'):
     with open(filename, mode) as f:
         f.write(string)
 
-# Process command line and define TrainingFile to use
+# Process command line and define ConvFile to use
 cmdExit = 0
 Version = file_get_contents(ScriptDir+'/dejavu.version').strip()
 Verbose = True
-TrainingFile = ''
+ConvFile = ''
 while len(sys.argv) > 0:
   arg = sys.argv.pop(0).strip()
   if not arg: continue
@@ -136,32 +134,32 @@ while len(sys.argv) > 0:
   elif arg[0:1] == '-':
       printerr('Invalid option '+ arg)
   else:
-    TrainingFile = arg
+    ConvFile = arg
 
-# Training file validation and default
+# Conversation file validation and default
 #if len(sys.argv) > 1: 
-#  TrainingFile = sys.argv[1]
+#  ConvFile = sys.argv[1]
 #else: 
-if len(TrainingFile) == 0: 
-  TrainingFile = UserHome+'/training.dejavu.txt'
-  if not os.path.exists(TrainingFile):
-    string = file_get_contents(ScriptDir+'/training.dejavu.txt')
+if len(ConvFile) == 0: 
+  ConvFile = UserHome+'/conversation.dejavu.txt'
+  if not os.path.exists(ConvFile):
+    string = file_get_contents(ScriptDir+'/conversation.dejavu.txt')
     match = re.search(r'USER_NAME=(\w+)', string)
     if match:
       string = re.sub(r'USER_NAME=\w+', 'USER_NAME='+UserSysName.upper(), string)
-    file_put_contents(UserHome+'/training.dejavu.txt', string)
-if not os.path.exists(TrainingFile):
-  if os.path.exists(UserHome+'/'+TrainingFile):
-    TrainingFile = UserHome+'/'+TrainingFile
-  elif os.path.exists(UserHome+'/'+TrainingFile+'.dejavu.txt'):
-    TrainingFile = UserHome+'/'+TrainingFile+'.dejavu.txt'
+    file_put_contents(UserHome+'/conversation.dejavu.txt', string)
+if not os.path.exists(ConvFile):
+  if os.path.exists(UserHome+'/'+ConvFile):
+    ConvFile = UserHome+'/'+ConvFile
+  elif os.path.exists(UserHome+'/'+ConvFile+'.dejavu.txt'):
+    ConvFile = UserHome+'/'+ConvFile+'.dejavu.txt'
   else:
-    printerr('DéjàVu training file "' + TrainingFile + '" does not exist!')
+    printerr('DéjàVu conversation file "' + ConvFile + '" does not exist!')
     exit()
-TrainingFileName = os.path.basename(TrainingFile)
+ConvFileName = os.path.basename(ConvFile)
 
 # readline() history
-historyFile = UserHome+'/'+TrainingFileName.replace('.txt', '.history')
+historyFile = UserHome+'/'+ConvFileName.replace('.txt', '.history')
 try:
     readline.read_history_file(historyFile)
     readline.set_history_length(200)
@@ -182,9 +180,9 @@ except KeyError:
 try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
 except: openai.organization = ''
 
-# open up the Training file
+# open up the Conversation file
 value_list = []
-with open(TrainingFile, 'r') as f:
+with open(ConvFile, 'r') as f:
   lines = f.readlines()
   params = {}
   inprompt = False
@@ -263,18 +261,18 @@ def cmdhelp():
 # Print current parameters
 def cmdstatus(all=False):
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
-  printinfo(' Training File: ' + TrainingFile)
+  printinfo('Conversation File: ' + ConvFile)
   if all: 
-    printinfo('  History File: ' + historyFile)
-    printinfo('     AI Engine: ' + engine)
+    printinfo('     History File: ' + historyFile)
+    printinfo('        AI Engine: ' + engine)
     sx = len(prompt)
-    printinfo('   Tokens Used: ~' + str(int(sx/3.5)))
-    printinfo('   Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
-    printinfo('   Temperature: ' + str(temperature))
-    printinfo('     Frequency: ' + str(freq_pen))
-    printinfo('      Presence: ' + str(pres_pen))
-  printinfo('     Your Name: ' + USER_NAME)
-  printinfo('       AI Name: ' + AI_NAME)
+    printinfo('      Tokens Used: ~' + str(int(sx/3.5)))
+    printinfo('      Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
+    printinfo('      Temperature: ' + str(temperature))
+    printinfo('        Frequency: ' + str(freq_pen))
+    printinfo('         Presence: ' + str(pres_pen))
+  printinfo('        Your Name: ' + USER_NAME)
+  printinfo('          AI Name: ' + AI_NAME)
 
 # Replace <<>> markers in prompt and conversation 
 # with the appropriate text
@@ -288,7 +286,7 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr=AI_NAME, USs='<<USER_
 # Exit script nicely
 def orderly_exit():
   print()
-  if Verbose: printinfo('Exiting '+ScriptName+' '+TrainingFile)
+  if Verbose: printinfo('Exiting '+ScriptName+' '+ConvFile)
   sys.exit()
 
 if __name__ == '__main__':
@@ -401,7 +399,7 @@ if __name__ == '__main__':
 
       # save [file]
       elif tok[0] == 'save':
-        if len(tok) < 2: filename = TrainingFile
+        if len(tok) < 2: filename = ConvFile
         else: filename = tok[1]
         if os.path.exists(filename):
           try:
