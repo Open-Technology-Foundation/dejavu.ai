@@ -177,7 +177,7 @@ atexit.register(readline.write_history_file, historyFile)
 try:  openai.api_key = os.environ['OPENAI_API_KEY']
 except KeyError:
   printerr('Environment variable OPENAI_API_KEY is not defined '+str(KeyError))
-  printinfo('Go to https://beta.openai.com/account/api-keys for your own API key.')
+  printinfo('Go to https://openai.com/api for your own API key.')
   printinfo(':~$ export OPENAI_API_KEY="your_key"')
   printinfo('If you set up your openai account as an organization, you will also have to set OPENAI_ORGANIZATION_ID')
   printinfo(':~$ export OPENAI_ORGANIZATION_ID="your_organization"')
@@ -256,12 +256,13 @@ def gpt3_completion(prompt, engine='text-davinci-003', temperature=0.7, top_p=1.
 def cmdhelp():
   printinfo('Valid system commands are:')
   printinfo('  !status')
+  printinfo('  !temperature [0]')
   printinfo('  !list [0-0]')
   printinfo('  !delete [0-0]')
   printinfo('  !prompt')
   printinfo('  !summarize [prompt|conv|all]')
   printinfo('  !save [file]')
-  printinfo('  !temperature [0]')
+  printinfo('  !exec [cmd...]')
   printinfo('  !exit')
 
 # Print current parameters
