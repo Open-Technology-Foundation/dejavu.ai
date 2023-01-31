@@ -313,8 +313,7 @@ if __name__ == '__main__':
     Columns = shutil.get_terminal_size().columns - 1
     print(Fore.YELLOW+Style.BRIGHT + USER_NAME +':'+ Style.RESET_ALL)
     if len(kbTypeAhead): 
-      userInput = kbTypeAhead[0]
-      del kbTypeAhead[0]
+      userInput = kbTypeAhead.pop(0)
       print(userInput)
     else:
       try: 
