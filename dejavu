@@ -171,6 +171,7 @@ try:
     readline.set_history_length(200)
 except FileNotFoundError:
     file_put_contents(historyFile, '')
+
 atexit.register(readline.write_history_file, historyFile)
 
 # Get the openai API key
@@ -267,19 +268,32 @@ def cmdhelp():
 
 # Print current parameters
 def cmdstatus(all=False):
+  def pp(pref, suff):
+    printinfo(format('%13s %s' % (pref+':', '{}'.format(suff))))
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
-  printinfo('Conversation File: ' + ConvFile)
+  pp(   'Conv. File',  os.path.basename(ConvFile))
   if all: 
-    printinfo('     History File: ' + historyFile)
-    printinfo('        AI Engine: ' + engine)
-    sx = len(prompt)
-    printinfo('      Tokens Used: ~' + str(int(sx/3.5)))
-    printinfo('      Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
-    printinfo('      Temperature: ' + str(temperature))
-    printinfo('        Frequency: ' + str(freq_pen))
-    printinfo('         Presence: ' + str(pres_pen))
-  printinfo('        Your Name: ' + USER_NAME)
-  printinfo('          AI Name: ' + AI_NAME)
+    pp( 'History File',os.path.basename(historyFile))
+    pp( 'AI Engine',   engine)
+    pp( 'Tokens Used', int(len(prompt)/3.5))
+    pp( 'Tokens Left', (max(16,int(4096-(len(prompt)/3.5)-100))))
+    pp( 'Temperature', temperature)
+    pp( 'Frequency',   freq_pen)
+    pp( 'Presence',    pres_pen)
+  pp(   'Your Name:',  USER_NAME)
+  pp(   'AI Name:',    AI_NAME)
+
+#  if all: 
+#    printinfo('     History File: ' + historyFile)
+#    printinfo('        AI Engine: ' + engine)
+#    sx = len(prompt)
+#    printinfo('      Tokens Used: ~' + str(int(sx/3.5)))
+#    printinfo('      Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
+#    printinfo('      Temperature: ' + str(temperature))
+#    printinfo('        Frequency: ' + str(freq_pen))
+#    printinfo('         Presence: ' + str(pres_pen))
+#  printinfo('        Your Name: ' + USER_NAME)
+#  printinfo('          AI Name: ' + AI_NAME)
 
 # Replace <<>> markers in prompt and conversation 
 # with the appropriate text
@@ -474,8 +488,7 @@ if __name__ == '__main__':
     # Add the response to the conversation
     conversation.append(AI_NAME+': %s' % response)
 
-    #for devaju -c 'cmd'
-    if cmdExit:
+    #for devaju -x -c 'cmd'
+    if cmdExit: 
       exit()
-
 #end
