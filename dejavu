@@ -16,15 +16,11 @@ import subprocess
 import sys
 import textwrap
 import time
-# for dejavu -c
-try:
-  if os.environ["DISPLAY"]:
-    from pynput.keyboard import Key, Controller
-    keyboard = Controller()
-except: keyboard = ''
-kbTypeAhead = ''
 from colorama import init, Fore, Back, Style
 init()
+
+# for dejavu -c
+kbTypeAhead = []
 
 ScriptName = sys.argv.pop(0)
 try: 
@@ -119,10 +115,10 @@ while len(sys.argv) > 0:
     exit()
 
   elif arg in ["-c", "--command"]:
-    if keyboard and len(sys.argv) > 0:
-      kbTypeAhead = sys.argv.pop(0)+'\n'
+    if len(sys.argv) > 0:
+      kbTypeAhead.append(sys.argv.pop(0))
     else:
-      printerr('This terminal does not have a DISPLAY.')
+      printerr('Command was not specified.')
       exit()
 
   elif arg in ["-x", "--exit"]:
@@ -315,11 +311,16 @@ if __name__ == '__main__':
   conversation = list()
   while True:
     Columns = shutil.get_terminal_size().columns - 1
-    try: 
-      print(Fore.YELLOW+Style.BRIGHT + USER_NAME +':'+ Style.RESET_ALL)
-      if kbTypeAhead: keyboard.type(kbTypeAhead)
-      userInput = input(); kbTypeAhead = ''
-    except KeyboardInterrupt: orderly_exit()
+    print(Fore.YELLOW+Style.BRIGHT + USER_NAME +':'+ Style.RESET_ALL)
+    if len(kbTypeAhead): 
+      userInput = kbTypeAhead[0]
+      del kbTypeAhead[0]
+      print(userInput)
+    else:
+      try: 
+        userInput = input()
+      except KeyboardInterrupt: orderly_exit()
+    
     if userInput.strip() == '': continue
 
     # Process commands
@@ -489,6 +490,6 @@ if __name__ == '__main__':
     conversation.append(AI_NAME+': %s' % response)
 
     #for devaju -x -c 'cmd'
-    if cmdExit: 
+    if len(kbTypeAhead)==0 and cmdExit: 
       exit()
 #end
