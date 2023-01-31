@@ -17,8 +17,11 @@ import sys
 import textwrap
 import time
 # for dejavu -c
-from pynput.keyboard import Key, Controller
-keyboard = Controller()
+try:
+  if os.environ["DISPLAY"]:
+    from pynput.keyboard import Key, Controller
+    keyboard = Controller()
+except: keyboard = ''
 kbTypeAhead = ''
 from colorama import init, Fore, Back, Style
 init()
@@ -116,8 +119,11 @@ while len(sys.argv) > 0:
     exit()
 
   elif arg in ["-c", "--command"]:
-    if len(sys.argv) > 0:
+    if keyboard and len(sys.argv) > 0:
       kbTypeAhead = sys.argv.pop(0)+'\n'
+    else:
+      printerr('This terminal does not have a DISPLAY.')
+      exit()
 
   elif arg in ["-x", "--exit"]:
       Verbose = 0
