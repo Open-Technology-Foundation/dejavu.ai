@@ -98,7 +98,7 @@ while len(sys.argv) > 0:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
     os.mkdir(tempdir)
     os.chdir(tempdir)
-    qqq = "-{0}".format("v" if Verbose else "qa")
+    qqq = "-{0}".format("v" if Verbose else "q")
     subprocess.call(["git", "clone", qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
     args = [ cmd, qqq ]
