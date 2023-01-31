@@ -95,7 +95,7 @@ while len(sys.argv) > 0:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
     os.mkdir(tempdir)
     os.chdir(tempdir)
-    qqq = "-{0}".format("v" if Verbose else "q")
+    qqq = "-{0}".format("v" if Verbose else "qa")
     subprocess.call(["git", "clone", qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
     args = [ cmd, qqq ]
@@ -130,9 +130,9 @@ while len(sys.argv) > 0:
   elif re.match(r'^-[cvqVh]', arg):
       sys.argv = [''] + ['-%s' % c for c in arg[1:]] + sys.argv
   elif re.match(r'^--', arg):
-      printerr('Invalid option '+ arg)
+      printerr('Invalid option '+ arg); exit()
   elif arg[0:1] == '-':
-      printerr('Invalid option '+ arg)
+      printerr('Invalid option '+ arg); exit()
   else:
     ConvFile = arg
 
