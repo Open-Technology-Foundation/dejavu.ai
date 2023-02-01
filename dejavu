@@ -19,9 +19,6 @@ import time
 from colorama import init, Fore, Back, Style
 init()
 
-# for dejavu -c
-kbTypeAhead = []
-
 ScriptName = sys.argv.pop(0)
 try: 
   realfile = os.readlink(ScriptName)
@@ -70,10 +67,32 @@ def int_list(input_string, minVal, maxVal, revSort=False):
   if revSort: return range_list[::-1]
   else:       return range_list
 
-def printerr(msg):
-  print(Fore.RED + '! ' + msg + Style.RESET_ALL, file=sys.stderr)
-def printinfo(msg, suffix='# '):
-  print(Style.DIM + suffix + msg + Style.RESET_ALL)
+useColor = True
+def printerr(*args, **kwargs):
+  output=kwargs.get('file', sys.stderr)
+  if useColor: 
+    print(kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
+  for arg in args: 
+    print(kwargs.get('prefix', '!!')+arg, end=kwargs.get('end', '\n'), file=output)
+  if useColor: 
+    print(Style.RESET_ALL, end='', file=output)
+def printinfo(*args, **kwargs):
+  output=kwargs.get('file', sys.stdout)
+  if useColor: 
+    print(kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
+  for arg in args: 
+    print(kwargs.get('prefix', '# ')+arg, end=kwargs.get('end', '\n'), file=output)
+  if useColor: 
+    print(Style.RESET_ALL, end='', file=output)
+def printstd(*args, **kwargs):
+  output=kwargs.get('file', sys.stdout)
+  if useColor: 
+    print(kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), end='', file=output)
+  for arg in args: 
+    print(arg, end=kwargs.get('end', '\n'), file=output)
+  if useColor: 
+    print(Style.RESET_ALL, end='', file=output)
+
 
 def file_get_contents(filepath):
     with open(filepath, 'r', encoding='utf-8') as infile:
@@ -83,17 +102,17 @@ def file_put_contents(filename, string, mode='w'):
         f.write(string)
 
 # Process command line and define ConvFile to use
-cmdExit = 0
 Version = file_get_contents(ScriptDir+'/dejavu.version').strip()
-Verbose = True
 ConvFile = ''
+cmdTypeAhead = []
+cmdExit = 0
+Verbose = True
 while len(sys.argv) > 0:
   arg = sys.argv.pop(0).strip()
   if not arg: continue
   if arg in ["-u", "--upgrade", "--update"]:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
-    os.mkdir(tempdir)
-    os.chdir(tempdir)
+    os.mkdir(tempdir); os.chdir(tempdir)
     qqq = "-{0}".format("v" if Verbose else "q")
     subprocess.call(["git", "clone", qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
@@ -116,14 +135,17 @@ while len(sys.argv) > 0:
 
   elif arg in ["-c", "--command"]:
     if len(sys.argv) > 0:
-      kbTypeAhead.append(sys.argv.pop(0))
+      cmdTypeAhead.append(sys.argv.pop(0))
     else:
-      printerr('Command was not specified.')
+      printerr('Command was not specified for', arg)
       exit()
 
   elif arg in ["-x", "--exit"]:
       Verbose = 0
       cmdExit = 1
+
+  elif arg in ["-C", "--no-color"]:
+    useColor = False
 
   elif arg in ["-h", "-?", "--help"]:
     subprocess.run(["less", ScriptDir+'/'+ScriptName+'-synopsis.txt'])
@@ -174,12 +196,14 @@ atexit.register(readline.write_history_file, historyFile)
 try:  openai.api_key = os.environ['OPENAI_API_KEY']
 except KeyError:
   printerr('Environment variable OPENAI_API_KEY is not defined '+str(KeyError))
-  printinfo('Go to https://openai.com/api for your own API key.')
-  printinfo(':~$ export OPENAI_API_KEY="your_key"')
-  printinfo('If you set up your openai account as an organization, you will also have to set OPENAI_ORGANIZATION_ID')
-  printinfo(':~$ export OPENAI_ORGANIZATION_ID="your_organization"')
-  printinfo('Both these environment variables should be set in your ~/.bashrc file.')
+  printinfo([ 
+    'Go to https://openai.com/api for your own API key.',
+    ':~$ export OPENAI_API_KEY="your_key"',
+    'If you set up your openai account as an organization, you will also have to set OPENAI_ORGANIZATION_ID',
+    ':~$ export OPENAI_ORGANIZATION_ID="your_organization"',
+    'Both these environment variables should be set in your ~/.bashrc file.' ])
   exit()
+
 try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
 except: openai.organization = ''
 
@@ -264,9 +288,9 @@ def cmdhelp():
 
 # Print current parameters
 def cmdstatus(all=False):
+  printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
     printinfo(format('%13s %s' % (pref+':', '{}'.format(suff))))
-  printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   pp(   'Conv. File',  os.path.basename(ConvFile))
   if all: 
     pp( 'History File',os.path.basename(historyFile))
@@ -279,17 +303,6 @@ def cmdstatus(all=False):
   pp(   'Your Name:',  USER_NAME)
   pp(   'AI Name:',    AI_NAME)
 
-#  if all: 
-#    printinfo('     History File: ' + historyFile)
-#    printinfo('        AI Engine: ' + engine)
-#    sx = len(prompt)
-#    printinfo('      Tokens Used: ~' + str(int(sx/3.5)))
-#    printinfo('      Tokens Left: ~' + str(max(16, int(4096 - (sx/3.5) - 100))))
-#    printinfo('      Temperature: ' + str(temperature))
-#    printinfo('        Frequency: ' + str(freq_pen))
-#    printinfo('         Presence: ' + str(pres_pen))
-#  printinfo('        Your Name: ' + USER_NAME)
-#  printinfo('          AI Name: ' + AI_NAME)
 
 # Replace <<>> markers in prompt and conversation 
 # with the appropriate text
@@ -311,9 +324,9 @@ if __name__ == '__main__':
   conversation = list()
   while True:
     Columns = shutil.get_terminal_size().columns - 1
-    print(Fore.YELLOW+Style.BRIGHT + USER_NAME +':'+ Style.RESET_ALL)
-    if len(kbTypeAhead): 
-      userInput = kbTypeAhead.pop(0)
+    printstd(USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
+    if len(cmdTypeAhead): 
+      userInput = cmdTypeAhead.pop(0)
       print(userInput)
     else:
       try: 
@@ -372,13 +385,13 @@ if __name__ == '__main__':
         while i <= end:
           text = conversation[i-1]
           if text[0:len(USER_NAME)+2] == USER_NAME+': ':
-            print(str(i)+'. '+Fore.YELLOW+Style.DIM + USER_NAME +':'+ Style.RESET_ALL)
+            printstd(str(i)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
             text = text[len(USER_NAME)+2:]
           elif text[0:len(AI_NAME)+2] == AI_NAME+': ':
-            print(str(i)+'. '+Fore.GREEN+Style.DIM + AI_NAME +':'+ Style.RESET_ALL)
+            printstd(str(i)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME)+2:] +'\n\n'
           for line in text.splitlines(): 
-            printinfo(textwrap.fill(line, width=Columns), '')
+            printinfo(textwrap.fill(line, width=Columns), prefix='')
           i += 1
         continue
 
@@ -398,7 +411,7 @@ if __name__ == '__main__':
 
       # prompt display
       elif tok[0] == 'prompt':
-        printinfo(PromptReplace(''), '')
+        printinfo(PromptReplace(''), prefix='')
         continue
 
       # summarise
@@ -481,7 +494,7 @@ if __name__ == '__main__':
       continue
 
     # Print the response from GPT-3
-    print(Fore.GREEN + AI_NAME +':'+ Style.RESET_ALL)
+    printstd(AI_NAME+':', color=Fore.GREEN)
     for line in response.splitlines(): 
       print(textwrap.fill(line, width=Columns))
 
@@ -489,6 +502,6 @@ if __name__ == '__main__':
     conversation.append(AI_NAME+': %s' % response)
 
     #for devaju -x -c 'cmd'
-    if len(kbTypeAhead)==0 and cmdExit: 
+    if len(cmdTypeAhead)==0 and cmdExit: 
       exit()
 #end
