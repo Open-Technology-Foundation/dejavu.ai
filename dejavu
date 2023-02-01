@@ -16,8 +16,6 @@ import subprocess
 import sys
 import textwrap
 import time
-from getEDITOR import getEDITOR, getBROWSER
-EDITOR = getEDITOR(); BROWSER = getBROWSER()
 from colorama import init, Fore, Back, Style
 init()
 
@@ -34,6 +32,9 @@ os.makedirs(UserHome, exist_ok=True)
 UserSysName = os.getenv('USER')
 if UserSysName == '': UserSysName = os.getenv('USER_NAME')
 ScriptDir = '/usr/share/dejavu.ai'
+sys.path.append(ScriptDir)
+from getEDITOR import getEDITOR, getBROWSER
+EDITOR = getEDITOR(); BROWSER = getBROWSER()
 
 # generic functions
 def is_numeric(string):

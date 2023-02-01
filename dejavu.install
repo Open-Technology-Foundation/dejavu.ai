@@ -53,7 +53,6 @@ main() {
 		fi
 	fi
 	
-	local -a args=() 
 	local verbose_=1 quiet_='' tempdir
 	while (($#)); do case "$1" in
 		-u|--upgrade|--update)
@@ -122,7 +121,7 @@ main() {
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/conversation.dejavu.txt "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/example.dejavu.cmd "$SHAREDIR"/
-	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" "$SHAREDIR"/
+	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" "$PRGDIR/getEDITOR.py" "$SHAREDIR"/
 	
 	cd /usr/local/bin
 	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
