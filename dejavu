@@ -145,10 +145,8 @@ while len(sys.argv) > 0:
       printerr('Command File was not specified for', arg)
       exit()
     file = sys.argv.pop(0)
-    if not '.dejavu.cmd' in filename:
-      filename += '.dejavu.cmd'
-    if not '/' in filename:
-      filename = UserHome + '/' + filename
+    if not '.dejavu.cmd' in file: file += '.dejavu.cmd'
+    if not '/' in file: file = UserHome + '/' + file
     if not os.path.exists(file):
       printerr('File \''+file+'\' does not exist.')
       exit()
@@ -394,11 +392,11 @@ if __name__ == '__main__':
         continue
 
       # status
-      elif tok[0] == 'status':
+      elif tok[0] == 'stat' or tok[0] == 'status':
         cmdstatus(True); continue
 
       # temperature
-      elif tok[0] == 'temperature':
+      elif tok[0] == 'temp' or tok[0] == 'temperature':
         if len(tok) > 1:
           if is_numeric(tok[1]):
             sx = float(tok[1])
@@ -438,7 +436,7 @@ if __name__ == '__main__':
         continue
 
       # delete [0-0]
-      elif tok[0] == 'delete':
+      elif tok[0] == 'dele' or tok[0] == 'delete':
         if len(tok) < 2: continue
         rnge = int_list(tok[1], 1, len(conversation), True)
         if not rnge: 
@@ -452,12 +450,12 @@ if __name__ == '__main__':
         continue
 
       # prompt display
-      elif tok[0] == 'prompt':
+      elif tok[0] == 'prom' or tok[0] == 'prompt':
         printinfo(PromptReplace(''), prefix='')
         continue
 
       # summarise
-      elif tok[0] == 'summarize' or tok[0] == 'summarise':
+      elif tok[0] == 'summ' or tok[0] == 'summarize' or tok[0] == 'summarise':
         if len(tok) < 2: what = 'conv'
         else: what = tok[1]
         if what[0:6] == 'prompt':
@@ -500,7 +498,7 @@ if __name__ == '__main__':
         continue
 
       # import file
-      elif tok[0] == 'import':
+      elif tok[0] == 'impo' or tok[0] == 'import':
         #cmdstatus()
         if len(tok) < 2: 
           printerr('Text file to import must be specified.')
