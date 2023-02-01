@@ -346,8 +346,8 @@ def cmdstatus(all=False):
     pp( 'Presence',    pres_pen)
     pp( 'Editor',      EDITOR)
     pp( 'Browser',     BROWSER)
-  pp(   'Your Name:',  USER_NAME)
-  pp(   'AI Name:',    AI_NAME)
+  pp(   'Your Name',   USER_NAME)
+  pp(   'AI Name',     AI_NAME)
 
 
 # Replace <<>> markers in prompt and conversation 
