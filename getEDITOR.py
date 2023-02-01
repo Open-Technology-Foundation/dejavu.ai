@@ -1,14 +1,9 @@
 import os
-import sys
-from colorama import init, Fore, Back, Style
-from markdown import markdownFromFile
-import random
 
-EDITOR = ''
 def getEDITOR():
-  _ent_EDITOR = os.environ.get('EDITOR')
   EDITOR = os.environ.get('EDITOR')
   if not EDITOR:
+    _ent_EDITOR = os.environ.get('_ent_EDITOR')
     if _ent_EDITOR:
       EDITOR = _ent_EDITOR
     elif os.environ.get('SUDO_EDITOR'):
@@ -22,11 +17,16 @@ def getEDITOR():
         EDITOR = SELECTED_EDITOR
     elif os.path.isfile('/etc/alternatives/editor'):
       EDITOR = '/etc/alternatives/editor'
+  return EDITOR
 
-getEDITOR()
-exit()
-
-InputFile = 'README.md'
-OutputFile = '/tmp/dejavu-'+''.join(random.choices('qertyuiopxyz1234567890-_',k=12))+'.html'
-markdownFromFile(input=InputFile, output=OutputFile)
-
+def getBROWSER():
+  BROWSER = os.environ.get('BROWSER')
+  if not BROWSER:
+    _ent_BROWSER = os.environ.get('_ent_BROWSER')
+    if _ent_BROWSER:
+      BROWSER = _ent_BROWSER
+    elif os.path.isfile('/usr/bin/w3m'):
+      BROWSER = '/usr/bin/w3m'
+    elif os.path.isfile('/usr/bin/lynx'):
+      BROWSER = '/usr/bin/lynx'
+  return BROWSER

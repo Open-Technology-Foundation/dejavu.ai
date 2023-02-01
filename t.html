@@ -1,0 +1,47 @@
+<h1>DéjàVu - GPT-3 Terminal ChatBot</h1>
+<p>Bring the power of GPT-3 directly to your terminal command-line.</p>
+<p>Remembers context and history. You may never Google search anything ever again :) ...</p>
+<p>(The DéjàVu web interface is also available <a href="https://okusiassociates.com/dejavu/">here</a>.)</p>
+<h2>Requirements</h2>
+<p>For the moment, <code>DéjàVu GPT-3 Terminal</code> has only been tested on Ubuntu Linux.  Other platforms may require minor adjustments. </p>
+<p>You will need to obtain an API key from <a href="https://openai.com/api/">openAI</a> in order to run this program.</p>
+<h2>Installation</h2>
+<p>You should have copied down your openAI API key and organization ID (if applicable). Update your environment variables as follows:</p>
+<p><code>export OPENAI_API_KEY='sk-_your_key_'
+export OPENAI_ORGANIZATION_ID='org-_your_org_id'</code></p>
+<p><code>dejavu.install</code> will detect these variables during instalation.</p>
+<p>Once that's done, you're ready to install DejaVu. </p>
+<p><code>dejavu.install</code> will:</p>
+<ul>
+<li>Execute <code>apt update</code> and <code>apt upgrade</code> (can disable with --no-apt)</li>
+<li>Install python 3, pip and git packages (disabled with --no-apt)</li>
+<li>Modify <code>~/.bashrc</code> and <code>/etc/bash.bashrc</code> to include openai environment variables.</li>
+<li>Store program files in <code>/usr/share/dejavu.ai</code></li>
+<li>Install the executable <code>dejavu</code> in <code>/usr/local/bin/</code></li>
+<li>Create symlink <code>dv</code> for <code>dejavu</code> in <code>/usr/local/bin</code>, only if <code>dv</code> does not already exist.</li>
+</ul>
+<h3>Synopsis: dejavu.install [-vqaVh]</h3>
+<pre><code>Options : -v|--verbose   Verbose on (default)
+        : -q|--quiet     Verbose off. 
+        :                If environment key ```OPENAI_API_KEY```
+        :                has already been set you will not 
+        :                be prompted to input it.
+        : -a|--no-apt    Do not execute apt during installation.
+        : -u|--upgrade   Upgrade ```dejavu``` from git repository.
+        : -V|--version   Print version.
+</code></pre>
+<h2>Execution</h2>
+<p>When you've installed the program, run:</p>
+<p><code>dejavu [conversation_file]</code></p>
+<p>If no conversation_file is specified, it will default to <code>conversation.dejavu.txt</code> located in <code>~/.dejavu/</code></p>
+<h3>Synopsis: dejavu [-vquV] [ConvFile]</h3>
+<p><code>ConvFile</code> is a saved conversation file, or the name of a new conversation you wish to create.</p>
+<p>Conversation Files are located in <code>~/.dejavu/</code> with extension <code>.dejavu.txt</code>.</p>
+<p>The default Conversation File is <code>conversation.dejavu.txt</code>. This can/should be edited to suit your own personality and requirements.</p>
+<pre><code>Options : -v|--verbose   Verbose on (default)
+        : -q|--quiet     Verbose off. Start-up status 
+        :                messages will not appear.
+        : -l|--list      List conversation files.
+        : -u|--upgrade   Upgrade DéjàVu from git repository.
+        : -V|--version   Print DéjàVu version.
+</code></pre>

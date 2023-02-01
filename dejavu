@@ -16,6 +16,8 @@ import subprocess
 import sys
 import textwrap
 import time
+from getEDITOR import getEDITOR, getBROWSER
+EDITOR = getEDITOR(); BROWSER = getBROWSER()
 from colorama import init, Fore, Back, Style
 init()
 
@@ -133,9 +135,11 @@ while len(sys.argv) > 0:
         print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], filesize/1024, modified_date.strftime('%Y-%m-%d %H:%M:%S')))
     exit()
 
-  elif arg in ['-c', '--command']:
+  elif arg in ['-c', '--cmd']:
     if len(sys.argv) > 0:
-      cmdTypeAhead.append(sys.argv.pop(0))
+      tmp = sys.argv.pop(0).strip()
+      if tmp[0] == '\\': tmp = tmp[1:]
+      cmdTypeAhead.append(tmp)
     else:
       printerr('Command was not specified for', arg)
       exit()
@@ -194,9 +198,6 @@ while len(sys.argv) > 0:
     ConvFile = arg
 
 # Conversation file validation and default
-#if len(sys.argv) > 1: 
-#  ConvFile = sys.argv[1]
-#else: 
 if len(ConvFile) == 0: 
   ConvFile = UserHome+'/conversation.dejavu.txt'
   if not os.path.exists(ConvFile):
@@ -318,13 +319,15 @@ def cmdhelp():
     [ '!summarize [what]', 'Where what can be prompt, conv, or all', 'Default is all.' ],
     [ '!save [file]',      'Save current conversation. If file is not specified', 'then saves to current conversation file.' ],
     [ '!exec [cmd...]',    'Execute a shell command.' ],
+    [ '!help',             'Open DéjàVu Help file.' ],
     [ '!exit',             'Exit DéjàVu.' ]
   ]
   for cmd in cmds:
     printinfo(format('%18s: %s' % (cmd[0], cmd[1])))
-    cmd=cmd[2:]
-    for cd in cmd:
-      printinfo(format('%18s  %s' % ('', cd)))
+    for cd in cmd[2:]: printinfo(format('%18s  %s' % ('', cd)))
+  printinfo('Note: All commands can be shortened to first four letters,',
+            'eg, !temp for !temperature')
+  printinfo('range can be in the form 1, 2, 3, 4-6, 7-, -8')
 
 # Print current parameters
 def cmdstatus(all=False):
@@ -340,6 +343,8 @@ def cmdstatus(all=False):
     pp( 'Temperature', temperature)
     pp( 'Frequency',   freq_pen)
     pp( 'Presence',    pres_pen)
+    pp( 'Editor',      EDITOR)
+    pp( 'Browser',     BROWSER)
   pp(   'Your Name:',  USER_NAME)
   pp(   'AI Name:',    AI_NAME)
 
@@ -379,11 +384,14 @@ if __name__ == '__main__':
     if userInput[0] == '!':
       cmd = userInput[1:].strip()
       tok = cmd.split()
+
       # help
       if(len(tok) == 0):
         cmdhelp(); continue
+
       elif tok[0] == 'help' or tok[0] == '?':
-        cmdhelp(); continue
+        subprocess.run(['less', ScriptDir+'/README.md'])
+        continue
 
       # exec
       elif tok[0] == 'exec':

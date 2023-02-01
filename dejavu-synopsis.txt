@@ -21,17 +21,17 @@ Options : -v|--verbose   Verbose on (default)
         : -q|--quiet     Verbose off. Start-up status 
         :                messages will not appear.
         : -l|--list      List conversation files in ~/.dejavu.
-        : -c|--command 'cmd'
-        :                Execute 'cmd' on entry to DéjàVu.
-        :                Use with -x to immediately exit.
+        : -c|--cmd 'cmd' Execute 'cmd' on entry to DéjàVu.
+        :                Use with -x to immediately exit. May be used
+        :                multiple times.
         : -f|--cmd-file  Execute a Dejavu command text file.
         :                See ~/.dejavu/example.dejavu.cmd
         : -x|--exit      Immediately exit DéjàVu after first command.
         : -u|--upgrade   Upgrade DéjàVu from git repository.
         : -V|--version   Print DéjàVu version.
         :
-Requires: python 3, pip+[colorama,openai,pynput], git,
-        : openai API key/s, root access
+Requires: python 3, pip+[colorama,openai], git,
+        : openai API key/s, apt install access
         :
 See Also: https://openai.com/api/
         : https://github.com/GaryDean/dejavu.ai.git
