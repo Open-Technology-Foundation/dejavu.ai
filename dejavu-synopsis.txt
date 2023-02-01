@@ -24,6 +24,8 @@ Options : -v|--verbose   Verbose on (default)
         : -c|--command 'cmd'
         :                Execute 'cmd' on entry to DéjàVu.
         :                Use with -x to immediately exit.
+        : -f|--cmd-file  Execute a Dejavu command text file.
+        :                See ~/.dejavu/example.dejavu.cmd
         : -x|--exit      Immediately exit DéjàVu after first command.
         : -u|--upgrade   Upgrade DéjàVu from git repository.
         : -V|--version   Print DéjàVu version.

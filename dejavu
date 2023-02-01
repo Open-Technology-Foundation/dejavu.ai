@@ -110,22 +110,22 @@ Verbose = True
 while len(sys.argv) > 0:
   arg = sys.argv.pop(0).strip()
   if not arg: continue
-  if arg in ["-u", "--upgrade", "--update"]:
+  if arg in ['-u', '--upgrade', '--update']:
     tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
     os.mkdir(tempdir); os.chdir(tempdir)
-    qqq = "-{0}".format("v" if Verbose else "q")
-    subprocess.call(["git", "clone", qqq, REPOSITORY, tempdir])
+    qqq = "-{0}".format('v' if Verbose else 'q')
+    subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
     args = [ cmd, qqq ]
     os.execvp(cmd, args)
     exit()
-  elif arg in ["-V", "--version"]:
+  elif arg in ['-V', '--version']:
     print(ScriptName+' vs '+Version); exit()
-  elif arg in ["-v", "--verbose"]:
+  elif arg in ['-v', '--verbose']:
     Verbose = 1
-  elif arg in ["-q", "--quiet"]:
+  elif arg in ['-q', '--quiet']:
     Verbose = 0
-  elif arg in ["-l", "--list"]:
+  elif arg in ['-l', '--list']:
     for file in os.listdir(UserHome):
       if file.endswith('.'+ScriptName+'.txt'):
         filesize = os.stat(UserHome+'/'+file).st_size
@@ -133,22 +133,57 @@ while len(sys.argv) > 0:
         print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], filesize/1024, modified_date.strftime('%Y-%m-%d %H:%M:%S')))
     exit()
 
-  elif arg in ["-c", "--command"]:
+  elif arg in ['-c', '--command']:
     if len(sys.argv) > 0:
       cmdTypeAhead.append(sys.argv.pop(0))
     else:
       printerr('Command was not specified for', arg)
       exit()
 
-  elif arg in ["-x", "--exit"]:
+  elif arg in ['-f', '--cmd-file']:
+    if len(sys.argv) == 0:
+      printerr('Command File was not specified for', arg)
+      exit()
+    file = sys.argv.pop(0)
+    if not '.dejavu.cmd' in filename:
+      filename += '.dejavu.cmd'
+    if not '/' in filename:
+      filename = UserHome + '/' + filename
+    if not os.path.exists(file):
+      printerr('File \''+file+'\' does not exist.')
+      exit()
+    lines = file_get_contents(file).split('\n')
+    lne   = ''
+    blanklines = 0
+    for line in lines:
+      if line:
+        if line[0] == '#': continue
+        blanklines = 0
+        lne += (line[0:-1] if line[-1] == '\\' else line + '\n')
+        continue
+      else:
+        blanklines += 1
+        if blanklines < 2:
+          if lne: lne += '\n'
+          continue
+      lne = lne.rstrip('\r\n')
+      #if lne: print('['+lne+']')
+      if lne: cmdTypeAhead.append(lne)
+      lne = ''
+      blanklines = 0
+    lne = lne.rstrip('\r\n')
+    #if lne: print('['+lne+']')
+    if lne: cmdTypeAhead.append(lne)
+
+  elif arg in ['-x', '--exit']:
       Verbose = 0
       cmdExit = 1
 
-  elif arg in ["-C", "--no-color"]:
+  elif arg in ['-C', '--no-color']:
     useColor = False
 
-  elif arg in ["-h", "-?", "--help"]:
-    subprocess.run(["less", ScriptDir+'/'+ScriptName+'-synopsis.txt'])
+  elif arg in ['-h', '-?', '--help']:
+    subprocess.run(['less', ScriptDir+'/'+ScriptName+'-synopsis.txt'])
     exit()
   # de-aggregate aggregated short options
   elif re.match(r'^-[cvqVh]', arg):
@@ -275,16 +310,23 @@ def gpt3_completion(prompt, engine='text-davinci-003', temperature=0.7, top_p=1.
     return text
 
 def cmdhelp():
-  printinfo('Valid system commands are:')
-  printinfo('  !status')
-  printinfo('  !temperature [0]')
-  printinfo('  !list [0-0]')
-  printinfo('  !delete [0-0]')
-  printinfo('  !prompt')
-  printinfo('  !summarize [prompt|conv|all]')
-  printinfo('  !save [file]')
-  printinfo('  !exec [cmd...]')
-  printinfo('  !exit')
+  printinfo('DéjàVu System Commands')
+  cmds = [
+    [ '!status',           'Show status of current environment.' ],
+    [ '!temperature [f]',  'Display or Set Temperature.', 'Valid value for f is 0.0 - 1.0' ],
+    [ '!list [range]',     'List current conversation.', 'If range omitted, lists entire conversation.'],
+    [ '!delete range',     'Delete conversation items.' ],
+    [ '!prompt',           'Display current pre-conversation information.' ],
+    [ '!summarize [what]', 'Where what can be prompt, conv, or all', 'Default is all.' ],
+    [ '!save [file]',      'Save current conversation. If file is not specified', 'then saves to current conversation file.' ],
+    [ '!exec [cmd...]',    'Execute a shell command.' ],
+    [ '!exit',             'Exit DéjàVu.' ]
+  ]
+  for cmd in cmds:
+    printinfo(format('%18s: %s' % (cmd[0], cmd[1])))
+    cmd=cmd[2:]
+    for cd in cmd:
+      printinfo(format('%18s  %s' % ('', cd)))
 
 # Print current parameters
 def cmdstatus(all=False):
@@ -434,17 +476,17 @@ if __name__ == '__main__':
       # save [file]
       elif tok[0] == 'save':
         if len(tok) < 2: filename = ConvFile
-        else: filename = tok[1]
+        else: 
+          filename = tok[1].replace('"', '').replace('"', '')
+        if not '.dejavu.txt' in filename:
+          filename += '.dejavu.txt'
+        if not '/' in filename:
+          filename = UserHome + '/' + filename
         if os.path.exists(filename):
           try:
-            userInput = input('\n'+filename+' exists. Overwrite? (y/n) ')
+            userInput = input('\n"'+filename+'" exists. Overwrite? (y/n) ')
             if userInput != 'y': continue
           except KeyboardInterrupt: continue
-        else:
-          if not '.dejavu.txt' in filename:
-            filename += '.dejavu.txt'
-          if not '/' in filename:
-            filename = UserHome + '/' + filename
         p = 'engine='+engine+'\ntemperature='+str(temperature)+'\ntop_p='+str(top_p)+'\ntokens=4096'+'\nfreq_pen='+str(freq_pen)+'\npres_pen='+str(pres_pen)+'\nAI_NAME='+AI_NAME+'\nUSER_NAME='+USER_NAME+'\n'
         try:
           file_put_contents(filename, 
@@ -454,7 +496,7 @@ if __name__ == '__main__':
         except: 
           printerr('Error writing to ' + filename)
           continue
-        printinfo('Chat saved to ' + filename)  
+        printinfo('Session saved to ' + filename)  
         continue
 
       # import file
