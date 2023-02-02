@@ -10,12 +10,20 @@
 # To run this script:
 # 	$ dejavu -f example.dejavu.cmd
 #
+
+
+!user_name ANNA KARINA
+
+
+!ai_name NYTIMES
+
+
+!exit
  
 ROLE:
-You are a top journalist. Rewrite every paragraph in this article, \
-in the style of The New York Times, including a Datestamp at the top, \
-then a Headline, then a By-line (if any), and put the Source URL at \
-the end of the text.
+You are a top copy editor at the New York Times. 
+Rewrite every paragraph in the following article, in the style of The New York Times.
+Include a Datestamp at the top, then a Headline, then a By-line (if any), and put the Source URL at the end of the text.
 
 ARTICLE:
 Source: https://news.detik.com/berita/d-6545052/gempa-m-27-gong-cianjur-getaran-terasa-di-cipanas
@@ -27,13 +35,9 @@ Dwi Andayani - detikNews
 
 Wednesday, 01 Feb 2023 08:52 WIB
 
-Jakarta - An earthquake with a magnitude (M) of 2.7 occurred 
-in Cianjur Regency, West Java. The epicenter was at a depth 
-of 10 kilometers.
+Jakarta - An earthquake with a magnitude (M) of 2.7 occurred in Cianjur Regency, West Java. The epicenter was at a depth of 10 kilometers.
 
-Information regarding this earthquake was conveyed by BMKG 
-through its official Twitter account, Wednesday (1/2/2023) 
-at 08.10 WIB. The epicenter was on land to the northwest.
+Information regarding this earthquake was conveyed by BMKG through its official Twitter account, Wednesday (1/2/2023) at 08.10 WIB. The epicenter was on land to the northwest.
 
 "The epicenter was on land 5 km northwest of Cianjur Regency," wrote the BMKG.
 
@@ -48,7 +52,19 @@ REWRITE:
 # After this is complete the following commands will be submitted to Dejavu.
 
 # list the conversation and responses
-!list
+#!list
+
+
+TL;DR using perfect English:
+
+
+TL;DR TL;DR:
+
+
+TL;DR TL;DR TR;DR:
+
+
+!exit
 
 
 # further instructions

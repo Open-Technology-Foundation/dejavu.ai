@@ -16,93 +16,27 @@ import subprocess
 import sys
 import textwrap
 import time
+import markdown
 from colorama import init, Fore, Back, Style
 init()
 
-ScriptName = sys.argv.pop(0)
-try: 
-  realfile = os.readlink(ScriptName)
-except:
-  realfile = ScriptName
-ScriptName = os.path.basename(realfile)
-REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
-HomeDir=os.path.expanduser('~')
-UserHome=HomeDir+'/.'+ScriptName 
+ScriptDir   = '/usr/share/dejavu.ai'
+sys.path.append(ScriptDir)
+from std import file_get_contents, file_get_contents, \
+                EDITOR, BROWSER, \
+                int_list, is_numeric, \
+                useColor, printinfo, printerr, printstd
+
+ScriptName  = sys.argv.pop(0)
+try:    realfile = os.readlink(ScriptName)
+except: realfile = ScriptName
+ScriptName  = os.path.basename(realfile)
+REPOSITORY  = 'https://github.com/GaryDean/dejavu.ai.git'
+HomeDir     = os.path.expanduser('~')
+UserHome    = HomeDir+'/.'+ScriptName 
 os.makedirs(UserHome, exist_ok=True)
 UserSysName = os.getenv('USER')
 if UserSysName == '': UserSysName = os.getenv('USER_NAME')
-ScriptDir = '/usr/share/dejavu.ai'
-sys.path.append(ScriptDir)
-from getEDITOR import getEDITOR, getBROWSER
-EDITOR = getEDITOR(); BROWSER = getBROWSER()
-
-# generic functions
-def is_numeric(string):
-  try:
-    float(string)
-    return True
-  except ValueError: return False
-
-def int_list(input_string, minVal, maxVal, revSort=False):
-  range_list = []
-  try:
-    numlist = input_string.split(',')
-    for numC in numlist:
-      if numC.strip() == '': continue
-      if '-' in numC:
-        stnum, endnum = numC.split('-')
-        if stnum == '':   stnum = int(minVal)
-        if endnum == '':  endnum   = int(maxVal)
-        stnum, endnum = int(stnum), int(endnum)
-        if stnum < minVal or endnum > maxVal: 
-          printerr('Error out of range'+str(stnum)+'-'+str(endnum))
-          continue
-        range_list += range(stnum, endnum+1)
-      else:
-        if int(numC) < minVal or int(numC) > maxVal: continue
-        range_list.append(int(numC))
-  except: 
-    printerr('Exception error in int_list.')
-    return False
-  if len(range_list) == 0: return False
-  range_list = list(set(range_list))
-  range_list.sort()
-  if revSort: return range_list[::-1]
-  else:       return range_list
-
-useColor = True
-def printerr(*args, **kwargs):
-  output=kwargs.get('file', sys.stderr)
-  if useColor: 
-    print(kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
-  for arg in args: 
-    print(kwargs.get('prefix', '!!')+arg, end=kwargs.get('end', '\n'), file=output)
-  if useColor: 
-    print(Style.RESET_ALL, end='', file=output)
-def printinfo(*args, **kwargs):
-  output=kwargs.get('file', sys.stdout)
-  if useColor: 
-    print(kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
-  for arg in args: 
-    print(kwargs.get('prefix', '# ')+arg, end=kwargs.get('end', '\n'), file=output)
-  if useColor: 
-    print(Style.RESET_ALL, end='', file=output)
-def printstd(*args, **kwargs):
-  output=kwargs.get('file', sys.stdout)
-  if useColor: 
-    print(kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), end='', file=output)
-  for arg in args: 
-    print(arg, end=kwargs.get('end', '\n'), file=output)
-  if useColor: 
-    print(Style.RESET_ALL, end='', file=output)
-
-
-def file_get_contents(filepath):
-    with open(filepath, 'r', encoding='utf-8') as infile:
-        return infile.read()
-def file_put_contents(filename, string, mode='w'):
-    with open(filename, mode) as f:
-        f.write(string)
 
 # Process command line and define ConvFile to use
 Version = file_get_contents(ScriptDir+'/dejavu.version').strip()
@@ -151,10 +85,11 @@ while len(sys.argv) > 0:
       exit()
     file = sys.argv.pop(0)
     if not '.dejavu.cmd' in file: file += '.dejavu.cmd'
-    if not '/' in file: file = UserHome + '/' + file
     if not os.path.exists(file):
-      printerr('File \''+file+'\' does not exist.')
-      exit()
+      if not '/' in file: file = UserHome + '/' + file
+      if not os.path.exists(file):
+        printerr('File \''+file+'\' does not exist.')
+        exit()
     lines = file_get_contents(file).split('\n')
     lne   = ''
     blanklines = 0
@@ -170,12 +105,10 @@ while len(sys.argv) > 0:
           if lne: lne += '\n'
           continue
       lne = lne.rstrip('\r\n')
-      #if lne: print('['+lne+']')
       if lne: cmdTypeAhead.append(lne)
       lne = ''
       blanklines = 0
     lne = lne.rstrip('\r\n')
-    #if lne: print('['+lne+']')
     if lne: cmdTypeAhead.append(lne)
 
   elif arg in ['-x', '--exit']:
@@ -318,6 +251,7 @@ def cmdhelp():
     [ '!delete range',     'Delete conversation items.' ],
     [ '!prompt',           'Display current pre-conversation information.' ],
     [ '!summarize [what]', 'Where what can be prompt, conv, or all', 'Default is all.' ],
+    [ '!tldr [range]',     'Summarize all conversation entries in range', 'Default is previous response.' ],
     [ '!save [file]',      'Save current conversation. If file is not specified', 'then saves to current conversation file.' ],
     [ '!exec [cmd...]',    'Execute a shell command.' ],
     [ '!help',             'Open DéjàVu Help file.' ],
@@ -328,7 +262,7 @@ def cmdhelp():
     for cd in cmd[2:]: printinfo(format('%18s  %s' % ('', cd)))
   printinfo('Note: All commands can be shortened to first four letters,',
             'eg, !temp for !temperature')
-  printinfo('range can be in the form 1, 2, 3, 4-6, 7-, -8')
+  printinfo('range can be in these forms "1,2,3", "4-6", "7-", "-8", "all"')
 
 # Print current parameters
 def cmdstatus(all=False):
@@ -387,11 +321,15 @@ if __name__ == '__main__':
       tok = cmd.split()
 
       # help
-      if(len(tok) == 0):
-        cmdhelp(); continue
+      if(len(tok) == 0): cmdhelp(); continue
 
-      elif tok[0] == 'help' or tok[0] == '?':
-        subprocess.run(['less', ScriptDir+'/README.md'])
+      tok[0] = tok[0].lower()
+
+      # README.md
+      if tok[0] == 'help' or tok[0] == '?':
+        tmp = '/tmp/dejavu-README.html'
+        file_put_contents(tmp, markdown.markdown(file_get_contents(ScriptDir+'/README.md')))
+        subprocess.run([BROWSER, tmp])
         continue
 
       # exec
@@ -404,40 +342,83 @@ if __name__ == '__main__':
       elif tok[0] == 'stat' or tok[0] == 'status':
         cmdstatus(True); continue
 
+      # username
+      elif tok[0] == 'user' or tok[0] == 'user_name':
+        if len(tok) > 1: 
+          tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).upper()
+          if len(tmp) < 4 or len(tmp) > 16:
+            printerr('Invalid length in user_name "'+tmp+'". Min 4, Max 16.')
+            continue
+          USER_NAME = tmp
+        printinfo('USER_NAME is now '+USER_NAME)
+        continue
+      # ai_name
+      elif tok[0] == 'ai_n' or tok[0] == 'ai_name':
+        if len(tok) > 1: 
+          tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).upper()
+          if len(tmp) < 4 or len(tmp) > 16:
+            printerr('Invalid length in ai_name "'+tmp+'". Min 4, Max 16.')
+            continue
+          AI_NAME = tmp
+        printinfo('AI_NAME is now '+AI_NAME)
+        continue
+      #engine=text-davinci-003
+      elif tok[0] == 'engi' or tok[0] == 'engine':
+        if len(tok) > 1:
+          engine = tok[1] 
+        printinfo('Engine is now '+engine)
+        continue
       # temperature
       elif tok[0] == 'temp' or tok[0] == 'temperature':
-        if len(tok) > 1:
-          if is_numeric(tok[1]):
-            sx = float(tok[1])
-            temperature = max(0.0, min(1.0, sx))
+        if len(tok) > 1 and is_numeric(tok[1]):
+          temperature = max(0.0, min(1.0, float(tok[1])))
         printinfo('Temperature is now '+str(temperature))
+        continue
+      #top_p=1.0
+      elif tok[0] == 'top_' or tok[0] == 'top_p':
+        if len(tok) > 1 and is_numeric(tok[1]):
+          top_p = max(0.0, min(1.0, float(tok[1])))
+        printinfo('Top_p is now '+str(top_p))
+        continue
+      #tokens=4096
+      elif tok[0] == 'toke' or tok[0] == 'tokens':
+        if len(tok) > 1 and is_numeric(tok[1]):
+          tokens = max(16, min(4096, int(tok[1])))
+        printinfo('Tokens is now '+str(tokens))
+        continue
+      #freq_pen=0.0
+      elif tok[0] == 'freq' or tok[0] == 'freq_pen':
+        if len(tok) > 1 and is_numeric(tok[1]):
+          freq_pen = max(-2, min(2, float(tok[1])))
+        printinfo('Freq_pen is now '+str(freq_pen))
+        continue
+      #pres_pen=0.0
+      elif tok[0] == 'pres' or tok[0] == 'pres_pen':
+        if len(tok) > 1 and is_numeric(tok[1]):
+          pres_pen = max(-2, min(2, float(tok[1])))
+        printinfo('Pres_pen is now '+str(pres_pen))
+        continue
+      # prompt [newprompt]
+      elif tok[0] == 'prom' or tok[0] == 'prompt':
+        if len(tok) > 1:
+          Prompt = ' '.join(tok[1:]).replace('\\n', '\n').strip()
+          if Prompt[-10] != '\n<<BLOCK>>': Prompt += '\n\n<<BLOCK>>\n'
+        printinfo(PromptReplace(''), prefix='')
         continue
 
       # list [0-0]
       elif tok[0] == 'list':
-        rnge = '0-99999' if len(tok) < 2 else tok[1]
-        try:
-          if '-' in rnge:
-            start, end = rnge.split('-')
-            start = 1 if start == '' else start
-            end = 99999 if end == '' else end
-            start = int(start); end = int(end)
-          else:
-            start = int(rnge); end = int(start)
-        except ValueError:
-          printerr('Invalid value in range ' + rnge)
-          continue
-        start = max(int(start), 1)
-        end = min(int(end), len(conversation))
-        i = int(start)
-        printinfo('List Conversation')
-        while i <= end:
-          text = conversation[i-1]
+        if len(tok) < 2: tok.append('all')
+        rnge = int_list(tok[1], 1, len(conversation), False)
+        if not rnge: printerr('Invalid range ' + tok[1]); continue
+        i = int(0)
+        for r in rnge:
+          text = conversation[r-1]
           if text[0:len(USER_NAME)+2] == USER_NAME+': ':
-            printstd(str(i)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
+            printstd(str(i+1)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
             text = text[len(USER_NAME)+2:]
           elif text[0:len(AI_NAME)+2] == AI_NAME+': ':
-            printstd(str(i)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
+            printstd(str(i+1)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME)+2:] +'\n\n'
           for line in text.splitlines(): 
             printinfo(textwrap.fill(line, width=Columns), prefix='')
@@ -448,19 +429,12 @@ if __name__ == '__main__':
       elif tok[0] == 'dele' or tok[0] == 'delete':
         if len(tok) < 2: continue
         rnge = int_list(tok[1], 1, len(conversation), True)
-        if not rnge: 
-          printerr('Invalid range ' + tok[1])
-          continue
+        if not rnge: printerr('Invalid range ' + tok[1]); continue
         i = int(0)
         for r in rnge:
           del conversation[r-1]
           i += 1
         printinfo(str(i) +' entries deleted')
-        continue
-
-      # prompt display
-      elif tok[0] == 'prom' or tok[0] == 'prompt':
-        printinfo(PromptReplace(''), prefix='')
         continue
 
       # summarise
@@ -480,17 +454,34 @@ if __name__ == '__main__':
           printerr('Invalid option. Valid options for summarize are prompt|conv|all.')
           continue
 
+      # tldr [range]
+      elif tok[0] == 'tldr' or tok[0] == 'tl;dr':
+        if len(tok) < 2: tok.append(str(len(conversation)))
+        rnge = int_list(tok[1], 1, len(conversation), False)
+        if not rnge: printerr('Invalid range ' + tok[1]); continue
+        i=0
+        for r in rnge:
+          text = conversation[r-1]
+          if text[0:len(AI_NAME)+2] != AI_NAME+': ': continue
+          try:
+            response = gpt3_completion(text+'\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+          except: 
+            printerr('GPT-3 experienced an error. Possibly overloaded.')
+            break
+          printstd(AI_NAME+' TL;DR'+ ('' if len(rnge)==1 else '['+str(i+1)+']') + ':', color=Fore.GREEN)
+          printinfo(response, prefix='')
+          conversation.append(AI_NAME+': %s' % response)
+          i+=1
+        continue
+
       # save [file]
       elif tok[0] == 'save':
         if len(tok) < 2: filename = ConvFile
-        else: 
-          filename = tok[1].replace('"', '').replace('"', '')
-        if not '.dejavu.txt' in filename:
-          filename += '.dejavu.txt'
-        if not '/' in filename:
-          filename = UserHome + '/' + filename
+        else: filename = tok[1].replace('"', '').replace('"', '')
+        if not '.dejavu.txt' in filename: filename += '.dejavu.txt'
+        if not '/' in filename: filename = UserHome + '/' + filename
         if os.path.exists(filename):
-          try:
+          try:  
             userInput = input('\n"'+filename+'" exists. Overwrite? (y/n) ')
             if userInput != 'y': continue
           except KeyboardInterrupt: continue
