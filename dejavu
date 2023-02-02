@@ -22,7 +22,7 @@ init()
 
 ScriptDir   = '/usr/share/dejavu.ai'
 sys.path.append(ScriptDir)
-from std import file_get_contents, file_get_contents, \
+from std import file_get_contents, file_put_contents, \
                 EDITOR, BROWSER, \
                 int_list, is_numeric, \
                 useColor, printinfo, printerr, printstd
