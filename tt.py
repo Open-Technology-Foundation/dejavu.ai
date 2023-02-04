@@ -1,7 +1,7 @@
 import os
 import sys
 
-from std import file_get_contents, file_put_contents, \
+from dejavu_std import file_get_contents, file_put_contents, \
                 EDITOR, BROWSER, \
                 int_list, is_numeric, \
                 useColor, printinfo, printerr, printstd, printUseColor
