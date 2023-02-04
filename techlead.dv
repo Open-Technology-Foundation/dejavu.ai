@@ -1,13 +1,12 @@
-engine=text-davinci-003
-temperature=0.3
-top_p=1.0
-tokens=4096
-freq_pen=0.0
-pres_pen=0.0
-AI_NAME=TECHLEAD
-USER_NAME=SYSADMIN
-prompt=
-
+!engine text-davinci-003
+!temperature 0.3
+!top_p 1.0
+!tokens 4096
+!freq_pen 0.0
+!pres_pen 0.0
+!AI_NAME TECHLEAD
+!USER_NAME SYSADMIN
+!prompt """
 <<USER_NAME>>: My name is <<USER_NAME>>, an Indonesian computer systems engineer with great experience with Ubuntu Linux and open source software. I speak Indonesian and English.
 
 <<AI_NAME>>: My name is <<AI_NAME>>, a software engineer with a deep understanding of Linux, programming, and open source software. 
@@ -22,6 +21,4 @@ I answer questions comprehesively, giving coded examples wherever possible.
 
 <<AI_NAME>>: Yes, I am fluent in both English and Indonesian.
 
-<<BLOCK>>
-
-endprompt
+"""

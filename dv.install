@@ -14,7 +14,6 @@ REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
 Version=$(cat "$PRGDIR/dejavu.version")
 doApt=1
 doUpgrade=0
-hasSymLink=''
 
 dejavu_help() {
 cat <<-EOT
@@ -52,6 +51,8 @@ main() {
 			exit
 		fi
 	fi
+
+	cd "$PRGDIR"
 	
 	local verbose_=1 quiet_='' tempdir
 	while (($#)); do case "$1" in
@@ -108,35 +109,34 @@ main() {
 		sudo apt install -q"$quiet_" python3 pip git
 	fi
 	sudo pip install -q"$quiet_" --upgrade --no-color pip
-	sudo pip install -q"$quiet_" --upgrade --no-color -r ./requirements.txt
+	sudo pip install -q"$quiet_" --upgrade --no-color -r "$PRGDIR"/requirements.txt
 
 	sudo mkdir -p "$SHAREDIR"
 	sudo chmod 775 "$SHAREDIR"
 	cd "$SHAREDIR"
-	sudo cp -p "$PRGDIR"/*.dejavu.txt "$SHAREDIR"/
+
 	sudo cp -p "$PRGDIR"/README.md "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/LICENCE "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu-synopsis.txt "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/conversation.dejavu.txt "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/example.dejavu.cmd "$SHAREDIR"/
-	sudo cp -p "$PRGDIR/dejavu" "$PRGDIR/dejavu.install" "$PRGDIR/std.py" "$SHAREDIR"/
+	sudo cp "$PRGDIR"/*.dv "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
+	sudo chmod 775 "$PRGDIR"/dv
 	
 	cd /usr/local/bin
-	sudo cp "$PRGDIR/dejavu" /usr/local/bin/dejavu
-	sudo chmod 775 "/usr/local/bin/dejavu"
-  [[ ! -f dv ]] && sudo ln -s dejavu dv
-  [[ "$(readlink -fn dv)" == /usr/local/bin/dejavu ]] \
-  		&& hasSymLink="(or 'dv' for short)"
+	sudo ln -s --force "$PRGDIR"/dv dv
+	sudo ln -s --force "$PRGDIR"/dv dejavu
 
 	# ~/.bashrc /etc/bash.bashrc
 	local tmpfile file
 	tmpfile="/tmp/$PRG-$RANDOM"
 	for file in "$HOME/.bashrc" /etc/bash.bashrc; do
 		((verbose_)) && echo "Modifying '$file'"
-		[[ ! -f "$file" ]] && echo "# This file created by $PRG ($PRGNAME)" > "$file"
-		
+		if [[ ! -f "$file" ]]; then
+			echo "# This file created by $PRG ($PRGNAME)" > "$file"
+			chmod 664 "$file"
+		fi
 		grep -v '^[[:blank:]]*OPENAI_API_KEY=\|^[[:blank:]]*OPENAI_ORGANIZATION_ID=\|^[[:blank:]]*export OPENAI_' "$file" \
 				>"$tmpfile"
 		(	echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" 
@@ -155,7 +155,7 @@ main() {
 	if ((verbose_)); then
 		echo
 		echo "$PRGNAME is installed."
-		echo "To run, enter 'dejavu' $hasSymLink"
+		echo "To run, enter 'dv'"
 		echo "Want to help develop $PRGNAME? Go here: $REPOSITORY"
 		echo 'Have fun!'
 	fi

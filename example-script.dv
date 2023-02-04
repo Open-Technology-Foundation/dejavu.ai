@@ -8,22 +8,22 @@
 # By convention, Dejavu command files should have the extension '.dejavu.cmd'
 #
 # To run this script:
-# 	$ dejavu -f example.dejavu.cmd
+# 	$ dv -f example-script.dv
 #
+!engine				text-davinci-003
+!temperature	0.3
+!top_p				1.0
+!tokens				4096
+!freq_pen			0.0
+!pres_pen			0.0
 
+!AI_NAME			Philip B Corbett
+!USER_NAME		gary dean
 
-!user_name ANNA KARINA
-
-
-!ai_name NYTIMES
-
-
-!exit
- 
+!prompt 			"""
 ROLE:
-You are a top copy editor at the New York Times. 
-Rewrite every paragraph in the following article, in the style of The New York Times.
-Include a Datestamp at the top, then a Headline, then a By-line (if any), and put the Source URL at the end of the text.
+You, <<AI_NAME>>, are the top copy editor at the New York Times. 
+
 
 ARTICLE:
 Source: https://news.detik.com/berita/d-6545052/gempa-m-27-gong-cianjur-getaran-terasa-di-cipanas
@@ -45,34 +45,25 @@ The coordinates of the earthquake were at 6.77 South Latitude (LS) and 107.13 Ea
 
 The earthquake was felt on the Modified Mercalli Intensity (MMI) II scale in Cipanas. To note MMI II means vibrations are felt by several people, light objects that are hung sway.
 
-REWRITE: 
+
+TASK:
+Rewrite every paragraph in the article, in the style of The New York Times. 
+
+Include a Datestamp at the top, then a Headline, then a By-line (if any), and put the Source URL at the end of the text.
 
 
-# This is a new section; Dejavu will submit the above to GPT-3.
-# After this is complete the following commands will be submitted to Dejavu.
+"""
 
-# list the conversation and responses
-#!list
+!instruction REWRITE:
 
-
-TL;DR using perfect English:
-
-
-TL;DR TL;DR:
-
-
-TL;DR TL;DR TR;DR:
-
-
-!exit
-
+!tldr
 
 # further instructions
-Rewrite this article again to make it more sensational.
+#!instruction """
+#Rewrite this re-written article and make it more sensational.
+#"""
 
+#tldr: 
 
 # save the entire session to a new file
-!save article.rewrite
-
-
-
+#!save article.rewrite
