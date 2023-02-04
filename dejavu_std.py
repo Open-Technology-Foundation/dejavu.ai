@@ -140,13 +140,14 @@ def initHistory(filename, ext='.history'):
   return historyFile
 
 
-def selectFile(dirs, prompt='Select File: ', home=''):
-  files = [ '' ]
+def selectFile(dirs, globule='**/*', prompt='Select File: ', home=''):
+  dfiles = [ '' ]; ffiles = [ '' ]
   for root in dirs:
-    for file in glob.glob("**/*.dv", root_dir=root, recursive=True):
-      files.append((root+'/'+file).replace(home, '~').replace('./',''))
+    for file in glob.glob(globule, root_dir=root, recursive=True):
+      dfiles.append((root+'/'+file).replace(home, '~').replace('./',''))
+      ffiles.append(root+'/'+file)
   selection = 0
-  for index, file in enumerate(files):
+  for index, file in enumerate(dfiles):
     if index == 0: continue
     printstd(str(index) + ': ' + file)
   while True:
@@ -155,8 +156,8 @@ def selectFile(dirs, prompt='Select File: ', home=''):
     except KeyboardInterrupt:
       selection = 0; break
     except:
-      printerr('Select 0-'+str(len(files)-1)); continue
+      printerr('Select 0-'+str(len(dfiles)-1)); continue
     if selection == 0: break
-    if selection >= 1 and selection < len(files): break
+    if selection >= 1 and selection < len(dfiles): break
     else: printerr('Invalid selection.')
-  return(files[selection])
+  return(ffiles[selection])

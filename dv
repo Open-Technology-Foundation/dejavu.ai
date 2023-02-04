@@ -39,6 +39,7 @@ Version = readfile(ScriptDir+'/dejavu.version').strip()
 
 ConvFile = ''
 cmdTypeAhead = []
+argvTypeAhead = []
 Instructions = []
 cmdEcho = True
 cmdExit = 0
@@ -46,14 +47,14 @@ Verbose = True
 
 # read .dv file
 def read_dvfile(file):
-  global cmdTypeAhead, Instructions
+  global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
   if not '.dv' in file: file += '.dv'
   if not os.path.exists(file):
     if not '/' in file: file = UserHome + '/' + file
     if not os.path.exists(file):
       printerr('File \''+file+'\' does not exist.')
-      exit()
+      return False
   lne = readfile(file)
   Lines = lne.split('\n')
   lne   = ''
@@ -109,8 +110,11 @@ def read_dvfile(file):
   cmdTypeAhead.insert(0, '!echo off')
   cmdTypeAhead.append('!status short')
   cmdTypeAhead.append('!echo on')
-  lne = ''
-  return
+  if len(argvTypeAhead):
+    for lne in argvTypeAhead:
+      cmdTypeAhead.append(lne)
+    argvTypeAhead = []
+  return True
 
 # argv processing -------------------------
 while len(sys.argv) > 0:
@@ -143,7 +147,7 @@ while len(sys.argv) > 0:
     if len(sys.argv) > 0:
       tmp = sys.argv.pop(0).strip()
       if tmp[0] == '\\': tmp = tmp[1:]
-      cmdTypeAhead.append(tmp)
+      argvTypeAhead.append(tmp)
     else:
       printerr('Command was not specified for', arg)
       exit()
@@ -197,8 +201,6 @@ if not os.path.exists(ConvFile):
 ConvFile = os.path.realpath(ConvFile)
 ConvFileName = os.path.basename(ConvFile)
 
-historyFile = initHistory(ConvFile)
-
 # Get the openai API key
 try:  openai.api_key = os.environ['OPENAI_API_KEY']
 except KeyError:
@@ -227,7 +229,11 @@ prompt      = ''
 Prompt      = prompt
 stop        = ''
 
-read_dvfile(ConvFile)
+if not read_dvfile(ConvFile):
+  printerr('Error reading '+ConvFile)
+  exit()
+historyFile = initHistory(ConvFile)
+
 
 conversation= []
 text_block  = ''
@@ -375,10 +381,16 @@ if __name__ == '__main__':
 
       # files
       elif tok[0] == 'file' or tok[0] == 'files':
-        tmp = selectFile(['.', UserHome], 'Select File to Edit: ', UserHome)
+        tmp = selectFile(['.', UserHome], '**/*.dv', 'Select File to Edit: ', UserHome)
         if tmp:
+          modify_datestamp = os.path.getmtime(tmp)
           try: subprocess.run(EDITOR +' '+ tmp, shell=True, executable='/bin/bash')
-          except: printerr('#!#'); continue
+          except: printerr('ERROR in editor'); continue
+          if modify_datestamp != os.path.getmtime(tmp):
+            if input('Run '+tmp+'? y/n ') != 'y': continue
+            readline.write_history_file(historyFile)
+            read_dvfile(ConvFile)
+            historyFile = initHistory(ConvFile)
         continue
 
       # edit
@@ -388,7 +400,29 @@ if __name__ == '__main__':
         except: printerr('#!#'); continue
         if modify_datestamp != os.path.getmtime(ConvFile):
           if input('Re-Load '+ConvFile+'? y/n ') == 'y':
+            readline.write_history_file(historyFile)
             read_dvfile(ConvFile)
+            historyFile = initHistory(ConvFile)
+        continue
+
+      # run
+      elif tok[0] == 'run':
+        if len(tok) < 2:
+          file = selectFile(['.', UserHome], '**/*.dv', 'Select File to Run: ', UserHome)
+          if not file: continue
+        else: 
+          file = ' '.join(tok[1:])
+          if not os.path.exists(file):
+            printerr('!run: File '+file+' does not exist.')
+            continue
+        try:
+          readline.write_history_file(historyFile)
+          read_dvfile(file)
+          ConvFile = file
+          historyFile = initHistory(ConvFile)
+        except:
+          read_dvfile(ConvFile)
+          historyFile = initHistory(ConvFile)
         continue
 
       # exec
@@ -400,9 +434,10 @@ if __name__ == '__main__':
       # status
       elif tok[0] == 'stat' or tok[0] == 'status':
         longstatus = True
-        if len(tok) > 1:
+        if len(tok) > 1: 
           if tok[1] == 'short': longstatus = False
-        cmdstatus(longstatus); continue
+        cmdstatus(longstatus)
+        continue
 
       # username
       elif tok[0] == 'user' or tok[0] == 'user_name':
