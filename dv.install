@@ -125,8 +125,9 @@ main() {
 	sudo chmod 775 "$PRGDIR"/dv
 	
 	cd /usr/local/bin
-	sudo ln -s --force "$PRGDIR"/dv dv
-	sudo ln -s --force "$PRGDIR"/dv dejavu
+	sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
+	sudo ln -s --force "$SHAREDIR"/dv dv
+	sudo ln -s --force "$SHAREDIR"/dv dejavu
 
 	# ~/.bashrc /etc/bash.bashrc
 	local tmpfile file

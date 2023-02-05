@@ -8,7 +8,6 @@ import datetime
 import json
 import openai
 import os
-import random
 import re
 import readline
 import shutil
@@ -42,6 +41,7 @@ cmdTypeAhead = []
 argvTypeAhead = []
 Instructions = []
 cmdEcho = True
+AutoSave = False
 cmdExit = 0
 Verbose = True
 
@@ -61,9 +61,9 @@ def read_dvfile(file):
   while len(Lines) > 0:
     line = Lines.pop(0).rstrip()
     if not line: 
-      cmdTypeAhead.append(''); continue
+      Instructions.append(''); continue
     if line[0] == '#': 
-      cmdTypeAhead.append(line); continue
+      Instructions.append(line); continue
     # handle \ line continuations
     while line[-1] == '\\' and len(Lines) > 0: 
       line = line[0:-1] + Lines.pop(0).rstrip()
@@ -73,46 +73,47 @@ def read_dvfile(file):
       tok = lne.split()
       if tok[0] == '!prompt' and len(tok) > 1:
         if tok[1] != '"""': 
-          cmdTypeAhead.append('!prompt '+' '.join(tok[1:]))
+          Instructions.append('!prompt '+' '.join(tok[1:]))
           lne = ''
           continue
         prompt = ''
         while len(Lines) > 0:
           line = Lines.pop(0).rstrip()
           if line == '"""':
-            cmdTypeAhead.append('!prompt '+prompt)
+            Instructions.append('!prompt '+prompt)
             break
           prompt += line + '\\n'
       elif tok[0] == '!instruction' and len(tok) > 1:
         if tok[1] != '"""': 
-          cmdTypeAhead.append('!instruction '+' '.join(tok[1:]))
+          Instructions.append('!instruction '+' '.join(tok[1:]))
           lne = ''
           continue
         instr = ''
         while len(Lines) > 0:
           line = Lines.pop(0).rstrip()
           if line == '"""':
-            cmdTypeAhead.append('!instruction '+instr)
+            Instructions.append('!instruction '+instr)
             break
           instr += line + '\\n'
       else:
-        cmdTypeAhead.append(' '.join(tok))
+        Instructions.append(' '.join(tok))
       lne = ''
       continue
-    cmdTypeAhead.append('!instruction '+lne)
+    Instructions.append('!instruction '+lne)
     lne = ''
   # end loop processing  
   lne = lne.rstrip('\r\n')
-  if lne: cmdTypeAhead.append('!instruction '+lne)
-  Instructions = cmdTypeAhead.copy()
-  #writefile('debug.dv', '\n'.join(cmdTypeAhead))
+  if lne: Instructions.append('!instruction '+lne)
+  cmdTypeAhead = Instructions.copy()
   cmdTypeAhead = [x for x in cmdTypeAhead if not x.startswith('#') and x]
   cmdTypeAhead.insert(0, '!echo off')
   cmdTypeAhead.append('!status short')
   cmdTypeAhead.append('!echo on')
+#  writefile('debug.dv', '\n'.join(cmdTypeAhead), 'w')
+#  writefile('debug.dv', '\n---\n', 'a')
+#  writefile('debug.dv', '\n'.join(Instructions), 'a')
   if len(argvTypeAhead):
-    for lne in argvTypeAhead:
-      cmdTypeAhead.append(lne)
+    for lne in argvTypeAhead: cmdTypeAhead.append(lne)
     argvTypeAhead = []
   return True
 
@@ -121,7 +122,7 @@ while len(sys.argv) > 0:
   arg = sys.argv.pop(0).strip()
   if not arg: continue
   if arg in ['-u', '--upgrade', '--update']:
-    tempdir = "/tmp/{0}-upgrade-{1}".format(ScriptName, random.randint(0, 9999))
+    tempdir = dvtempname('upgrade', '')
     os.mkdir(tempdir); os.chdir(tempdir)
     qqq = "-{0}".format('v' if Verbose else 'q')
     subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
@@ -157,6 +158,9 @@ while len(sys.argv) > 0:
       printerr('Command File was not specified for', arg)
       exit()
     ConvFile =sys.argv.pop(0)
+
+  elif arg in ['-a', '--autosave']:
+      AutoSave = 1
 
   elif arg in ['-x', '--exit']:
       Verbose = 0
@@ -320,15 +324,52 @@ def cmdstatus(all=False):
 
 # Replace <<>> markers in prompt and conversation 
 # with the appropriate text
-def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr=AI_NAME, USs='<<USER_NAME>>', USr=USER_NAME):
-  newp = Prompt
-  newp = newp.replace('<<CONVERSATION>>', conversationText)
+def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>>', USr=''):
+  global Prompt, AI_NAME, USER_NAME
+  if not AIr: AIr = AI_NAME
+  if not USr: USr = USER_NAME
+  newp = Prompt+('\n' if Prompt[-1]!='\n' else '')+conversationText
+  newp = newp.replace('<<CONVERSATION>>', '')
   newp = newp.replace(AIs, AIr, -1)
   newp = newp.replace(USs, USr, -1)
   return newp.strip() + '\n'
 
+def autoSave(filename):
+  global conversation, Instructions
+  printinfo('AutoSaving '+filename, end='')
+#  file = '/tmp/'+ScriptName+'-autosave-'+str(datetime.datetime.now().time()).replace(':','_')+'.dv'
+  file = dvtempname('autosave', '.dv')
+  try:
+    writefile(file, '', 'w')
+    for tmp in Instructions:
+      if tmp[0:8] == '!prompt ':
+        tmp = '!prompt """\n' + \
+              tmp[8:].replace('\\n', '\n') 
+        writefile(file, tmp, 'a')
+        writefile(file, '"""\n', 'a')
+        continue
+      elif tmp[0:13] == '!instruction ':
+        tmp = '!instruction """\n' + \
+              tmp[13:].replace('\\n', '\n') + '\n' + \
+              '"""'
+      # ignore !conversation in Instructions
+      elif tmp[0:14] == '!conversation ':
+        continue
+
+      writefile(file, tmp+'\n', 'a')
+
+    for tmp in conversation:
+        writefile(file, '!conversation ' +tmp.replace('\n','\\n')+'\n', 'a')
+
+    if os.path.exists(filename): os.replace(filename, filename+'~')
+    os.rename(file, filename)
+  except:
+    printerr('Error renaming '+file+' to '+filename)
+
 # Exit script nicely
 def orderly_exit():
+  global AutoSave
+  if AutoSave: autoSave(ConvFile)
   print(Style.RESET_ALL if useColor else '')
   if Verbose: printinfo('Exiting '+ScriptName+' '+ConvFile)
   sys.exit()
@@ -340,17 +381,17 @@ if __name__ == '__main__':
     Columns = shutil.get_terminal_size().columns - 1
     if len(cmdTypeAhead): 
       userInput = cmdTypeAhead.pop(0)
-      if userInput[0] == '#': continue
+      if userInput[0].rstrip() == '#' or userInput.strip() == '': continue
       if cmdEcho and userInput[0:5] != '!echo': 
         printstd(USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
         print(userInput)
     else:
       cmdEcho = True
       printstd(USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
-      try: userInput = input()
+      try: userInput = input().lstrip()
       except KeyboardInterrupt: orderly_exit()
     
-    if userInput.strip() == '' or userInput[0] == '#': continue
+    if userInput.strip() == '' or userInput[0].rstrip() == '#': continue
 
     # Process commands
     if userInput[0] == '!':
@@ -364,9 +405,10 @@ if __name__ == '__main__':
 
       # README.md
       if tok[0] == 'help' or tok[0] == '?' or tok[0] == '!':
-        tmp = '/tmp/dejavu-README.html'
+        tmp = dvtempname('README', '.html')
         writefile(tmp, markdown.markdown(readfile(ScriptDir+'/README.md')))
         subprocess.run([BROWSER, tmp])
+        os.remove(tmp)
         continue
 
       elif tok[0] == 'echo':
@@ -376,7 +418,17 @@ if __name__ == '__main__':
             cmdEcho = True
           elif tok[1] == '0' or tok[1] == 'off' or tok[1] == 'false':
             cmdEcho = False
-          else: printinfo('Command Echo is '+str('On' if cmdEcho else 'Off'))
+        else: printinfo('Command Echo is '+str('On' if cmdEcho else 'Off'))
+        continue
+
+      elif tok[0] == 'auto' or tok[0] == 'autosave':
+        if len(tok) > 1:
+          tok[1] = tok[1].lower()
+          if tok[1] == '1' or tok[1] == 'on' or tok[1] == 'true':
+            AutoSave = True
+          elif tok[1] == '0' or tok[1] == 'off' or tok[1] == 'false':
+            AutoSave = False
+        else: printinfo('AutoSave is '+str('On' if AutoSave else 'Off'))
         continue
 
       # files
@@ -442,7 +494,7 @@ if __name__ == '__main__':
       # username
       elif tok[0] == 'user' or tok[0] == 'user_name':
         if len(tok) > 1: 
-          tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).upper()
+          tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).strip().upper()
           if len(tmp) < 4 or len(tmp) > 16:
             printerr('Invalid length in user_name "'+tmp+'". Min 4, Max 16.')
             continue
@@ -452,7 +504,7 @@ if __name__ == '__main__':
       # ai_name
       elif tok[0] == 'ai_n' or tok[0] == 'ai_name':
         if len(tok) > 1: 
-          tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).upper()
+          tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).strip().upper()
           if len(tmp) < 4 or len(tmp) > 16:
             printerr('Invalid length in ai_name "'+tmp+'". Min 4, Max 16.')
             continue
@@ -500,9 +552,7 @@ if __name__ == '__main__':
       elif tok[0] == 'prom' or tok[0] == 'prompt':
         if len(tok) > 1:
           Prompt = ' '.join(tok[1:]).replace('\\n', '\n').strip()
-          if len(Prompt) < 10 or Prompt[-10] != '\n<<CONVERSATION>>': Prompt += '\n\n<<CONVERSATION>>\n'
-          PromptReplace('')
-        elif cmdEcho: printinfo(PromptReplace(''), prefix='')
+        elif cmdEcho: printinfo(Prompt, prefix='')
         continue
 
       # instruction [instruction]
@@ -521,6 +571,16 @@ if __name__ == '__main__':
                     '"""'
             printinfo(tmp, prefix='')
           continue
+        # proceed to gpt
+
+      # conversation [conversation]
+      elif tok[0] == 'conv' or tok[0] == 'conversation':
+        if len(tok) > 1:
+          conversation.append(' '.join(tok[1:]).replace('\\n', '\n'))
+        else: 
+          for tmp in conversation:
+            printinfo(tmp, prefix='')
+        continue
 
       # list [0-0]
       elif tok[0] == 'list':
@@ -533,7 +593,7 @@ if __name__ == '__main__':
         if not rnge: printerr('Invalid range !list ' + tok[1]); continue
         i = int(0)
         for r in rnge:
-          text = conversation[r-1]
+          text = conversation[r-1].replace('<<USER_NAME>>', USER_NAME).replace('<<AI_NAME>>', AI_NAME)
           if text[0:len(USER_NAME)+2] == USER_NAME+': ':
             printstd(str(i+1)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
             text = text[len(USER_NAME)+2:]
@@ -569,13 +629,13 @@ if __name__ == '__main__':
         else: what = tok[1]
         if what[0:4] == 'prom' or what == 'prompt':
           userInput = PromptReplace('') \
-              +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         elif what[0:4] == 'conv' or what == 'conversation':
           userInput = text_block \
-              +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         elif what == 'all':
           userInput = PromptReplace(text_block) \
-              +'\n\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         else:
           printerr('Invalid option. Valid options for !summarize are prompt|conv|all.')
           continue
@@ -588,7 +648,8 @@ if __name__ == '__main__':
         i=0
         for r in rnge:
           text = conversation[r-1]
-          if text[0:len(AI_NAME)+2] != AI_NAME+': ': continue
+          if text[0:13] != '<<AI_NAME>>: ': continue
+          text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
           try:
             response = gpt3_completion(text+'\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
           except: 
@@ -596,7 +657,7 @@ if __name__ == '__main__':
             break
           printstd(AI_NAME+' TL;DR'+ ('' if len(rnge)==1 else '['+str(i+1)+']') + ':', color=Fore.GREEN)
           printinfo(response, prefix='')
-          conversation.append(AI_NAME+': %s' % response)
+          conversation.append('<<AI_NAME>>: %s' % response)
           i+=1
         continue
 
@@ -615,8 +676,8 @@ if __name__ == '__main__':
         try:
           writefile(filename, 
             p+'prompt=\n' \
-             + PromptReplace('\n\n'.join(conversation),AI_NAME,'<<AI_NAME>>',USER_NAME,'<<USER_NAME>>') \
-             + '\n\n<<CONVERSATION>>\n\nendprompt\n')
+             + PromptReplace('\n'.join(conversation),AI_NAME,'<<AI_NAME>>',USER_NAME,'<<USER_NAME>>').strip() \
+             + '\n')
         except: 
           printerr('Error writing to ' + filename)
           continue
@@ -627,45 +688,53 @@ if __name__ == '__main__':
       elif tok[0] == 'impo' or tok[0] == 'import':
         #cmdstatus()
         if len(tok) < 2: 
-          printerr('Text file to import must be specified.')
-          continue
-        filename = tok[1]
-        if not os.path.exists(filename):
-          printerr(filename+' does not exist.')
-          continue
-        if cmdEcho: printinfo('Importing from text file '+filename)  
-        userInput = readfile(filename).strip()+'\n'
+          tmpfile = dvtempname('command', '')
+          writefile(tmpfile, '')
+          try: subprocess.run(EDITOR +' '+ tmpfile, shell=True, executable='/bin/bash')
+          except: printerr('#!#'); continue
+          userInput = readfile(tmpfile)
+          os.remove(tmpfile)
+          if not userInput: continue
+          if input('Execute command in '+tmpfile+'? y/n ') != 'y':
+              continue
+        else:
+          filename = tok[1]
+          if not os.path.exists(filename):
+            printerr(filename+' does not exist.')
+            continue
+          if cmdEcho: printinfo('Importing from text file '+filename)  
+          userInput = readfile(filename).strip()+'\n'
 
       # exit
       elif tok[0] == 'exit':
         orderly_exit()
+        continue
 
       # invalid command
       else:
         printerr('Invalid command: !' + cmd)
-        cmdhelp(); continue
+        cmdhelp()
+        continue
 
     # Prepend username to user input 
-    conversation.append(USER_NAME+': %s' % userInput)
+    conversation.append('<<USER_NAME>>: %s' % userInput)
     # Aggregate the entire conversation 
-    text_block = '\n'.join(conversation)
-    prompt = PromptReplace(text_block) + '\n' + AI_NAME +': '
-
+    text_block = ('\n'.join(conversation)).strip()
+    writefile('debug', '\n---\n'+PromptReplace(text_block, '<<AI_NAME>>', AI_NAME, '<<USER_NAME>>', USER_NAME), 'a')
     # Send the entire conversation to GPT-3
     try:
-      response = gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+      response = gpt3_completion(PromptReplace(text_block)+'\n'+AI_NAME+': ', \
+            engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
     except:
       printerr('GPT-3 experienced an error. Possibly overloaded.')
       conversation.pop()
       continue
-
+    # Add the response to the conversation list
+    conversation.append('<<AI_NAME>>: %s' % response)
     # Print the response from GPT-3
     printstd(AI_NAME+':', color=Fore.GREEN)
     for line in response.splitlines(): 
       print(textwrap.fill(line, width=Columns))
-
-    # Add the response to the conversation
-    conversation.append(AI_NAME+': %s' % response)
 
     #for devaju -x -c 'cmd'
     if len(cmdTypeAhead)==0 and cmdExit: exit()

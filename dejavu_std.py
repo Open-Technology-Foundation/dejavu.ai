@@ -4,6 +4,7 @@ import sys
 import readline
 import atexit
 import glob
+import random
 from colorama import init, Fore, Back, Style
 init()
 
@@ -49,6 +50,12 @@ def writefile(filename, string, mode='w', enc='utf-8'):
     with open(filename, mode, encoding=enc) as f:
         f.write(string)
 
+def dvtempname(label, ext='.dv'):
+  return "/tmp/dv-{0}-{1}{2}".format(label, random.randint(0, 9999), ext)
+
+
+def escstr(str):
+    return str.replace('\n','\\n').replace('\r','\\r').replace('\t','\\t')
 
 def is_num(string):
   try:

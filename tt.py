@@ -1,63 +1,56 @@
 import os
 import sys
+import curses
 
-from dejavu_std import file_get_contents, file_put_contents, \
-                EDITOR, BROWSER, \
-                int_list, is_numeric, \
-                useColor, printinfo, printerr, printstd, printUseColor
-#from colorama import init, Fore, Back, Style
-#init()
-#from markdown import markdownFromFile
-#import random
-cmdTypeAhead = []
-if True:
-  if True:
-    file = 'example-script'
+# Get the curses window, turn off echoing of keyboard to screen, turn on
+# instant (no waiting) key response, and use special values for cursor keys
+screen = curses.initscr()
+curses.noecho()
+curses.cbreak()
+screen.keypad(True)
 
-    #file = sys.argv.pop(0)
-    if not '.dv' in file: file += '.dv'
-    if not os.path.exists(file):
-      if not '/' in file: file = UserHome + '/' + file
-      if not os.path.exists(file):
-        printerr('File \''+file+'\' does not exist.')
-        exit()
+# Set up colors
+curses.start_color()
+curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+curses.init_pair(2, curses.COLOR_BLACK, curses.COLOR_WHITE)
 
-    lne = file_get_contents(file)
-    Lines = lne.split('\n')
-    lne   = ''
-    while len(Lines) > 0:
-      line = Lines.pop(0).rstrip()
-      if not line: continue
-      if line[0] == '#': continue
-      # handle \ line continuations
-      if line[-1] == '\\': lne += line[0:-1]; continue
+# Create the form
+form = curses.newwin(10, 40, 0, 0)
+form.border(0)
+form.addstr(1, 1, 'Name:', curses.color_pair(1))
+form.addstr(2, 1, 'Address:', curses.color_pair(1))
+form.addstr(3, 1, 'Phone Number:', curses.color_pair(1))
+form.addstr(5, 1, 'Submit', curses.color_pair(2))
 
-      lne += line.rstrip('\r\n')
-      if not lne: lne=''; continue
-      
-      if lne[0] == '!':
-        tok = lne.split()
-        if tok[0] == '!prompt' and len(tok) > 1:
-          if tok[1] != '"""': 
-            cmdTypeAhead.append('!prompt '+' '.join(tok[1:]))
-            lne = ''
-            continue
-          prompt = ''
-          while len(Lines) > 0:
-            line = Lines.pop(0).rstrip()
-            if line == '"""':
-              cmdTypeAhead.append('!prompt '+prompt)
-              break
-            prompt += line + '\\n'
-        else:
-          cmdTypeAhead.append(' '.join(tok))
-        lne = ''
-        continue
-      cmdTypeAhead.append(lne)
-      lne = ''
-    lne = lne.rstrip('\r\n')
-    if lne: cmdTypeAhead.append(lne)
-    lne = ''
-#printinfo('[start '+file+']')
-printinfo('\n'.join(cmdTypeAhead), prefix='')
-#printinfo('[end]')
+# Get user input
+name_field = curses.newwin(1, 28, 1, 11)
+address_field = curses.newwin(1, 28, 2, 11)
+phone_field = curses.newwin(1, 28, 3, 11)
+submit_field = curses.newwin(1, 28, 5, 11)
+
+name_field.bkgd(' ', curses.color_pair(2))
+address_field.bkgd(' ', curses.color_pair(2))
+phone_field.bkgd(' ', curses.color_pair(2))
+submit_field.bkgd(' ', curses.color_pair(2))
+
+# Set initial focus
+form.move(1, 11)
+form.refresh()
+
+# Get user input
+name = name_field.getstr().decode('utf-8')
+address = address_field.getstr().decode('utf-8')
+phone = phone_field.getstr().decode('utf-8')
+
+# Display the results
+form.addstr(7, 1, 'Name: ' + name, curses.color_pair(1))
+form.addstr(8, 1, 'Address: ' + address, curses.color_pair(1))
+form.addstr(9, 1, 'Phone Number: ' + phone, curses.color_pair(1))
+
+# Exit
+curses.nocbreak()
+screen.keypad(0)
+curses.echo()
+curses.endwin()
+
+print(name, address, phone)
