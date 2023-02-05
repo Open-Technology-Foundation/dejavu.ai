@@ -1,9 +1,0 @@
-!edit
-y
-!edit
-y
-in python, how do i rename or move a file?
-how would i rename /tmp/filename to ~/filename
-!clear
-in python, how would i rename /tmp/filename to /home/sysadmin/filename?
-what happens is /home/sysadmin/filename already exists?
