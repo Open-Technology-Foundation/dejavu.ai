@@ -1,5 +1,5 @@
 import os
-import io
+#import io
 import sys
 import readline
 import atexit

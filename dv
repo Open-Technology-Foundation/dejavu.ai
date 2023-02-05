@@ -3,9 +3,9 @@
 # Linux terminal interface for GPT-3
 # Gary Dean garydean@okusi.id
 # https://github.com/GaryDean/dejavu.ai.git
-import atexit
+#import atexit
 import datetime
-import json
+#import json
 import openai
 import os
 import re
@@ -14,7 +14,7 @@ import shutil
 import subprocess
 import sys
 import textwrap
-import time
+#import time
 import markdown
 from colorama import init, Fore, Back, Style
 init()
@@ -47,7 +47,7 @@ Verbose = True
 
 # read .dv file
 def read_dvfile(file):
-  global cmdTypeAhead, argvTypeAhead, Instructions
+  global cmdTypeAhead, argvTypeAhead, Instructions, Verbose
   cmdTypeAhead = []; Instructions = []
   if not '.dv' in file: file += '.dv'
   if not os.path.exists(file):
@@ -107,8 +107,9 @@ def read_dvfile(file):
   cmdTypeAhead = Instructions.copy()
   cmdTypeAhead = [x for x in cmdTypeAhead if not x.startswith('#') and x]
   cmdTypeAhead.insert(0, '!echo off')
-  cmdTypeAhead.append('!status short')
-  cmdTypeAhead.append('!echo on')
+  if Verbose: 
+    cmdTypeAhead.append('!status short')
+    cmdTypeAhead.append('!echo on')
 #  writefile('debug.dv', '\n'.join(cmdTypeAhead), 'w')
 #  writefile('debug.dv', '\n---\n', 'a')
 #  writefile('debug.dv', '\n'.join(Instructions), 'a')
@@ -133,9 +134,9 @@ while len(sys.argv) > 0:
   elif arg in ['-V', '--version']:
     print(ScriptName+' vs '+Version); exit()
   elif arg in ['-v', '--verbose']:
-    Verbose = 1
+    Verbose = 1; cmdEcho = 1
   elif arg in ['-q', '--quiet']:
-    Verbose = 0
+    Verbose = 0; cmdEcho = 0
   elif arg in ['-l', '--list']:
     for file in os.listdir(UserHome):
       if file.endswith('.'+ScriptName+'.txt'):
@@ -174,7 +175,7 @@ while len(sys.argv) > 0:
     subprocess.run(['less', ScriptDir+'/'+ScriptName+'-synopsis.txt'])
     exit()
   # de-aggregate aggregated short options
-  elif re.match(r'^-[cvqVh]', arg):
+  elif re.match(r'^-[caCfvqVh]', arg):
       sys.argv = [''] + ['-%s' % c for c in arg[1:]] + sys.argv
   elif re.match(r'^--', arg):
       printerr('Invalid option '+ arg); exit()
@@ -378,6 +379,7 @@ def orderly_exit():
 if __name__ == '__main__':
   conversation = list()
   while True:
+    if len(cmdTypeAhead)==0 and cmdExit: sys.exit()
     Columns = shutil.get_terminal_size().columns - 1
     if len(cmdTypeAhead): 
       userInput = cmdTypeAhead.pop(0)
@@ -736,6 +738,6 @@ if __name__ == '__main__':
     for line in response.splitlines(): 
       print(textwrap.fill(line, width=Columns))
 
-    #for devaju -x -c 'cmd'
-    if len(cmdTypeAhead)==0 and cmdExit: exit()
+    # eg, devaju -x -c 'command'
+    if len(cmdTypeAhead)==0 and cmdExit: sys.exit()
 #end
