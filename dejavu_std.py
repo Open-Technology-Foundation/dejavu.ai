@@ -1,5 +1,4 @@
 import os
-#import io
 import sys
 import readline
 import atexit
@@ -50,8 +49,11 @@ def writefile(filename, string, mode='w', enc='utf-8'):
     with open(filename, mode, encoding=enc) as f:
         f.write(string)
 
-def dvtempname(label, ext='.dv'):
-  return "/tmp/dv-{0}-{1}{2}".format(label, random.randint(0, 9999), ext)
+def tempname(label, ext='.tmp'):
+  tmpdir = os.getenv('TMPDIR')
+  if not tmpdir: tmpdir = '/tmp'
+  os.makedirs(tmpdir, exist_ok=True)
+  return "{0}/dv-{1}-{2}{3}".format(tmpdir, label, random.randint(420,99420), ext)
 
 
 def escstr(str):
@@ -114,7 +116,7 @@ def getEditor():
       EDITOR = '/etc/alternatives/editor'
     else:
       EDITOR = '/bin/less'
-  return EDITOR
+  return EDITOR.strip()
 getEditor()
 
 BROWSER = ''
@@ -131,7 +133,7 @@ def getBrowser():
       BROWSER = '/usr/bin/lynx'
     else:
       BROWSER = '/bin/less'
-  return BROWSER
+  return BROWSER.strip()
 getBrowser()
 
 

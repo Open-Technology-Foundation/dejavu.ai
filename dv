@@ -3,9 +3,8 @@
 # Linux terminal interface for GPT-3
 # Gary Dean garydean@okusi.id
 # https://github.com/GaryDean/dejavu.ai.git
-#import atexit
+
 import datetime
-#import json
 import openai
 import os
 import re
@@ -14,7 +13,6 @@ import shutil
 import subprocess
 import sys
 import textwrap
-#import time
 import markdown
 from colorama import init, Fore, Back, Style
 init()
@@ -123,8 +121,8 @@ while len(sys.argv) > 0:
   arg = sys.argv.pop(0).strip()
   if not arg: continue
   if arg in ['-u', '--upgrade', '--update']:
-    tempdir = dvtempname('upgrade', '')
-    os.mkdir(tempdir); os.chdir(tempdir)
+    tempdir = tempname('upgrade', '')
+    os.makedirs(tempdir, exist_ok=True); os.chdir(tempdir)
     qqq = "-{0}".format('v' if Verbose else 'q')
     subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
@@ -274,30 +272,34 @@ def cmdhelp():
             "For more comprehensive help, enter '!help'", '')
   cmds = [
     [ '!status',            'Show status of current environment.' ],
-    [ '!temperature [f]',   'Display or Set Temperature.', 'Valid value for "f" is 0.0 - 1.0.' ],
-    [ '!list [long|short] [range]',     \
-                            '', 'List current conversation.', \
-                            '"short" for condenced list, "long" for full list.', \
-                            'Default is "long".', \
-                            'If "range" omitted, lists entire conversation.'],
+    [ '!temperature [f]',   'Display or Set Temperature.', 
+                            'Valid value for "f" is 0.0 - 1.0.' ],
+    [ '!list [long|short] [range]', '', 
+                            'List current conversation.', 
+                            '"short" for condenced list, "long" for full list.', 
+                            'Default is "long".', 
+                            'If "range" omitted, lists entire conversation.' ],
     [ '!delete range',      'Delete conversation items in "range".' ],
-    [ '!clear',             'Clear all conversation. Same as !delete 1-' ],
+    [ '!clear',             'Clear all conversation.  Same as !delete 1-' ],
     [ '!files',             'Display conversation scripts in current and user home', 
                             'directories, with option to edit.' ],
     [ '!edit',              'Edit the current conversation prompt.dv file.' ],
-    [ '!prompt [prompt]',   'Display current conversation set-up information.', 'If "prompt" is specified, set the new conversion prompt.' ],
-    [ '!tldr [range]',      'Summarize all conversation responses in "range".', \
+    [ '!prompt [prompt]',   'Display current conversation set-up information.', 
+                            'If "prompt" is specified, set the new conversion prompt.' ],
+    [ '!tldr [range]',      'Summarize all conversation responses in "range".', 
                             'Default is the previous response.' ],
-    [ '!summarize [conversation|prompt|all]',  '', \
-                            'Summarise every conversation or prompt items.', \
+    [ '!summarize [conversation|prompt|all]', '', 
+                            'Summarise every conversation or prompt items.', 
                             'Default is "conversation".' ],
-    [ '!save [file]',       'Save current conversation. If "file" is not specified', \
+    [ '!save [file]',       'Save current conversation.  If "file" is not specified', 
                             'then saves to current conversation file.' ],
-    [ '!import [file]',     'Import "file" into the input prompt.' ],
+    [ '!import [file]',     'Import "file" into the input prompt.', 
+                            'If "file" is not specified, opens EDITOR to enable ',
+                            'multi-line commands.'],
     [ '!exec [cmd...]',     'Execute a shell command.' ],
     [ '!echo [on|off]',     'Turn command echo on|off.'],
     [ '!help',              'Open DéjàVu Help file.' ],
-    [ '!exit',              'Exit DéjàVu.' ]
+    [ '!exit|!quit',        'Exit DéjàVu.  Pressing ^C will also exit.']
   ]
   for cmd in cmds:
     printinfo(format('%16s: %s' % (cmd[0], cmd[1])))
@@ -338,7 +340,7 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
 def autoSave(filename):
   global conversation, Instructions
   printinfo('AutoSaving '+filename, end='')
-  file = dvtempname('autosave', '.dv')
+  file = tempname('autosave', '.dv')
   try:
     writefile(file, '', 'w')
     for tmp in Instructions:
@@ -406,7 +408,7 @@ if __name__ == '__main__':
 
       # README.md
       if tok[0] == 'help' or tok[0] == '?' or tok[0] == '!':
-        tmp = dvtempname('README', '.html')
+        tmp = tempname('README', '.html')
         writefile(tmp, markdown.markdown(readfile(ScriptDir+'/README.md')))
         subprocess.run([BROWSER, tmp])
         os.remove(tmp)
@@ -688,7 +690,7 @@ if __name__ == '__main__':
       # import file
       elif tok[0] == 'impo' or tok[0] == 'import':
         if len(tok) < 2: 
-          tmpfile = dvtempname('command', '')
+          tmpfile = tempname('command', '.dv')
           writefile(tmpfile, '')
           try: subprocess.run(EDITOR +' '+ tmpfile, shell=True, executable='/bin/bash')
           except: printerr('#!#'); continue
@@ -705,7 +707,7 @@ if __name__ == '__main__':
           if cmdEcho: printinfo('Importing from text file '+filename)  
           userInput = readfile(filename).strip()+'\n'
 
-      elif tok[0] == 'loca' or tok[0] == 'locals':
+      elif tok[0] == 'vars' or tok[0] == 'locals':
         varsearch = tok[1] if len(tok) > 1 else ''
         locals_list = [(key, value) for key, value in locals().items() if not callable(value)]
         for key, value in locals_list:
@@ -713,10 +715,14 @@ if __name__ == '__main__':
           if value[0:7] == '<module': continue
           if varsearch and key[0:len(varsearch)] != varsearch: continue
           print(f"{key}={value}")
+        print()
+        print('Environment:')
+        for env in ['USER', 'HOME','EDITOR', 'BROWSER', 'PATH', 'TMPDIR', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
+          print(env + '=' + str(os.getenv(env)))
         continue
 
       # exit
-      elif tok[0] == 'exit':
+      elif tok[0] == 'exit' or tok[0] == 'quit':
         orderly_exit()
         continue
 
