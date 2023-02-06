@@ -119,12 +119,27 @@ export OPENAI_ORGANIZATION_ID=\[aq]org-_your_org_id_\[aq]
 .PP
 You may wish to place these declarations into your \f[C].bash.rc\f[R]
 and/or \f[C]/etc/bash.bashrc\f[R] files.
-.SH FILES
 .SH EXAMPLES
+.IP
+.nf
+\f[C]
+# run \[ti]/.dv/default.dv
+dejavu
+
+# run \[ti]/.dv/chat.dv (autosave chatbot)
+dejavu chat
+
+# run \[ti]/.dv/techlead.dv (THE techlead)
+dejavu techlead
+
+# get a quick answer to a question and exit
+dejavu -c \[aq]in python, display full syntax and usage for os.execvp() with coded examples\[aq] -x
+\f[R]
+.fi
 .SH REQUIRES
 .PP
 Python 3, pip, git, openai API key/s, apt install access
-.SH AUTHOR
+.SH AUTHORS
 .PP
 Written by Gary Dean, garydean\[at]okusi.id
 .SH REPORTING BUGS

@@ -91,18 +91,28 @@ Before running, make sure you have set up you openAI API key in your system's en
 
 You may wish to place these declarations into your ```.bash.rc``` and/or ```/etc/bash.bashrc``` files.  
 
-# FILES
-
-
-
 # EXAMPLES
 
+ ```
 
+ # run ~/.dv/default.dv
+ dejavu
+
+ # run ~/.dv/chat.dv (autosave chatbot)
+ dejavu chat
+
+ # run ~/.dv/techlead.dv (THE techlead)
+ dejavu techlead
+
+ # get a quick answer to a question and exit
+ dejavu -c 'in python, display full syntax and usage for os.execvp() with coded examples' -x
+
+ ```
 
 # REQUIRES
 Python 3, pip, git, openai API key/s, apt install access
 
-# AUTHOR
+# AUTHORS
 Written by Gary Dean, garydean@okusi.id
 
 # REPORTING BUGS
