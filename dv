@@ -128,7 +128,7 @@ while len(sys.argv) > 0:
     qqq = "-{0}".format('v' if Verbose else 'q')
     subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
-    args = [ cmd, qqq ]
+    args = [ cmd, qqq, '-a' if qqq == '-q' else '' ]
     os.execvp(cmd, args)
     exit()
   elif arg in ['-V', '--version']:
