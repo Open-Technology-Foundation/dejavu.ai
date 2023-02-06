@@ -266,7 +266,12 @@ def gpt3_completion(prompt, engine='text-davinci-003', temperature=0.7, top_p=1.
     return text
 
 def cmdhelp():
-  printinfo('DéjàVu System Commands')
+  printinfo('DéjàVu System Commands', '')
+  printinfo('Note: All commands can be shortened to first four letters,',
+            'eg, !temp for !temperature', '',
+            '"range" can be in the forms "1,2,3", "4-6", "7-", "-8", "all"', 
+            'and can be combined in any order.', '',
+            "For more comprehensive help, enter '!help'", '')
   cmds = [
     [ '!status',            'Show status of current environment.' ],
     [ '!temperature [f]',   'Display or Set Temperature.', 'Valid value for "f" is 0.0 - 1.0.' ],
@@ -297,10 +302,6 @@ def cmdhelp():
   for cmd in cmds:
     printinfo(format('%16s: %s' % (cmd[0], cmd[1])))
     for cd in cmd[2:]: printinfo(format('%16s  %s' % ('', cd)))
-  printinfo('Note: All commands can be shortened to first four letters,',
-            'eg, !temp for !temperature')
-  printinfo('"range" can be in these forms "1,2,3", "4-6", "7-", "-8", "all"', \
-            'and can be combined in any order.')
 
 # Print current parameters
 def cmdstatus(all=False):
@@ -329,8 +330,7 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
   global Prompt, AI_NAME, USER_NAME
   if not AIr: AIr = AI_NAME
   if not USr: USr = USER_NAME
-  newp = Prompt+('\n' if Prompt[-1]!='\n' else '')+conversationText
-  newp = newp.replace('<<CONVERSATION>>', '')
+  newp = Prompt+('\n' if Prompt[-1]!='\n' else '') + conversationText
   newp = newp.replace(AIs, AIr, -1)
   newp = newp.replace(USs, USr, -1)
   return newp.strip() + '\n'
@@ -338,7 +338,6 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
 def autoSave(filename):
   global conversation, Instructions
   printinfo('AutoSaving '+filename, end='')
-#  file = '/tmp/'+ScriptName+'-autosave-'+str(datetime.datetime.now().time()).replace(':','_')+'.dv'
   file = dvtempname('autosave', '.dv')
   try:
     writefile(file, '', 'w')
@@ -688,7 +687,6 @@ if __name__ == '__main__':
 
       # import file
       elif tok[0] == 'impo' or tok[0] == 'import':
-        #cmdstatus()
         if len(tok) < 2: 
           tmpfile = dvtempname('command', '')
           writefile(tmpfile, '')
@@ -707,6 +705,16 @@ if __name__ == '__main__':
           if cmdEcho: printinfo('Importing from text file '+filename)  
           userInput = readfile(filename).strip()+'\n'
 
+      elif tok[0] == 'loca' or tok[0] == 'locals':
+        varsearch = tok[1] if len(tok) > 1 else ''
+        locals_list = [(key, value) for key, value in locals().items() if not callable(value)]
+        for key, value in locals_list:
+          value = str(value).replace('\n','\\n')
+          if value[0:7] == '<module': continue
+          if varsearch and key[0:len(varsearch)] != varsearch: continue
+          print(f"{key}={value}")
+        continue
+
       # exit
       elif tok[0] == 'exit':
         orderly_exit()
@@ -715,7 +723,7 @@ if __name__ == '__main__':
       # invalid command
       else:
         printerr('Invalid command: !' + cmd)
-        cmdhelp()
+        if Verbose: printinfo("Enter '!' for command help")
         continue
 
     # Prepend username to user input 
