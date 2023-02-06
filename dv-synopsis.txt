@@ -1,39 +1,57 @@
-Name    : DéjàVu GPT-3 Terminal vs 0.9
-        :
-Script  : dejavu[|dv]
-        :
-Desc    : DéjàVu GPT-3 Terminal Chat program that remembers
-        : context.
-        :
-Synopsis: dejavu [-vqlxuV] [-c cmd] [conversation]
-        :
-        : Where conversation is an existing conversation file, or
-        : the name of a new conversation you wish to create.
-        :
-        : The default conversation is conversation.dejavu.txt. This 
-        : can/should be edited to suit your own personality and 
-        : requirements.
-        :
-        : Conversation files are located in ~/.dejavu/ with the extension
-        : '.dejavu.txt'.
-        :
-Options : -v|--verbose   Verbose on (default)
-        : -q|--quiet     Verbose off. Start-up status 
-        :                messages will not appear.
-        : -l|--list      List conversation files in ~/.dejavu.
-        : -c|--cmd 'cmd' Execute 'cmd' on entry to DéjàVu.
-        :                Use with -x to immediately exit. May be used
-        :                multiple times.
-        : -f|--cmd-file  Execute a Dejavu command text file.
-        :                See ~/.dejavu/example.dejavu.cmd
-        : -x|--exit      Immediately exit DéjàVu after first command.
-        : -u|--upgrade   Upgrade DéjàVu from git repository.
-        : -V|--version   Print DéjàVu version.
-        :
-Requires: python 3, pip+[colorama,openai], git,
-        : openai API key/s, apt install access
-        :
-See Also: https://openai.com/api/
-        : https://github.com/GaryDean/dejavu.ai.git
-        : https://okusiassociates.com/dejavu/
-       
+NAME
+	DejaVu - GPT-3 Terminal vs 0.9
+
+SYNOPSIS
+	dejavu [-vqlxuV] [-c cmd] [conversation]
+   
+	Where conversation is an existing conversation file, or the name of a new conversation you wish to create.
+
+	The default conversation is conversation.dejavu.txt. This can/should be edited to suit your own personality and requirements.
+
+	By default, conversation files are located and created in ~/.dv/ with the extension '.dv'.
+
+DESCRIPTION
+	DejaVu GPT-3 Terminal Chat program that remembers context.
+
+OPTIONS
+	-v|--verbose   Verbose on (default)
+	-q|--quiet     Verbose off. Start-up status 
+	              messages will not appear.
+	-l|--list      List conversation files in ~/.dejavu.
+	-c|--cmd 'cmd' Execute 'cmd' on entry to DéjàVu.
+	Use with -x to immediately exit. May be used
+		       multiple times.
+	-f|--cmd-file  Execute a Dejavu command text file.
+  	         See ~/.dejavu/example.dejavu.cmd
+	-x|--exit      Immediately exit DéjàVu after first command.
+	-u|--upgrade   Upgrade DéjàVu from git repository.
+	-V|--version   Print DéjàVu version.
+
+ENVIRONMENT
+
+
+FILES
+
+
+EXAMPLES
+
+
+REQUIRES
+	python 3, pip+[colorama,openai], git, openai API key/s, apt install access
+
+AUTHOR
+	Written by Gary Dean.
+
+REPORTING BUGS
+	Report bugs and deficiencies on the Dejavu github page
+	https://github.com/GaryDean/dejavu.ai.git
+			
+COPYRIGHT
+	Copyright  ©  2023  Okusi Associates.  License GPLv3+: GNU GPL version 3 or
+	later <https://gnu.org/licenses/gpl.html>.
+	This is free software: you are free to change and redistribute it.  There is NO WARRANTY, to the extent permitted by law.
+
+SEE ALSO
+	https://openai.com/api/
+	https://github.com/GaryDean/dejavu.ai.git
+	https://okusiassociates.com/dejavu/

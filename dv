@@ -3,6 +3,7 @@
 # Linux terminal interface for GPT-3
 # Gary Dean garydean@okusi.id
 # https://github.com/GaryDean/dejavu.ai.git
+# #: git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu && /tmp/dejavu/dv.install
 
 import datetime
 import openai
@@ -13,7 +14,6 @@ import shutil
 import subprocess
 import sys
 import textwrap
-import markdown
 from colorama import init, Fore, Back, Style
 init()
 
@@ -406,12 +406,9 @@ if __name__ == '__main__':
 
       tok[0] = tok[0].lower()
 
-      # README.md
+      # man page - README.md
       if tok[0] == 'help' or tok[0] == '?' or tok[0] == '!':
-        tmp = tempname('README', '.html')
-        writefile(tmp, markdown.markdown(readfile(ScriptDir+'/README.md')))
-        subprocess.run([BROWSER, tmp])
-        os.remove(tmp)
+        subprocess.run(['man', 'dv'])
         continue
 
       elif tok[0] == 'echo':

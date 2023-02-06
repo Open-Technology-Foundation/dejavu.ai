@@ -106,10 +106,10 @@ main() {
 	if ((doApt)); then
 		sudo apt update -q"$quiet_"
 		sudo apt upgrade -q"$quiet_"
-		sudo apt install -q"$quiet_" python3 pip git
+		sudo apt install -q"$quiet_" python3 pip git pandoc
 	fi
-	sudo pip install -q"$quiet_" --upgrade --no-color pip
-	sudo pip install -q"$quiet_" --upgrade --no-color -r "$PRGDIR"/requirements.txt
+	sudo pip install -qq"$quiet_" --upgrade --no-color pip
+	sudo pip install -qq"$quiet_" --upgrade --no-color -r "$PRGDIR"/requirements.txt
 
 	sudo mkdir -p "$SHAREDIR"
 	sudo chmod 775 "$SHAREDIR"
@@ -124,6 +124,7 @@ main() {
 	sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
 	sudo chmod 775 "$PRGDIR"/dv
 	
+	mkdir -p -m 0755 /usr/local/bin
 	cd /usr/local/bin
 	sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
 	sudo ln -s --force "$SHAREDIR"/dv dv

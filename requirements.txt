@@ -1,3 +1,2 @@
 colorama==0.4.6
-Markdown==3.3.6
 openai==0.26.4

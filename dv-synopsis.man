@@ -1,0 +1,47 @@
+.PP
+NAME D\['e]j\[`a]Vu GPT-3 Terminal vs 0.9
+.PP
+SYNOPSIS dejavu [-vqlxuV] [-c cmd] [conversation]
+.IP
+.nf
+\f[C]
+Where conversation is an existing conversation file, or the name of a new conversation you wish to create.
+
+The default conversation is conversation.dejavu.txt. This can/should be edited to suit your own personality and requirements.
+
+    By default, conversation files are located and created in \[ti]/.dv/ with the extension \[aq].dv\[aq].
+\f[R]
+.fi
+.PP
+DESCRIPTION D\['e]j\[`a]Vu GPT-3 Terminal Chat program that remembers
+context.
+.PP
+OPTIONS -v|--verbose Verbose on (default) -q|--quiet Verbose off.
+Start-up status messages will not appear.
+-l|--list List conversation files in \[ti]/.dejavu.
+-c|--cmd \[aq]cmd\[aq] Execute \[aq]cmd\[aq] on entry to D\['e]j\[`a]Vu.
+Use with -x to immediately exit.
+May be used multiple times.
+-f|--cmd-file Execute a Dejavu command text file.
+See \[ti]/.dejavu/example.dejavu.cmd -x|--exit Immediately exit
+D\['e]j\[`a]Vu after first command.
+-u|--upgrade Upgrade D\['e]j\[`a]Vu from git repository.
+-V|--version Print D\['e]j\[`a]Vu version.
+.PP
+REQUIRES python 3, pip+[colorama,openai], git, openai API key/s, apt
+install access
+.PP
+AUTHOR Written by Gary Dean.
+.PP
+REPORTING BUGS Report bugs and deficiencies on the Dejavu github page
+https://github.com/GaryDean/dejavu.ai.git (https://github.com/GaryDean/dejavu.ai.git)
+.PP
+COPYRIGHT Copyright \[co] 2023 Okusi Associates.
+License GPLv3+: GNU GPL version 3 or later
+https://gnu.org/licenses/gpl.html (https://gnu.org/licenses/gpl.html).
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.PP
+SEE ALSO https://openai.com/api/ (https://openai.com/api/)
+https://github.com/GaryDean/dejavu.ai.git (https://github.com/GaryDean/dejavu.ai.git)
+https://okusiassociates.com/dejavu/ (https://okusiassociates.com/dejavu/)
