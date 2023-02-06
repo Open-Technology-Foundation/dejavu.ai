@@ -1,4 +1,4 @@
-% DV(1) dv 0.9.101
+% DV(1) GPT-3 Terminal and Chatbot | Version 0.9
 % Gary Dean
 % December 2022
 

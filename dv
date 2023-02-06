@@ -116,6 +116,23 @@ def read_dvfile(file):
     argvTypeAhead = []
   return True
 
+def dvUsage():
+  print('DéjàVu - GPT-3 Terminal and Chatbot vs '+Version)
+  print("Usage: "+ScriptName+""" [-vqlfxuV] [-c cmd] [dvfile]
+Where 'dvfile' is a conversation.dv file. Default '~/.dv/default.dv'
+ -l|--list      List dvfiles in '~/.dv/'.
+ -a|--autosave on|off 
+                On exit, save conversation to current dvfile. Default is off.
+ -c|--cmd 'cmd' Execute 'cmd' on entry to DéjàVu.
+ -x|--exit      Immediately exit DéjàVu after first command has been executed.
+ -v|--verbose   Verbose on. Default is on.
+ -q|--quiet     Verbose off.
+ -V|--version   Print DéjàVu version.
+ -C|--no-color  Do not use color. Default is to use color.
+ -u|--upgrade   Upgrade DéjàVu from git repository.
+ --help         Full Help manpages.
+""")
+
 # argv processing -------------------------
 while len(sys.argv) > 0:
   arg = sys.argv.pop(0).strip()
@@ -135,6 +152,7 @@ while len(sys.argv) > 0:
     Verbose = 1; cmdEcho = 1
   elif arg in ['-q', '--quiet']:
     Verbose = 0; cmdEcho = 0
+
   elif arg in ['-l', '--list']:
     for file in os.listdir(UserHome):
       if file.endswith('.'+ScriptName+'.txt'):
@@ -152,12 +170,6 @@ while len(sys.argv) > 0:
       printerr('Command was not specified for', arg)
       exit()
 
-  elif arg in ['-f', '--cmd-file']:
-    if len(sys.argv) == 0:
-      printerr('Command File was not specified for', arg)
-      exit()
-    ConvFile =sys.argv.pop(0)
-
   elif arg in ['-a', '--autosave']:
       AutoSave = 1
 
@@ -169,9 +181,11 @@ while len(sys.argv) > 0:
 #    useColor = False
     useColor = printUseColor(False)
 
-  elif arg in ['-h', '-?', '--help']:
-    subprocess.run(['less', ScriptDir+'/'+ScriptName+'-synopsis.txt'])
-    exit()
+  elif arg in ['-h', '-?']:
+    dvUsage(); exit()
+  elif arg =='--help':
+    os.execvp('man', ['man', ScriptName]); exit()
+
   # de-aggregate aggregated short options
   elif re.match(r'^-[caCfvqVh]', arg):
       sys.argv = [''] + ['-%s' % c for c in arg[1:]] + sys.argv
