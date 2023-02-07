@@ -39,7 +39,7 @@ Installation One-Liner, if you\[cq]re in a hurry:
 .IP
 .nf
 \f[C]
-git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu && /tmp/ dejavu/dv.install
+git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu && /tmp/dejavu/dv.install
 \f[R]
 .fi
 .PP
@@ -62,7 +62,7 @@ Store program files in \f[C]/usr/share/dejavu.ai\f[R]
 .IP \[bu] 2
 Create symlinks \f[C]dv\f[R] and \f[C]dejavu\f[R] in
 \f[C]/usr/local/bin\f[R].
-.SS Execution and Operation
+.SS Execution
 .PP
 To run:
 .IP
@@ -133,15 +133,55 @@ dejavu chat
 dejavu techlead
 
 # get a quick answer to a question and exit
-dejavu -c \[aq]in python, display full syntax and usage for os.execvp() with coded examples\[aq] -x
+dejavu -c \[aq]in python, display syntax, options, usage and examples for .replace()\[aq] -x
+\f[R]
+.fi
+.SH OPERATION
+.SS D\['e]j\[`a]Vu System Commands
+.PP
+Note: All commands can be shortened to first four letters, eg,
+\f[B]!temp\f[R] for \f[B]!temperature\f[R]
+.PP
+\f[B]range\f[R] can be in the forms \[lq]1,2,3\[rq], \[lq]4-6\[rq],
+\[lq]7-\[rq], \[lq]-8\[rq], \[lq]all\[rq] and can be combined in any
+order.
+.IP
+.nf
+\f[C]
+         !status: Show status of current environment.
+!temperature [f]: Display or Set Temperature.
+                  Valid value for \[dq]f\[dq] is 0.0 - 1.0.
+!list [long|short] [range]: 
+                  List current conversation.
+                  \[dq]short\[dq] for condenced list, \[dq]long\[dq] for full list.
+                  Default is \[dq]long\[dq].
+                  If \[dq]range\[dq] omitted, lists entire conversation.
+   !delete range: Delete conversation items in \[dq]range\[dq].
+          !clear: Clear all conversation.  Same as !delete 1-
+          !files: Display conversation scripts in current and user home
+                  directories, with option to edit.
+           !edit: Edit the current conversation prompt.dv file.
+!prompt [prompt]: Display current conversation set-up information.
+                  If \[dq]prompt\[dq] is specified, set the new conversion prompt.
+   !tldr [range]: Summarize all conversation responses in \[dq]range\[dq].
+                  Default is the previous response.
+!summarize [conversation|prompt|all]: 
+                  Summarise every conversation or prompt items.
+                  Default is \[dq]conversation\[dq].
+    !save [file]: Save current conversation.  If \[dq]file\[dq] is not specified
+                  then saves to current conversation file.
+  !import [file]: Import \[dq]file\[dq] into the input prompt.
+                  If \[dq]file\[dq] is not specified, opens EDITOR to enable 
+                  multi-line commands.
+  !exec [cmd...]: Execute a shell command.
+  !echo [on|off]: Turn command echo on|off.
+           !help: Open D\['e]j\[`a]Vu Help file.
+     !exit|!quit: Exit D\['e]j\[`a]Vu.  Pressing \[ha]C will also exit.
 \f[R]
 .fi
 .SH REQUIRES
 .PP
 Python 3, pip, git, openai API key/s, apt install access
-.SH AUTHORS
-.PP
-Written by Gary Dean, garydean\[at]okusi.id
 .SH REPORTING BUGS
 .PP
 Report bugs and deficiencies on the Dejavu github
@@ -153,6 +193,9 @@ License GPLv3+: GNU GPL version 3 or later GNU
 Licences (https://gnu.org/licenses/gpl.html).
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
+.SH AUTHORS
+.PP
+Written by Gary Dean, garydean\[at]okusi.id
 .SH SEE ALSO
 .PP
 openai api (https://openai.com/api/)
