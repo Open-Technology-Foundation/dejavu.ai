@@ -406,7 +406,7 @@ if __name__ == '__main__':
         print(userInput)
     else:
       cmdEcho = True
-      printstd(USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
+      printstd(str(len(conversation)+1)+'. '+USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
       try: userInput = input().lstrip()
       except KeyboardInterrupt: orderly_exit()
     
@@ -761,7 +761,7 @@ if __name__ == '__main__':
     # Add the response to the conversation list
     conversation.append('<<AI_NAME>>: %s' % response)
     # Print the response from GPT-3
-    printstd(AI_NAME+':', color=Fore.GREEN)
+    printstd(str(len(conversation)+1)+'. '+AI_NAME+':', color=Fore.GREEN)
     for line in response.splitlines(): 
       print(textwrap.fill(line, width=Columns))
 

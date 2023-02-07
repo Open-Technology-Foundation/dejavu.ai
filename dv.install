@@ -115,14 +115,14 @@ main() {
 	sudo chmod 775 "$SHAREDIR"
 	cd "$SHAREDIR"
 
-	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.man "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/*.dv "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
 	sudo chmod 775 "$PRGDIR"/dv
 	
-	mkdir -p -m 0755 /usr/local/bin
+	sudo mkdir -p -m 755 /usr/local/bin
 	cd /usr/local/bin
 	sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
 	sudo ln -s --force "$SHAREDIR"/dv dv
@@ -131,11 +131,8 @@ main() {
 	# manpages
 	cd "$SHAREDIR"
   sudo mkdir -p -m 0755 /usr/local/share/man/man1
-  sudo cp "$SHAREDIR"/dejavu.man /usr/local/man/man1/dv.1
-  sudo cp "$SHAREDIR"/dejavu.man /usr/local/man/man1/dejavu.1
-  sudo rm -f /usr/local/man/man1/dv.1.gz /usr/local/man/man1/dejavu.1.gz
-  sudo gzip /usr/local/man/man1/dv.1
-  sudo gzip /usr/local/man/man1/dejavu.1
+  sudo cp "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dv.1.gz
+  sudo cp "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dejavu.1.gz
   sudo mandb -sq
 
 	# ~/.bashrc /etc/bash.bashrc
