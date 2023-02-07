@@ -1,4 +1,4 @@
-**DéjàVu - GPT-3 Terminal and Chatbot vs 0.9**
+# DéjàVu - GPT-3 Terminal and Chatbot vs 0.9
 
 ## SYNOPSIS
 **dejavu** [-vqlxuV] [-c cmd] [dvfile]
@@ -180,9 +180,6 @@ Copyright  ©  2023  Okusi Associates.  License GPLv3+: GNU GPL version 3 or
 later [GNU Licences](https://gnu.org/licenses/gpl.html).
 This is free software: you are free to change and redistribute it.  There is 
 NO WARRANTY, to the extent permitted by law.
-
-## AUTHORS
-Written by Gary Dean, garydean@okusi.id
 
 ## SEE ALSO
 [openai api](https://openai.com/api/)

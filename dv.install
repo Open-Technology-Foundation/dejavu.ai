@@ -131,8 +131,9 @@ main() {
 	# manpages
 	cd "$SHAREDIR"
   sudo mkdir -p -m 0755 /usr/local/share/man/man1
-  sudo cp "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dv.1.gz
-  sudo cp "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dejavu.1.gz
+  sudo rm -f /usr/local/man/man1/dv.1.gz /usr/local/man/man1/dejavu.1.gz
+  sudo cp -p "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dv.1.gz
+  sudo cp -p "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dejavu.1.gz
   sudo mandb -sq
 
 	# ~/.bashrc /etc/bash.bashrc
