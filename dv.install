@@ -106,7 +106,7 @@ main() {
 	if ((doApt)); then
 		sudo apt update -q"$quiet_"
 		sudo apt upgrade -q"$quiet_"
-		sudo apt install -q"$quiet_" python3 pip git pandoc
+		sudo apt install -q"$quiet_" python3 pip git
 	fi
 	sudo pip install -qq"$quiet_" --upgrade --no-color pip
 	sudo pip install -qq"$quiet_" --upgrade --no-color -r "$PRGDIR"/requirements.txt

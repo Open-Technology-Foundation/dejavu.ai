@@ -321,6 +321,7 @@ def cmdhelp():
 
 # Print current parameters
 def cmdstatus(all=False):
+  global Prompt, conversation
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
     printinfo(format('%13s %s' % (pref+':', '{}'.format(suff))))
@@ -330,8 +331,9 @@ def cmdstatus(all=False):
   if all: 
     pp( 'History File',historyFile.replace(UserHome,'~')) # os.path.basename(historyFile))
     pp( 'AI Engine',   engine)
-    pp( 'Tokens Used', int(len(prompt)/3.5))
-    pp( 'Tokens Left', (max(16,int(4096-(len(prompt)/3.5)-100))))
+    sx = len(Prompt)+len(''.join(conversation))
+    pp( 'Tokens Used', int(sx/3.5))
+    pp( 'Tokens Left', (max(16,int(4096-(sx/3.5)-100))))
     pp( 'Temperature', temperature)
     pp( 'Frequency',   freq_pen)
     pp( 'Presence',    pres_pen)
