@@ -1,6 +1,7 @@
 # This is a DéjàVu chatbot script.
 # Please edit in accordance with your preferences.
 # Lines beginning with # comments, and are ignored by the program.
+
 !autosave on
 !USER_NAME BIKSU
 !AI_NAME TENZO

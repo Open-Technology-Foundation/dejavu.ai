@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 """
-DéjàVu GPT-3 Terminal
-Linux terminal interface for GPT-3
+DéjàVu GPT-3 Terminal Interface for GPT-3
 Gary Dean garydean@okusi.id
 https://github.com/GaryDean/dejavu.ai.git
+
 #: git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu \
     && /tmp/dejavu/dv.install
 """
@@ -23,7 +23,9 @@ ScriptName  = os.path.realpath(sys.argv.pop(0))
 ScriptDir   = os.path.dirname(ScriptName)
 ScriptName  = os.path.basename(ScriptName)
 sys.path.append(ScriptDir)
+# pylink disable=wrong-import-position
 from dejavu_std import *
+#import dejavu_std
 
 HomeDir     = os.path.expanduser('~')
 UserHome    = HomeDir+'/.'+ScriptName
@@ -49,7 +51,7 @@ def read_dvfile(dvfile):
   """
   Read .dv script
   """
-  global cmdTypeAhead, argvTypeAhead, Instructions, Verbose
+  global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
   if not '.dv' in dvfile: dvfile += '.dv'
   if not os.path.exists(dvfile):
@@ -144,7 +146,8 @@ while len(sys.argv) > 0:
   if arg in ['-u', '--upgrade', '--update']:
     tempdir = tempname('upgrade', '')
     os.makedirs(tempdir, exist_ok=True); os.chdir(tempdir)
-    qqq = "-{0}".format('v' if Verbose else 'q')
+    #qqq = "-{0}".format('v' if Verbose else 'q')
+    qqq = '-v' if Verbose else '-q'
     subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
     cmd = tempdir + '/' + ScriptName + '.install'
     args = [ cmd, qqq, '-a' if qqq == '-q' else '' ]
@@ -183,7 +186,7 @@ while len(sys.argv) > 0:
     cmdExit = 1
 
   elif arg in ['-C', '--no-color']:
-    useColor = printUseColor(False)
+    UseColor(False)
 
   elif arg in ['-h', '-?']:
     dvUsage(); sys.exit()
@@ -240,9 +243,8 @@ except KeyError:
     ':~$ export OPENAI_ORGANIZATION_ID="your_organization"',
     'Both these environment variables should be set in your ~/.bashrc file.' ])
   sys.exit()
-
 try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
-except: openai.organization = ''
+except KeyError: openai.organization = ''
 
 engine      = 'text-davinci-003'
 temperature = 1
@@ -264,10 +266,7 @@ historyFile = initHistory(ConvFile)
 conversation= []
 text_block  = ''
 
-def gpt3_completion(prompt, engine='text-davinci-003',
-    temperature=0.7, top_p=1.0, tokens=400,
-    freq_pen=0.0, pres_pen=0.0,
-    stop=['HAL:', 'BIKSU:']):
+def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop):
   """
   GPT-3 Completion function
   """
@@ -340,7 +339,7 @@ def cmdstatus(showall=False):
   """
   Print current parameters
   """
-  global Prompt, conversation
+  #global Prompt, conversation
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
     printinfo(format('%13s %s' % (pref+':', '{}'.format(suff))))
@@ -366,7 +365,7 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
   Replace <<>> markers in prompt and conversation
   with the appropriate text
   """
-  global Prompt, AI_NAME, USER_NAME
+  #global Prompt, AI_NAME, USER_NAME
   if not AIr: AIr = AI_NAME
   if not USr: USr = USER_NAME
   newp = Prompt+('\n' if Prompt[-1]!='\n' else '') + conversationText
@@ -378,7 +377,7 @@ def autoSave(filename):
   """
   Autosave chat
   """
-  global conversation, Instructions
+  #global conversation, Instructions
   printinfo('AutoSaving '+filename, end='')
   file = tempname('autosave', '.dv')
   try:
@@ -411,15 +410,15 @@ def orderly_exit():
   """
   Exit script nicely
   """
-  global AutoSave
+  #global AutoSave
   if AutoSave: autoSave(ConvFile)
-  print(Style.RESET_ALL if useColor else '')
+  print(Style.RESET_ALL if UseColor() else '')
   if Verbose: printinfo('Exiting '+ScriptName+' '+ConvFile)
   sys.exit()
 
 #---------------------------------------------------------------------------------
 if __name__ == '__main__':
-  conversation = list()
+  conversation = []
   while True:
     if len(cmdTypeAhead)==0 and cmdExit: sys.exit()
     Columns = shutil.get_terminal_size().columns - 1
@@ -524,7 +523,7 @@ if __name__ == '__main__':
           read_dvfile(file)
           ConvFile = file
           historyFile = initHistory(ConvFile)
-        except:
+        except Exception:
           read_dvfile(ConvFile)
           historyFile = initHistory(ConvFile)
         continue
@@ -637,7 +636,7 @@ if __name__ == '__main__':
             printstd(str(i+1)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME)+2:] +'\n\n'
           for line in text.splitlines():
-            if short: 
+            if short:
               printinfo(line[0:Columns-3]+'...',prefix='')
               break
             printinfo(textwrap.fill(line, width=Columns), prefix='')
@@ -678,7 +677,7 @@ if __name__ == '__main__':
             break
           printstd(AI_NAME+' TL;DR'+ ('' if len(rnge)==1 else '['+str(i+1)+']') + ':', color=Fore.GREEN)
           printinfo(response, prefix='')
-          conversation.append('<<AI_NAME>>: %s' % response)
+          conversation.append(f'<<AI_NAME>>: {response}')
           i+=1
         continue
 
@@ -748,7 +747,11 @@ if __name__ == '__main__':
             printerr('Import file error.', str(e))
             continue
           userInput = readfile(tmpfile)
-          os.remove(tmpfile)
+          try:
+            os.remove(tmpfile)
+            os.remove(tmpfile+'~')
+          except FileNotFoundError:
+            pass
           if not userInput: continue
           if input('Execute command in '+tmpfile+'? y/n ') != 'y':
             continue
@@ -786,7 +789,7 @@ if __name__ == '__main__':
         continue
 
     # Prepend username to user input
-    conversation.append('<<USER_NAME>>: %s' % userInput)
+    conversation.append(f'<<USER_NAME>>: {userInput}')
     # Aggregate the entire conversation
     text_block = ('\n'.join(conversation)).strip()
     writefile('debug', '\n---\n'+PromptReplace(text_block, '<<AI_NAME>>', AI_NAME, '<<USER_NAME>>', USER_NAME), 'a')
@@ -799,7 +802,7 @@ if __name__ == '__main__':
       conversation.pop()
       continue
     # Add the response to the conversation list
-    conversation.append('<<AI_NAME>>: %s' % response)
+    conversation.append(f'<<AI_NAME>>: {response}')
     # Print the response from GPT-3
     printstd(str(len(conversation)+1)+'. '+AI_NAME+':', color=Fore.GREEN)
     for line in response.splitlines():

@@ -1,27 +1,36 @@
 """
 Generic functions
 """
+# pylint: disable=global-statement
+
 import os
 import sys
 import readline
 import atexit
 import glob
 import random
-from colorama import init, Fore, Back, Style
+
+from colorama import init, deinit, Fore, Back, Style
 init()
 
-useColor = True
-def printUseColor(color=True):
-  """
-  Use Color flag.
-  """
-  useColor = color
+def has_color(stream):
+  """ Is there a terminal attached? """
+  if not hasattr(stream, 'isatty'): return False
+  if not stream.isatty(): return False
+  return True
+
+useColor = has_color(sys.stdout)
+def UseColor(color=None):
+  """ Print in Color or Not flag. """
+  global useColor
+  if color is not None:
+    useColor = color
+    if useColor: init()
+    else: deinit()
   return useColor
 
 def printerr(*args, **kwargs):
-  """
-  Print to stderr with optional color.
-  """
+  """ Print to stderr with optional color. """
   output=kwargs.get('file', sys.stderr)
   if useColor:
     print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
@@ -30,9 +39,7 @@ def printerr(*args, **kwargs):
   if useColor: print(Style.RESET_ALL, end='', file=output)
 
 def printinfo(*args, **kwargs):
-  """
-  Print info to std with optional color.
-  """
+  """ Print info to std with optional color. """
   output=kwargs.get('file', sys.stdout)
   if useColor:
     print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
@@ -41,9 +48,7 @@ def printinfo(*args, **kwargs):
   if useColor: print(Style.RESET_ALL, end='', file=output)
 
 def printstd(*args, **kwargs):
-  """
-  Print to std with optional color.
-  """
+  """ Print to std with optional color. """
   output=kwargs.get('file', sys.stdout)
   if useColor:
     print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), end='', file=output)
@@ -52,50 +57,41 @@ def printstd(*args, **kwargs):
   if useColor: print(Style.RESET_ALL, end='', file=output)
 
 
-def readfile(filepath, enc='utf-8'):
-  """
-  Read contents of filename into string.
-  """
-  with open(filepath, 'r', encoding=enc) as infile:
+def readfile(filepath, encoding='utf-8'):
+  """ Read contents of filename into string. """
+  with open(filepath, 'r', encoding=encoding) as infile:
     return infile.read()
 
-def writefile(filename, string, mode='w', enc='utf-8'):
-  """
-  Write string to filename.
-  """
-  with open(filename, mode, encoding=enc) as f:
+def writefile(filename, string, mode='w', encoding='utf-8'):
+  """ Write string to filename. """
+  with open(filename, mode, encoding=encoding) as f:
     f.write(string)
 
 def tempname(label, ext='.tmp'):
-  """
-  Return a temporary dirname/filename located in TMPDIR or /tmp.
-  """
+  """ Return a temporary dirname/filename located in TMPDIR or /tmp. """
   tmpdir = os.getenv('TMPDIR')
   if not tmpdir: tmpdir = '/tmp'
   os.makedirs(tmpdir, exist_ok=True)
-  return "{0}/dv-{1}-{2}{3}".format(tmpdir, label, random.randint(420,99420), ext)
+  rand = random.randint(420,99420)
+  #return "{0}/dv-{1}-{2}{3}".format(tmpdir, label, , ext)
+  return f"{tmpdir}/dv-{label}-{rand}{ext}"
 
 
 def escstr(string):
-  """
-  Escape \n\t\r in string.
-  """
+  """ Escape \n\t\r in string. """
   return string.replace('\n','\\n').replace('\r','\\r').replace('\t','\\t')
 
 def is_num(string):
-  """
-  Is there a number in this string?
-  """
+  """ Is this string a number? """
   try:
     float(string)
     return True
-  except ValueError: return False
+  except ValueError:
+    return False
 
 
 def int_list(input_string, minVal, maxVal, revSort=False):
-  """
-  Return an ordered list of numbers.
-  """
+  """ Return an ordered list of numbers. """
   range_list = []
   try:
     numlist = input_string.lower().split(',')
@@ -126,9 +122,7 @@ def int_list(input_string, minVal, maxVal, revSort=False):
 
 EDITOR = ''
 def getEditor():
-  """
-  Define EDITOR to use.
-  """
+  """ Define EDITOR to use. """
   global EDITOR
   EDITOR = os.environ.get('EDITOR')
   if not EDITOR:
@@ -140,7 +134,7 @@ def getEditor():
     elif os.environ.get('SELECTED_EDITOR'):
       EDITOR = os.environ.get('SELECTED_EDITOR')
     elif os.path.isfile(os.path.join(os.environ.get('HOME'), '.selected_editor')):
-      with open(os.path.join(os.environ.get('HOME'), '.selected_editor')) as f:
+      with open(os.path.join(os.environ.get('HOME'), '.selected_editor'), encoding='ASCII') as f:
         SELECTED_EDITOR = f.read()
       if SELECTED_EDITOR:
         EDITOR = SELECTED_EDITOR
@@ -153,9 +147,7 @@ getEditor()
 
 BROWSER = ''
 def getBrowser():
-  """
-  Define BROWSER to use.
-  """
+  """ Define BROWSER to use. """
   global BROWSER
   BROWSER = os.environ.get('BROWSER')
   if not BROWSER:
@@ -173,9 +165,7 @@ getBrowser()
 
 
 def initHistory(filename, ext='.history'):
-  """
-  readline() history file +atExit
-  """
+  """ readline() history file +atExit """
   historyFile = os.path.dirname(filename)+'/.'+os.path.basename(filename)+ext
   try:
     readline.read_history_file(historyFile)
@@ -187,9 +177,7 @@ def initHistory(filename, ext='.history'):
 
 
 def selectFile(dirs, globule='**/*', prompt='Select File: ', home=''):
-  """
-  Select a file from a list.
-  """
+  """ Select a file from a list. """
   dfiles = [ '' ]; ffiles = [ '' ]
   for root in dirs:
     for file in glob.glob(globule, root_dir=root, recursive=True):
@@ -204,8 +192,10 @@ def selectFile(dirs, globule='**/*', prompt='Select File: ', home=''):
       selection = int(input(prompt))
     except KeyboardInterrupt:
       selection = 0; break
-    except:
+    except Exception:
       printerr('Select 0-'+str(len(dfiles)-1)); continue
     if 0 <= selection < len(dfiles): break
     printerr('Invalid selection.')
   return ffiles[selection]
+
+#end
