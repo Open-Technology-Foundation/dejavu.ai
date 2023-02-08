@@ -23,7 +23,7 @@ ScriptName  = os.path.realpath(sys.argv.pop(0))
 ScriptDir   = os.path.dirname(ScriptName)
 ScriptName  = os.path.basename(ScriptName)
 sys.path.append(ScriptDir)
-# pylink disable=wrong-import-position
+# pylint: disable=wrong-import-position
 from dejavu_std import *
 #import dejavu_std
 
@@ -162,7 +162,7 @@ while len(sys.argv) > 0:
 
   elif arg in ['-l', '--list']:
     for file in os.listdir(UserHome):
-      if file.endswith('.'+ScriptName+'.txt'):
+      if file.endswith('.dv'):
         filesize = os.stat(UserHome+'/'+file).st_size
         modified_date = datetime.datetime.fromtimestamp(os.stat(UserHome+'/'+file).st_mtime)
         print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], \
@@ -195,7 +195,7 @@ while len(sys.argv) > 0:
 
   # de-aggregate aggregated short options
   elif re.match(r'^-[caCfvqVhuxl]', arg):
-    sys.argv = [''] + ['-%s' % c for c in arg[1:]] + sys.argv
+    sys.argv = [''] + [f'-{c}' for c in arg[1:]] + sys.argv
   elif re.match(r'^--', arg):
     printerr('Invalid option '+ arg); sys.exit()
   elif arg[0:1] == '-':
@@ -332,8 +332,8 @@ def cmdhelp():
     ['!exit|!quit',     'Exit DéjàVu.  Pressing ^C will also exit.']
   ]
   for cmd in cmds:
-    printinfo(format('%16s: %s' % (cmd[0], cmd[1])))
-    for cd in cmd[2:]: printinfo(format('%16s  %s' % ('', cd)))
+    printinfo(f'{cmd[0]:16s}: {cmd[1]}')
+    for cd in cmd[2:]: printinfo(f'%16s  {cd}' % '')
 
 def cmdstatus(showall=False):
   """
@@ -342,12 +342,12 @@ def cmdstatus(showall=False):
   #global Prompt, conversation
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
-    printinfo(format('%13s %s' % (pref+':', '{}'.format(suff))))
+    printinfo(f'%13s: {suff}' % pref)
   pp(   'Your Name',   USER_NAME)
   pp(   'AI Name',     AI_NAME)
-  pp(   'Conversation',ConvFile.replace(HomeDir,'~')) # os.path.basename(ConvFile))
+  pp(   'Conversation',ConvFile.replace(HomeDir,'~'))
   if showall:
-    pp( 'History File',historyFile.replace(HomeDir,'~')) # os.path.basename(historyFile))
+    pp( 'History File',historyFile.replace(HomeDir,'~'))
     pp( 'AI Engine',   engine)
     sx = len(Prompt)+len(''.join(conversation))
     pp( 'Tokens Used', int(sx/3.5))
