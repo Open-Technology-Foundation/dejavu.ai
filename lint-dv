@@ -1,0 +1,13 @@
+#!/bin/bash
+
+pylint --indent-string '  ' \
+	--disable wildcard-import \
+	--disable line-too-long \
+	--disable multiple-statements \
+	--disable invalid-name \
+	--max-line-length 80 \
+	--include-naming-hint=yes \
+	--disable broad-exception-caught \
+	"${@:1}" \
+	dejavu.py
+	
