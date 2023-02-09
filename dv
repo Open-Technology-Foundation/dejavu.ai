@@ -32,13 +32,13 @@ ScriptName  = os.path.basename(ScriptName)
 sys.path.append(ScriptDir)
 from dejavu_std import *
 
-dvHome = HOME + '/.' + ScriptName
+dvHome = f'{HOME}/.{ScriptName}'
 os.makedirs(dvHome, exist_ok=True)
 
 REPOSITORY = 'https://github.com/GaryDean/dejavu.ai.git'
 
 # Process command line and define ConvFile to use
-Version = readfile(ScriptDir+'/dejavu.version').strip()
+Version = readfile(f'{ScriptDir}/dejavu.version').strip()
 
 ConvFile      = ''
 cmdTypeAhead  = []
@@ -55,9 +55,9 @@ def read_dvfile(dvfile):
   cmdTypeAhead = []; Instructions = []
   if not '.dv' in dvfile: dvfile += '.dv'
   if not os.path.exists(dvfile):
-    if not '/' in dvfile: dvfile = dvHome + '/' + dvfile
+    if not '/' in dvfile: dvfile = f'{dvHome}/{dvfile}'
     if not os.path.exists(dvfile):
-      printerr('File \''+dvfile+'\' does not exist.')
+      printerr(f'File "{dvfile}" does not exist.')
       return False
   lne = readfile(dvfile)
   Lines = lne.split('\n')
@@ -147,12 +147,12 @@ while len(sys.argv) > 0:
     #qqq = "-{0}".format('v' if Verbose else 'q')
     qqq = '-v' if Verbose else '-q'
     subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
-    cmd = tempdir + '/' + ScriptName + '.install'
+    cmd = f'{tempdir}/{ScriptName}.install'
     args = [ cmd, qqq, '-a' if qqq == '-q' else '' ]
     os.execvp(cmd, args)
     sys.exit()
   elif arg in ['-V', '--version']:
-    print(ScriptName+' vs '+Version); sys.exit()
+    print(f'{ScriptName} vs {Version}'); sys.exit()
   elif arg in ['-v', '--verbose']:
     Verbose = 1; cmdEcho = 1
   elif arg in ['-q', '--quiet']:
@@ -162,7 +162,7 @@ while len(sys.argv) > 0:
     printinfo(f'Dejavu conversation files in {dvHome}')
     for file in os.listdir(dvHome):
       if file.endswith('.dv'):
-        filesize = os.stat(dvHome+'/'+file).st_size/1024
+        filesize = os.stat(f'{dvHome}/{file}').st_size/1024
         modified_date = datetime.datetime.fromtimestamp(os.stat(dvHome+'/'+file).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
         printstd(f'{file:12s} {filesize:7.2f}KB {modified_date:20s}')
     sys.exit()
@@ -208,7 +208,7 @@ if len(ConvFile) == 0:
   # Create default conversation file if not exist
   # and copy sample .dv files
   if not os.path.exists(ConvFile):
-    subprocess.run('rsync -aq ' + ScriptDir + '/*.dv ' + dvHome + '/', shell=True, check=False)
+    subprocess.run(f'rsync -aq {ScriptDir}/*.dv {dvHome}/', shell=True, check=False)
     string = readfile(ConvFile)
     string = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), string)
     writefile(ConvFile, string)
@@ -216,8 +216,8 @@ if len(ConvFile) == 0:
       + dvHome + '/', shell=True, check=False)
 if not ConvFile.endswith('.dv'): ConvFile += '.dv'
 if not os.path.exists(ConvFile):
-  if os.path.exists(dvHome+'/'+ConvFile):
-    ConvFile = dvHome+'/'+ConvFile
+  if os.path.exists(f'{dvHome}/{ConvFile}'):
+    ConvFile = f'{dvHome}/{ConvFile}'
   else:
     try:
       ConvFile = os.path.realpath(ConvFile)
@@ -404,7 +404,7 @@ def orderly_exit():
   #global AutoSave
   if AutoSave: autoSave(ConvFile)
   print(Style.RESET_ALL if UseColor() else '')
-  if Verbose: printinfo('Exiting '+ScriptName+' '+ConvFile)
+  if Verbose: printinfo(f'Exiting {ScriptName} {ConvFile}')
   sys.exit()
 
 #---------------------------------------------------------------------------------
@@ -677,10 +677,10 @@ if __name__ == '__main__':
         if len(tok) < 2: filename = ConvFile
         else: filename = tok[1].replace('"', '').replace('"', '')
         if not '.dv' in filename: filename += '.dv'
-        if not '/' in filename: filename = dvHome + '/' + filename
+        if not '/' in filename: filename = f'{dvHome}/{filename}'
         if os.path.exists(filename):
           try:
-            userInput = input('\n"'+filename+'" exists. Overwrite? (y/n) ')
+            userInput = input(f'\n{filename} exists. Overwrite? (y/n) ')
             if userInput != 'y': continue
           except KeyboardInterrupt: continue
         p = 'engine='+engine+'\ntemperature='+str(temperature)+'\ntop_p='+str(top_p)+'\ntokens=4096'+'\nfreq_pen='+str(freq_pen)+'\npres_pen='+str(pres_pen)+'\nAI_NAME='+AI_NAME+'\nUSER_NAME='+USER_NAME+'\n'
@@ -706,7 +706,7 @@ if __name__ == '__main__':
         print()
         print('Environment:')
         for env in ['USER', 'HOME', 'SHELL', 'EDITOR', 'BROWSER', 'TMPDIR', 'PATH', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
-          print(env + '=' + str(os.getenv(env)))
+          print(f'{env}={str(os.getenv(env))}')
         continue
 
       # instruction [instruction]
@@ -734,7 +734,7 @@ if __name__ == '__main__':
           writefile(tmpfile, '')
           while True:
             try:
-              subprocess.run(EDITOR +' '+ tmpfile, shell=True, executable=SHELL, check=False)
+              subprocess.run(f'{EDITOR} {tmpfile}', shell=True, executable=SHELL, check=False)
             except Exception as e:
               printerr('Import file error.', str(e))
               userInput = ''

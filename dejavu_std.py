@@ -143,8 +143,9 @@ def getShell():
   global SHELL
   SHELL = os.environ.get('SHELL')
   if not SHELL: SHELL = '/bin/bash'
-  os.environ['SHELL'] = SHELL.strip()
-  return SHELL.strip()
+  SHELL = SHELL.strip()
+  os.environ['SHELL'] = SHELL
+  return SHELL
 getShell()
 
 HOME = ''
@@ -153,8 +154,9 @@ def getHome():
   global HOME
   HOME = os.environ.get('HOME')
   if not HOME: HOME = os.getcwd()
-  os.environ['HOME'] = HOME.strip()
-  return HOME.strip()
+  HOME = HOME.strip()
+  os.environ['HOME'] = HOME
+  return HOME
 getHome()
 
 USER = ''
@@ -166,8 +168,9 @@ def getUser():
   if USER == '': USER = os.getenv('USERNAME')
   if USER == '': USER = os.getenv('USER_NAME')
   if not USER: USER = 'USER'
-  os.environ['USER'] = SHELL.strip()
-  return USER.strip()
+  USER = USER.strip()
+  os.environ['USER'] = USER
+  return USER
 getUser()
 
 EDITOR = ''
@@ -183,8 +186,8 @@ def getEditor():
       EDITOR = os.environ.get('SUDO_EDITOR')
     elif os.environ.get('SELECTED_EDITOR'):
       EDITOR = os.environ.get('SELECTED_EDITOR')
-    elif os.path.isfile(HOME + '.selected_editor'):
-      with open(os.path.join(HOME + '.selected_editor'), encoding='ASCII') as f:
+    elif os.path.isfile(f'{HOME}/.selected_editor'):
+      with open(os.path.join(f'{HOME}/.selected_editor'), encoding='ASCII') as f:
         SELECTED_EDITOR = f.read()
       if SELECTED_EDITOR:
         EDITOR = SELECTED_EDITOR
@@ -192,8 +195,9 @@ def getEditor():
       EDITOR = '/etc/alternatives/editor'
     else:
       EDITOR = '/bin/less'
-  os.environ['EDITOR'] = EDITOR.strip()
-  return EDITOR.strip()
+  EDITOR = EDITOR.strip()
+  os.environ['EDITOR'] = EDITOR
+  return EDITOR
 getEditor()
 
 BROWSER = ''
@@ -211,8 +215,9 @@ def getBrowser():
       BROWSER = '/usr/bin/lynx'
     else:
       BROWSER = '/bin/less'
-  os.environ['BROWSER'] = BROWSER.strip()
-  return BROWSER.strip()
+  BROWSER = BROWSER.strip()
+  os.environ['BROWSER'] = BROWSER
+  return BROWSER
 getBrowser()
 
 
