@@ -2,13 +2,10 @@
 Generic functions
 """
 # pylint: disable=global-statement
-# pylint: disable=global-statement
 # pylint: disable=too-many-arguments
 # pylint: disable=wildcard-import
 # pylint: disable=line-too-long
-# pylint: disable=multiple-statements
 # pylint: disable=invalid-name
-# pylint: disable=broad-exception-caught
 
 import os
 import sys

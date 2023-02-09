@@ -8,13 +8,12 @@ https://github.com/GaryDean/dejavu.ai.git
     && /tmp/dejavu/dv.install
 """
 # pylint: disable=global-statement
-# pylint: disable=too-many-arguments
 # pylint: disable=wildcard-import
 # pylint: disable=line-too-long
-# pylint: disable=multiple-statements
+# pylint: disable=wrong-import-position
 # pylint: disable=invalid-name
 # pylint: disable=broad-exception-caught
-# pylint: disable=wrong-import-position
+# pylint: disable=multiple-statements
 
 import os
 import datetime
@@ -50,7 +49,7 @@ cmdExit       = 0
 Verbose       = True
 
 def read_dvfile(dvfile):
-  """  Read .dv script  """
+  """  Read .dv script ------------------------------------------------------- """
   global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
   if not '.dv' in dvfile: dvfile += '.dv'
@@ -74,22 +73,22 @@ def read_dvfile(dvfile):
     lne = line.rstrip('\r\n')
     if not lne: lne=''; continue
     if lne[0] == '!':
-      tok = lne.split()
-      if tok[0] == '!prompt' and len(tok) > 1:
-        if tok[1] != '"""':
-          Instructions.append('!prompt '+' '.join(tok[1:]))
+      alne = lne.split()
+      if alne[0] == '!prompt' and len(alne) > 1:
+        if alne[1] != '"""':
+          Instructions.append('!prompt '+' '.join(alne[1:]))
           lne = ''
           continue
-        prompt = ''
+        promptstr = ''
         while len(Lines) > 0:
           line = Lines.pop(0).rstrip()
           if line == '"""':
-            Instructions.append('!prompt '+prompt)
+            Instructions.append('!prompt '+promptstr)
             break
-          prompt += line + '\\n'
-      elif tok[0] == '!instruction' and len(tok) > 1:
-        if tok[1] != '"""':
-          Instructions.append('!instruction '+' '.join(tok[1:]))
+          promptstr += line + '\\n'
+      elif alne[0] == '!instruction' and len(alne) > 1:
+        if alne[1] != '"""':
+          Instructions.append('!instruction '+' '.join(alne[1:]))
           lne = ''
           continue
         instr = ''
@@ -100,7 +99,7 @@ def read_dvfile(dvfile):
             break
           instr += line + '\\n'
       else:
-        Instructions.append(' '.join(tok))
+        Instructions.append(' '.join(alne))
       lne = ''
       continue
     Instructions.append('!instruction '+lne)
@@ -120,7 +119,7 @@ def read_dvfile(dvfile):
   return True
 
 def dvUsage():
-  """ dv short invocation help """
+  """ dv short invocation help ----------------------------------------------- """
   print('DéjàVu - GPT-3 Terminal and Chatbot vs '+Version)
   print("Usage: "+ScriptName+""" [-vqlfxuV] [-c cmd] [dvfile]
 Where 'dvfile' is a conversation.dv file. Default '~/.dv/default.dv'
@@ -137,72 +136,72 @@ Where 'dvfile' is a conversation.dv file. Default '~/.dv/default.dv'
  --help         Full Help manpages.
 """)
 
-# argv processing -------------------------
+# argv processing ---------------------------------------------------------------
 while len(sys.argv) > 0:
-  arg = sys.argv.pop(0).strip()
-  if not arg: continue
-  if arg in ['-u', '--upgrade', '--update']:
-    tempdir = tempname('upgrade', '')
-    os.makedirs(tempdir, exist_ok=True); os.chdir(tempdir)
+  sysargv = sys.argv.pop(0).strip()
+  if not sysargv: continue
+  if sysargv in ['-u', '--upgrade', '--update']:
+    tempdir_upgrade = tempname('upgrade', '')
+    os.makedirs(tempdir_upgrade, exist_ok=True); os.chdir(tempdir_upgrade)
     #qqq = "-{0}".format('v' if Verbose else 'q')
     qqq = '-v' if Verbose else '-q'
-    subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir])
-    cmd = f'{tempdir}/{ScriptName}.install'
-    args = [ cmd, qqq, '-a' if qqq == '-q' else '' ]
-    os.execvp(cmd, args)
+    subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir_upgrade])
+    installcmd = f'{tempdir_upgrade}/{ScriptName}.install'
+    installargs = [ installcmd, qqq, '-a' if qqq == '-q' else '' ]
+    os.execvp(installcmd, installargs)
     sys.exit()
-  elif arg in ['-V', '--version']:
+  elif sysargv in ['-V', '--version']:
     print(f'{ScriptName} vs {Version}'); sys.exit()
-  elif arg in ['-v', '--verbose']:
+  elif sysargv in ['-v', '--verbose']:
     Verbose = 1; cmdEcho = 1
-  elif arg in ['-q', '--quiet']:
+  elif sysargv in ['-q', '--quiet']:
     Verbose = 0; cmdEcho = 0
 
-  elif arg in ['-l', '--list']:
+  elif sysargv in ['-l', '--list']:
     printinfo(f'Dejavu conversation files in {dvHome}')
-    for file in os.listdir(dvHome):
-      if file.endswith('.dv'):
-        filesize = os.stat(f'{dvHome}/{file}').st_size/1024
-        modified_date = datetime.datetime.fromtimestamp(os.stat(dvHome+'/'+file).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
-        printstd(f'{file:12s} {filesize:7.2f}KB {modified_date:20s}')
+    for listfile in os.listdir(dvHome):
+      if listfile.endswith('.dv'):
+        filesize = os.stat(f'{dvHome}/{listfile}').st_size/1024
+        modified_date = datetime.datetime.fromtimestamp(os.stat(dvHome+'/'+listfile).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+        printstd(f'{listfile:12s} {filesize:7.2f}KB {modified_date:20s}')
     sys.exit()
 
-  elif arg in ['-c', '--cmd']:
+  elif sysargv in ['-c', '--cmd']:
     if len(sys.argv) > 0:
-      tmp = sys.argv.pop(0).strip()
-      if tmp[0] == '\\': tmp = tmp[1:]
-      argvTypeAhead.append(tmp)
+      argvparam = sys.argv.pop(0).strip()
+      if argvparam[0] == '\\': argvparam = argvparam[1:]
+      argvTypeAhead.append(argvparam)
     else:
-      printerr('Command was not specified for', arg)
+      printerr('Command was not specified for', sysargv)
       sys.exit()
 
-  elif arg in ['-a', '--autosave']:
+  elif sysargv in ['-a', '--autosave']:
     AutoSave = 1
 
-  elif arg in ['-x', '--exit']:
+  elif sysargv in ['-x', '--exit']:
     Verbose = 0
     cmdExit = 1
 
-  elif arg in ['-C', '--no-color']:
+  elif sysargv in ['-C', '--no-color']:
     UseColor(False)
 
-  elif arg in ['-h', '-?']:
+  elif sysargv in ['-h', '-?']:
     dvUsage(); sys.exit()
-  elif arg =='--help':
+  elif sysargv =='--help':
     os.execvp('man', ['man', ScriptName]); sys.exit()
 
   # de-aggregate aggregated short options
-  elif re.match(r'^-[caCfvqVhuxl]', arg):
-    sys.argv = [''] + [f'-{c}' for c in arg[1:]] + sys.argv
-  elif re.match(r'^--', arg):
-    printerr('Invalid option '+ arg); sys.exit()
-  elif arg[0:1] == '-':
-    printerr('Invalid option '+ arg); sys.exit()
+  elif re.match(r'^-[caCfvqVhuxl]', sysargv):
+    sys.argv = [''] + [f'-{c}' for c in sysargv[1:]] + sys.argv
+  elif re.match(r'^--', sysargv):
+    printerr('Invalid option '+ sysargv); sys.exit()
+  elif sysargv[0:1] == '-':
+    printerr('Invalid option '+ sysargv); sys.exit()
   else:
-    ConvFile = arg
+    ConvFile = sysargv
 
 
-# Conversation file validation and default
+# Conversation file validation and default --------------------------------------
 if len(ConvFile) == 0:
   ConvFile = dvHome+'/default.dv'
   # Create default conversation file if not exist
@@ -229,7 +228,7 @@ ConvFile = os.path.realpath(ConvFile)
 ConvFileName = os.path.basename(ConvFile)
 
 def getOpenAIKeys():
-  """ # Get OpenAI API keys """
+  """ # Get OpenAI API keys -------------------------------------------------- """
   try:
     openai.api_key = os.environ['OPENAI_API_KEY']
   except KeyError:
@@ -267,12 +266,12 @@ conversation = []
 text_block  = ''
 
 def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop):
-  """  GPT-3 Completion function """
+  """  GPT-3 Completion function ---------------------------------------------- """
   prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
   sx = len(prompt)
   tokens = max(16, int(4096 - (sx/3.5) - 100))
   try:
-    response = openai.Completion.create(
+    gpt3_response = openai.Completion.create(
       engine=engine,
       prompt=prompt,
       temperature=temperature,
@@ -282,14 +281,13 @@ def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_p
       presence_penalty=pres_pen,
       stop=stop,
       timeout=90)
-  except Exception as e:
-    printerr('GPT-3 experienced an error: '+str(e))
+  except Exception as gpte:
+    printerr('GPT-3 experienced an error: '+str(gpte))
     return ''
-  text = response['choices'][0]['text'].strip()
-  return text
+  return gpt3_response['choices'][0]['text'].strip()
 
-def cmdhelp():
-  """ dejavu command help """
+def cmd_help():
+  """ dejavu command help ----------------------------------------------------- """
   printinfo('DéjàVu System Commands', '')
   printinfo('Note: All commands can be shortened to first four letters,',
             'eg, !temp for !temperature', '',
@@ -327,12 +325,12 @@ def cmdhelp():
     ['!help',           'Open DéjàVu Help file.'],
     ['!exit|!quit',     'Exit DéjàVu.  Pressing ^C will also exit.']
   ]
-  for cmd in cmds:
-    printinfo(f'{cmd[0]:16s}: {cmd[1]}')
-    for cd in cmd[2:]: printinfo(f'%16s  {cd}' % '')
+  for cmdhelp in cmds:
+    printinfo(f'{cmdhelp[0]:16s}: {cmdhelp[1]}')
+    for chelp in cmdhelp[2:]: printinfo(f'%16s  {chelp}' % '')
 
 def cmdstatus(showall=False):
-  """ Print current parameters """
+  """ Print current parameters ----------------------------------------------- """
   #global Prompt, conversation
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
@@ -356,7 +354,7 @@ def cmdstatus(showall=False):
 
 
 def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>>', USr=''):
-  """
+  """ ---------------------------------------------------------------------------
   Replace <<>> markers in prompt and conversation
   with the appropriate text
   """
@@ -368,46 +366,44 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
   newp = newp.replace(USs, USr, -1)
   return newp.strip() + '\n'
 
-def autoSave(filename):
-  """ Autosave current chat """
+def autoSave(dv_filename):
+  """ Autosave current chat -------------------------------------------------- """
   #global conversation, Instructions
-  printinfo('AutoSaving '+filename, end='')
-  file = tempname('autosave', '.dv')
+  printinfo('AutoSaving '+dv_filename, end='')
+  autosave_file = tempname('autosave', '.dv')
   try:
-    writefile(file, '', 'w')
-    for tmp in Instructions:
-      if tmp[0:8] == '!prompt ':
-        tmp = '!prompt """\n' + \
-              tmp[8:].replace('\\n', '\n')
-        writefile(file, tmp, 'a')
-        writefile(file, '"""\n', 'a')
+    writefile(autosave_file, '', 'w')
+    for instr in Instructions:
+      if instr[0:8] == '!prompt ':
+        instr = '!prompt """\n' + \
+              instr[8:].replace('\\n', '\n')
+        writefile(autosave_file, instr, 'a')
+        writefile(autosave_file, '"""\n', 'a')
         continue
       # ignore !conversation in Instructions
-      if tmp[0:14] == '!conversation ':
+      if instr[0:14] == '!conversation ':
         continue
-      if tmp[0:13] == '!instruction ':
-        tmp = '!instruction """\n' + \
-              tmp[13:].replace('\\n', '\n') + '\n' + \
+      if instr[0:13] == '!instruction ':
+        instr = '!instruction """\n' + \
+              instr[13:].replace('\\n', '\n') + '\n' + \
               '"""'
-      writefile(file, tmp+'\n', 'a')
-
-    for tmp in conversation:
-      writefile(file, '!conversation ' +tmp.replace('\n','\\n')+'\n', 'a')
-
-    if os.path.exists(filename): os.replace(filename, filename+'~')
-    os.rename(file, filename)
-  except Exception as e:
-    printerr('Error renaming '+file+' to '+filename, str(e))
+      writefile(autosave_file, instr+'\n', 'a')
+    for instr in conversation:
+      writefile(autosave_file, '!conversation ' +instr.replace('\n','\\n')+'\n', 'a')
+    if os.path.exists(dv_filename): os.replace(dv_filename, dv_filename+'~')
+    os.rename(autosave_file, dv_filename)
+  except Exception as saveerr:
+    printerr(f'Error renaming {autosave_file} to {dv_filename}: {str(saveerr)}')
 
 def orderly_exit():
-  """ Exit script nicely """
+  """ Exit script nicely -----------------------------------------------------"""
   #global AutoSave
   if AutoSave: autoSave(ConvFile)
   print(Style.RESET_ALL if UseColor() else '')
   if Verbose: printinfo(f'Exiting {ScriptName} {ConvFile}')
   sys.exit()
 
-#---------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 if __name__ == '__main__':
   conversation = []
   while True:
@@ -435,7 +431,7 @@ if __name__ == '__main__':
       tok = cmd.split()
 
       # help
-      if len(tok) == 0: cmdhelp(); continue
+      if len(tok) == 0: cmd_help(); continue
 
       tok[0] = tok[0].lower()
 
@@ -626,11 +622,11 @@ if __name__ == '__main__':
           elif text[0:len(AI_NAME)+2] == AI_NAME+': ':
             printstd(str(i+1)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME)+2:] +'\n\n'
-          for line in text.splitlines():
+          for _line in text.splitlines():
             if short:
-              printinfo(line[0:ScreenColumns-3]+'...',prefix='')
+              printinfo(_line[0:ScreenColumns-3]+'...',prefix='')
               break
-            printinfo(textwrap.fill(line, width=ScreenColumns), prefix='')
+            printinfo(textwrap.fill(_line, width=ScreenColumns), prefix='')
           i += 1
         continue
 
@@ -662,13 +658,14 @@ if __name__ == '__main__':
           if text[0:13] != '<<AI_NAME>>: ': continue
           text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
           try:
-            response = gpt3_completion(text+'\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+            tldr_response = gpt3_completion(text+'\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+            if tldr_response == '': continue
           except Exception as e:
             printerr('GPT-3 experienced an error. Possibly overloaded.', str(e))
-            break
+            continue
           printstd(AI_NAME+' TL;DR'+ ('' if len(rnge)==1 else '['+str(i+1)+']') + ':', color=Fore.GREEN)
-          printinfo(response, prefix='')
-          conversation.append(f'<<AI_NAME>>: {response}')
+          printinfo(tldr_response, prefix='')
+          conversation.append(f'<<AI_NAME>>: {tldr_response}')
           i+=1
         continue
 
@@ -798,6 +795,9 @@ if __name__ == '__main__':
     try:
       response = gpt3_completion(PromptReplace(text_block)+'\n'+AI_NAME+': ', \
             engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+      if response == '': 
+        conversation.pop()
+        continue
     except Exception as e:
       printerr('GPT-3 experienced an error. Possibly overloaded.', str(e))
       conversation.pop()
@@ -806,8 +806,8 @@ if __name__ == '__main__':
     conversation.append(f'<<AI_NAME>>: {response}')
     # Print the response from GPT-3
     printstd(str(len(conversation)+1)+'. '+AI_NAME+':', color=Fore.GREEN)
-    for line in response.splitlines():
-      print(textwrap.fill(line, width=ScreenColumns))
+    for _line in response.splitlines():
+      print(textwrap.fill(_line, width=ScreenColumns))
 
     # eg, devaju -x -c 'command'
     if len(cmdTypeAhead)==0 and cmdExit: sys.exit()

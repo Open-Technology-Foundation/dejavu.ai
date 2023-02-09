@@ -1,6 +1,6 @@
 #!/bin/bash
 
-pylint --indent-string '  ' \
+pylint --rcfile lint-dv.cfg \
 		 --max-line-length 80 \
 		--include-naming-hint yes \
 	"${@:1}" \
