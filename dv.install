@@ -118,7 +118,7 @@ main() {
 	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/*.dv "$SHAREDIR"/
+	sudo rsync -a "$PRGDIR"/*.dv "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
 	sudo chmod 775 "$PRGDIR"/dv
 	

@@ -2,6 +2,13 @@
 Generic functions
 """
 # pylint: disable=global-statement
+# pylint: disable=global-statement
+# pylint: disable=too-many-arguments
+# pylint: disable=wildcard-import
+# pylint: disable=line-too-long
+# pylint: disable=multiple-statements
+# pylint: disable=invalid-name
+# pylint: disable=broad-exception-caught
 
 import os
 import sys
@@ -9,7 +16,7 @@ import readline
 import atexit
 import glob
 import random
-
+from shutil import get_terminal_size
 from colorama import init, deinit, Fore, Back, Style
 init()
 
@@ -28,6 +35,13 @@ def UseColor(color=None):
     if useColor: init()
     else: deinit()
   return useColor
+
+ScreenColumns = get_terminal_size().columns - 1
+def getScreenColumns():
+  """ Get current screen columns. """
+  global ScreenColumns
+  ScreenColumns = get_terminal_size().columns - 1
+  return ScreenColumns
 
 def printerr(*args, **kwargs):
   """ Print to stderr with optional color. """
@@ -133,6 +147,28 @@ def getShell():
   return SHELL.strip()
 getShell()
 
+HOME = ''
+def getHome():
+  """ Define HOME to use. """
+  global HOME
+  HOME = os.environ.get('HOME')
+  if not HOME: HOME = os.getcwd()
+  os.environ['HOME'] = HOME.strip()
+  return HOME.strip()
+getHome()
+
+USER = ''
+def getUser():
+  """ Define SHELL to use. """
+  global USER
+  USER = os.environ.get('USER')
+  if USER == '': USER = os.getenv('LOGNAME')
+  if USER == '': USER = os.getenv('USERNAME')
+  if USER == '': USER = os.getenv('USER_NAME')
+  if not USER: USER = 'USER'
+  os.environ['USER'] = SHELL.strip()
+  return USER.strip()
+getUser()
 
 EDITOR = ''
 def getEditor():
@@ -147,8 +183,8 @@ def getEditor():
       EDITOR = os.environ.get('SUDO_EDITOR')
     elif os.environ.get('SELECTED_EDITOR'):
       EDITOR = os.environ.get('SELECTED_EDITOR')
-    elif os.path.isfile(os.path.join(os.environ.get('HOME'), '.selected_editor')):
-      with open(os.path.join(os.environ.get('HOME'), '.selected_editor'), encoding='ASCII') as f:
+    elif os.path.isfile(HOME + '.selected_editor'):
+      with open(os.path.join(HOME + '.selected_editor'), encoding='ASCII') as f:
         SELECTED_EDITOR = f.read()
       if SELECTED_EDITOR:
         EDITOR = SELECTED_EDITOR

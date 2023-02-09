@@ -7,33 +7,35 @@ https://github.com/GaryDean/dejavu.ai.git
 #: git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu \
     && /tmp/dejavu/dv.install
 """
+# pylint: disable=global-statement
+# pylint: disable=too-many-arguments
+# pylint: disable=wildcard-import
+# pylint: disable=line-too-long
+# pylint: disable=multiple-statements
+# pylint: disable=invalid-name
+# pylint: disable=broad-exception-caught
+# pylint: disable=wrong-import-position
+
 import os
 import datetime
 import re
 import readline
-import shutil
 import subprocess
 import sys
 import textwrap
 import openai
-from colorama import init, Fore, Style
-init()
+from colorama import Fore, Style
 
 ScriptName  = os.path.realpath(sys.argv.pop(0))
 ScriptDir   = os.path.dirname(ScriptName)
 ScriptName  = os.path.basename(ScriptName)
 sys.path.append(ScriptDir)
-# pylint: disable=wrong-import-position
 from dejavu_std import *
-#import dejavu_std
 
-HomeDir     = os.path.expanduser('~')
-UserHome    = HomeDir+'/.'+ScriptName
-os.makedirs(UserHome, exist_ok=True)
-UserSysName = os.getenv('USER')
-if UserSysName == '': UserSysName = os.getenv('USER_NAME')
+dvHome = HOME + '/.' + ScriptName
+os.makedirs(dvHome, exist_ok=True)
 
-REPOSITORY  = 'https://github.com/GaryDean/dejavu.ai.git'
+REPOSITORY = 'https://github.com/GaryDean/dejavu.ai.git'
 
 # Process command line and define ConvFile to use
 Version = readfile(ScriptDir+'/dejavu.version').strip()
@@ -48,14 +50,12 @@ cmdExit       = 0
 Verbose       = True
 
 def read_dvfile(dvfile):
-  """
-  Read .dv script
-  """
+  """  Read .dv script  """
   global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
   if not '.dv' in dvfile: dvfile += '.dv'
   if not os.path.exists(dvfile):
-    if not '/' in dvfile: dvfile = UserHome + '/' + dvfile
+    if not '/' in dvfile: dvfile = dvHome + '/' + dvfile
     if not os.path.exists(dvfile):
       printerr('File \''+dvfile+'\' does not exist.')
       return False
@@ -120,9 +120,7 @@ def read_dvfile(dvfile):
   return True
 
 def dvUsage():
-  """
-  dv short invocation help
-  """
+  """ dv short invocation help """
   print('DéjàVu - GPT-3 Terminal and Chatbot vs '+Version)
   print("Usage: "+ScriptName+""" [-vqlfxuV] [-c cmd] [dvfile]
 Where 'dvfile' is a conversation.dv file. Default '~/.dv/default.dv'
@@ -161,12 +159,12 @@ while len(sys.argv) > 0:
     Verbose = 0; cmdEcho = 0
 
   elif arg in ['-l', '--list']:
-    for file in os.listdir(UserHome):
+    printinfo(f'Dejavu conversation files in {dvHome}')
+    for file in os.listdir(dvHome):
       if file.endswith('.dv'):
-        filesize = os.stat(UserHome+'/'+file).st_size
-        modified_date = datetime.datetime.fromtimestamp(os.stat(UserHome+'/'+file).st_mtime)
-        print('{:12s} {:7.2f}KB {:20s}'.format(file[:-(5+len(ScriptName))], \
-          filesize/1024, modified_date.strftime('%Y-%m-%d %H:%M:%S')))
+        filesize = os.stat(dvHome+'/'+file).st_size/1024
+        modified_date = datetime.datetime.fromtimestamp(os.stat(dvHome+'/'+file).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+        printstd(f'{file:12s} {filesize:7.2f}KB {modified_date:20s}')
     sys.exit()
 
   elif arg in ['-c', '--cmd']:
@@ -206,45 +204,47 @@ while len(sys.argv) > 0:
 
 # Conversation file validation and default
 if len(ConvFile) == 0:
-  ConvFile = UserHome+'/default.dv'
+  ConvFile = dvHome+'/default.dv'
   # Create default conversation file if not exist
   # and copy sample .dv files
   if not os.path.exists(ConvFile):
-    subprocess.run('rsync -aq ' + ScriptDir + '/*.dv ' + UserHome + '/', shell=True, check=False)
+    subprocess.run('rsync -aq ' + ScriptDir + '/*.dv ' + dvHome + '/', shell=True, check=False)
     string = readfile(ConvFile)
-    string = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+UserSysName.upper(), string)
+    string = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), string)
     writefile(ConvFile, string)
     subprocess.run('rsync -aq --exclude default.dv ' + ScriptDir + '/*.dv ' \
-      + UserHome + '/', shell=True, check=False)
+      + dvHome + '/', shell=True, check=False)
 if not ConvFile.endswith('.dv'): ConvFile += '.dv'
 if not os.path.exists(ConvFile):
-  if os.path.exists(UserHome+'/'+ConvFile):
-    ConvFile = UserHome+'/'+ConvFile
+  if os.path.exists(dvHome+'/'+ConvFile):
+    ConvFile = dvHome+'/'+ConvFile
   else:
     try:
       ConvFile = os.path.realpath(ConvFile)
-      writefile(ConvFile, readfile(UserHome+'/default.dv'))
+      writefile(ConvFile, readfile(dvHome+'/default.dv'))
     except Exception as e:
       printerr('DéjàVu file "' + ConvFile + '" could not be created!', str(e))
       sys.exit()
 ConvFile = os.path.realpath(ConvFile)
 ConvFileName = os.path.basename(ConvFile)
 
-# Get the openai API key
-try:
-  openai.api_key = os.environ['OPENAI_API_KEY']
-except KeyError:
-  printerr('Environment variable OPENAI_API_KEY is not defined '+str(KeyError))
-  printinfo([
-    'Go to https://openai.com/api for your own API key.',
-    ':~$ export OPENAI_API_KEY="your_key"',
-    'If you set up your openai account as an organization, '
-    ' you will also have to set OPENAI_ORGANIZATION_ID',
-    ':~$ export OPENAI_ORGANIZATION_ID="your_organization"',
-    'Both these environment variables should be set in your ~/.bashrc file.' ])
-  sys.exit()
-try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
-except KeyError: openai.organization = ''
+def getOpenAIKeys():
+  """ # Get OpenAI API keys """
+  try:
+    openai.api_key = os.environ['OPENAI_API_KEY']
+  except KeyError:
+    printerr('Environment variable OPENAI_API_KEY is not defined '+str(KeyError))
+    printinfo([
+      'Go to https://openai.com/api for your own API key.',
+      ':~$ export OPENAI_API_KEY="your_key"',
+      'If you set up your openai account as an organization, '
+      ' you will also have to set OPENAI_ORGANIZATION_ID',
+      ':~$ export OPENAI_ORGANIZATION_ID="your_organization"',
+      'Both these environment variables should be set in your ~/.bashrc file.' ])
+    sys.exit()
+  try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
+  except KeyError: openai.organization = ''
+getOpenAIKeys()
 
 engine      = 'text-davinci-003'
 temperature = 1
@@ -263,13 +263,11 @@ if not read_dvfile(ConvFile):
   sys.exit()
 historyFile = initHistory(ConvFile)
 
-conversation= []
+conversation = []
 text_block  = ''
 
 def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop):
-  """
-  GPT-3 Completion function
-  """
+  """  GPT-3 Completion function """
   prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
   sx = len(prompt)
   tokens = max(16, int(4096 - (sx/3.5) - 100))
@@ -291,9 +289,7 @@ def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_p
   return text
 
 def cmdhelp():
-  """
-  dejavu command help
-  """
+  """ dejavu command help """
   printinfo('DéjàVu System Commands', '')
   printinfo('Note: All commands can be shortened to first four letters,',
             'eg, !temp for !temperature', '',
@@ -336,18 +332,16 @@ def cmdhelp():
     for cd in cmd[2:]: printinfo(f'%16s  {cd}' % '')
 
 def cmdstatus(showall=False):
-  """
-  Print current parameters
-  """
+  """ Print current parameters """
   #global Prompt, conversation
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
     printinfo(f'%13s: {suff}' % pref)
   pp(   'Your Name',   USER_NAME)
   pp(   'AI Name',     AI_NAME)
-  pp(   'Conversation',ConvFile.replace(HomeDir,'~'))
+  pp(   'Conversation',ConvFile.replace(HOME,'~'))
   if showall:
-    pp( 'History File',historyFile.replace(HomeDir,'~'))
+    pp( 'History File',historyFile.replace(HOME,'~'))
     pp( 'AI Engine',   engine)
     sx = len(Prompt)+len(''.join(conversation))
     pp( 'Tokens Used', int(sx/3.5))
@@ -375,9 +369,7 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
   return newp.strip() + '\n'
 
 def autoSave(filename):
-  """
-  Autosave chat
-  """
+  """ Autosave current chat """
   #global conversation, Instructions
   printinfo('AutoSaving '+filename, end='')
   file = tempname('autosave', '.dv')
@@ -408,9 +400,7 @@ def autoSave(filename):
     printerr('Error renaming '+file+' to '+filename, str(e))
 
 def orderly_exit():
-  """
-  Exit script nicely
-  """
+  """ Exit script nicely """
   #global AutoSave
   if AutoSave: autoSave(ConvFile)
   print(Style.RESET_ALL if UseColor() else '')
@@ -422,7 +412,7 @@ if __name__ == '__main__':
   conversation = []
   while True:
     if len(cmdTypeAhead)==0 and cmdExit: sys.exit()
-    Columns = shutil.get_terminal_size().columns - 1
+    getScreenColumns()
     if len(cmdTypeAhead) > 0:
       userInput = cmdTypeAhead.pop(0)
       if userInput[0].rstrip() == '#' or userInput.strip() == '': continue
@@ -481,7 +471,7 @@ if __name__ == '__main__':
 
       # files
       if tok[0] == 'file' or tok[0] == 'files':
-        tmp = selectFile(['.', UserHome], '**/*.dv', 'Select File to Edit: ', UserHome)
+        tmp = selectFile(['.', dvHome], '**/*.dv', 'Select File to Edit: ', dvHome)
         if tmp:
           modify_datestamp = os.path.getmtime(tmp)
           try:
@@ -512,7 +502,7 @@ if __name__ == '__main__':
       # run
       if tok[0] == 'run':
         if len(tok) < 2:
-          file = selectFile(['.', UserHome], '**/*.dv', 'Select File to Run: ', UserHome)
+          file = selectFile(['.', dvHome], '**/*.dv', 'Select File to Run: ', dvHome)
           if not file: continue
         else:
           file = ' '.join(tok[1:])
@@ -638,9 +628,9 @@ if __name__ == '__main__':
             text = text[len(AI_NAME)+2:] +'\n\n'
           for line in text.splitlines():
             if short:
-              printinfo(line[0:Columns-3]+'...',prefix='')
+              printinfo(line[0:ScreenColumns-3]+'...',prefix='')
               break
-            printinfo(textwrap.fill(line, width=Columns), prefix='')
+            printinfo(textwrap.fill(line, width=ScreenColumns), prefix='')
           i += 1
         continue
 
@@ -687,7 +677,7 @@ if __name__ == '__main__':
         if len(tok) < 2: filename = ConvFile
         else: filename = tok[1].replace('"', '').replace('"', '')
         if not '.dv' in filename: filename += '.dv'
-        if not '/' in filename: filename = UserHome + '/' + filename
+        if not '/' in filename: filename = dvHome + '/' + filename
         if os.path.exists(filename):
           try:
             userInput = input('\n"'+filename+'" exists. Overwrite? (y/n) ')
@@ -715,7 +705,7 @@ if __name__ == '__main__':
           print(f"{key}={value}")
         print()
         print('Environment:')
-        for env in ['USER', 'HOME', 'SHELL', 'EDITOR', 'BROWSER', 'PATH', 'TMPDIR', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
+        for env in ['USER', 'HOME', 'SHELL', 'EDITOR', 'BROWSER', 'TMPDIR', 'PATH', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
           print(env + '=' + str(os.getenv(env)))
         continue
 
@@ -754,18 +744,18 @@ if __name__ == '__main__':
             while True:
               ynr = input('Execute command in '+tmpfile+'? yes/no/re-edit ').lower()
               if ynr in ['y', 'n', 'r']: break
-              else: printerr('Valid input (y, n, or r).')
-            if   ynr == 'y': break
-            elif ynr == 'r': continue
-            else:
-              userInput = ''
-              break
+              printerr('Valid input y, n, or r.')
+            if ynr == 'y': break
+            if ynr == 'r': continue
+            userInput = ''
+            break
           try:
             os.remove(tmpfile)
             os.remove(tmpfile+'~')
           except FileNotFoundError: pass
           if not userInput: continue
           print('\n' + userInput.strip())
+        # proceed to gpt
 
         else:
           filename = tok[1]
@@ -817,7 +807,7 @@ if __name__ == '__main__':
     # Print the response from GPT-3
     printstd(str(len(conversation)+1)+'. '+AI_NAME+':', color=Fore.GREEN)
     for line in response.splitlines():
-      print(textwrap.fill(line, width=Columns))
+      print(textwrap.fill(line, width=ScreenColumns))
 
     # eg, devaju -x -c 'command'
     if len(cmdTypeAhead)==0 and cmdExit: sys.exit()
