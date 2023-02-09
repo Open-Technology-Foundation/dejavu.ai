@@ -67,19 +67,22 @@ def writefile(filename, string, mode='w', encoding='utf-8'):
   with open(filename, mode, encoding=encoding) as f:
     f.write(string)
 
-def tempname(label, ext='.tmp'):
+
+def tempname(label='tmp', ext='.tmp'):
   """ Return a temporary dirname/filename located in TMPDIR or /tmp. """
   tmpdir = os.getenv('TMPDIR')
   if not tmpdir: tmpdir = '/tmp'
   os.makedirs(tmpdir, exist_ok=True)
-  rand = random.randint(420,99420)
+  rand = random.randint(11420,99420)
+  base = os.path.basename(__file__)
   #return "{0}/dv-{1}-{2}{3}".format(tmpdir, label, , ext)
-  return f"{tmpdir}/dv-{label}-{rand}{ext}"
+  return f"{tmpdir}/{base}-{label}-{rand}{ext}"
 
 
 def escstr(string):
   """ Escape \n\t\r in string. """
   return string.replace('\n','\\n').replace('\r','\\r').replace('\t','\\t')
+
 
 def is_num(string):
   """ Is this string a number? """
@@ -120,6 +123,17 @@ def int_list(input_string, minVal, maxVal, revSort=False):
   return range_list
 
 
+SHELL = ''
+def getShell():
+  """ Define SHELL to use. """
+  global SHELL
+  SHELL = os.environ.get('SHELL')
+  if not SHELL: SHELL = '/bin/bash'
+  os.environ['SHELL'] = SHELL.strip()
+  return SHELL.strip()
+getShell()
+
+
 EDITOR = ''
 def getEditor():
   """ Define EDITOR to use. """
@@ -142,6 +156,7 @@ def getEditor():
       EDITOR = '/etc/alternatives/editor'
     else:
       EDITOR = '/bin/less'
+  os.environ['EDITOR'] = EDITOR.strip()
   return EDITOR.strip()
 getEditor()
 
@@ -160,6 +175,7 @@ def getBrowser():
       BROWSER = '/usr/bin/lynx'
     else:
       BROWSER = '/bin/less'
+  os.environ['BROWSER'] = BROWSER.strip()
   return BROWSER.strip()
 getBrowser()
 

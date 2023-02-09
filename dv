@@ -356,6 +356,7 @@ def cmdstatus(showall=False):
     pp( 'Frequency',   freq_pen)
     pp( 'Presence',    pres_pen)
     pp( 'Cmd Echo',    'On' if cmdEcho else 'Off')
+    pp( 'Shell',       os.path.basename(SHELL))
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
 
@@ -484,7 +485,7 @@ if __name__ == '__main__':
         if tmp:
           modify_datestamp = os.path.getmtime(tmp)
           try:
-            subprocess.run(EDITOR +' '+ tmp, shell=True, executable='/bin/bash', check=False)
+            subprocess.run(EDITOR +' '+ tmp, shell=True, executable=SHELL, check=False)
           except Exception as e:
             printerr('ERROR in editor.', str(e)); continue
           if modify_datestamp != os.path.getmtime(tmp):
@@ -498,7 +499,7 @@ if __name__ == '__main__':
       if tok[0] == 'edit':
         modify_datestamp = os.path.getmtime(ConvFile)
         try:
-          subprocess.run(EDITOR +' '+ ConvFile, shell=True, executable='/bin/bash', check=False)
+          subprocess.run(EDITOR +' '+ ConvFile, shell=True, executable=SHELL, check=False)
         except Exception as e:
           printerr('Edit error '+str(e)); continue
         if modify_datestamp != os.path.getmtime(ConvFile):
@@ -531,7 +532,7 @@ if __name__ == '__main__':
       # exec
       if tok[0] == 'exec':
         try:
-          subprocess.run(' '.join(tok[1:]), shell=True, executable='/bin/bash', check=False)
+          subprocess.run(' '.join(tok[1:]), shell=True, executable=SHELL, check=False)
         except Exception as e:
           printerr('Exec error '+str(e))
         continue
@@ -714,7 +715,7 @@ if __name__ == '__main__':
           print(f"{key}={value}")
         print()
         print('Environment:')
-        for env in ['USER', 'HOME','EDITOR', 'BROWSER', 'PATH', 'TMPDIR', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
+        for env in ['USER', 'HOME', 'SHELL', 'EDITOR', 'BROWSER', 'PATH', 'TMPDIR', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
           print(env + '=' + str(os.getenv(env)))
         continue
 
@@ -741,20 +742,31 @@ if __name__ == '__main__':
         if len(tok) < 2:
           tmpfile = tempname('command', '.dv')
           writefile(tmpfile, '')
-          try:
-            subprocess.run(EDITOR +' '+ tmpfile, shell=True, executable='/bin/bash', check=False)
-          except Exception as e:
-            printerr('Import file error.', str(e))
-            continue
-          userInput = readfile(tmpfile)
+          while True:
+            try:
+              subprocess.run(EDITOR +' '+ tmpfile, shell=True, executable=SHELL, check=False)
+            except Exception as e:
+              printerr('Import file error.', str(e))
+              userInput = ''
+              break
+            userInput = readfile(tmpfile)
+            if not userInput: break
+            while True:
+              ynr = input('Execute command in '+tmpfile+'? yes/no/re-edit ').lower()
+              if ynr in ['y', 'n', 'r']: break
+              else: printerr('Valid input (y, n, or r).')
+            if   ynr == 'y': break
+            elif ynr == 'r': continue
+            else:
+              userInput = ''
+              break
           try:
             os.remove(tmpfile)
             os.remove(tmpfile+'~')
-          except FileNotFoundError:
-            pass
+          except FileNotFoundError: pass
           if not userInput: continue
-          if input('Execute command in '+tmpfile+'? y/n ') != 'y':
-            continue
+          print('\n' + userInput.strip())
+
         else:
           filename = tok[1]
           if not os.path.exists(filename):
@@ -792,7 +804,7 @@ if __name__ == '__main__':
     conversation.append(f'<<USER_NAME>>: {userInput}')
     # Aggregate the entire conversation
     text_block = ('\n'.join(conversation)).strip()
-    writefile('debug', '\n---\n'+PromptReplace(text_block, '<<AI_NAME>>', AI_NAME, '<<USER_NAME>>', USER_NAME), 'a')
+    #writefile('debug', '\n---\n'+PromptReplace(text_block, '<<AI_NAME>>', AI_NAME, '<<USER_NAME>>', USER_NAME), 'a')
     # Send the entire conversation to GPT-3
     try:
       response = gpt3_completion(PromptReplace(text_block)+'\n'+AI_NAME+': ', \
