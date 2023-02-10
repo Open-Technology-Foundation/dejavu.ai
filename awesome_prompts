@@ -1,9 +1,0 @@
-#!/usr/bin/python3
-from awesome_prompts import *
-
-try:
-  if __name__ == '__main__':
-    awe_prompt = select_awesome_prompt(sys.argv)
-    if awe_prompt: print(awe_prompt)
-except:
-  print()
