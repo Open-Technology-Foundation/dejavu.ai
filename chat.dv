@@ -1,6 +1,7 @@
 # This is the default Dejavu conversation prompt file.
 # Please edit in accordance with your preferences.
 # Lines beginning with # comments, and are ignored by the program.
+!echo off
 !USER_NAME SYSADMIN
 !AI_NAME HAL-2021
 !engine text-davinci-003
