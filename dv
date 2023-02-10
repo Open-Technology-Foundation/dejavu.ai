@@ -23,13 +23,15 @@ import subprocess
 import sys
 import textwrap
 import openai
+import tiktoken
 from colorama import Fore, Style
 
 ScriptName  = os.path.realpath(sys.argv.pop(0))
 ScriptDir   = os.path.dirname(ScriptName)
 ScriptName  = os.path.basename(ScriptName)
-sys.path.append(ScriptDir)
+if not ScriptDir in sys.path: sys.path.append(ScriptDir)
 from dejavu_std import *
+from awesome_prompts import *
 
 dvHome = f'{HOME}/.{ScriptName}'
 os.makedirs(dvHome, exist_ok=True)
@@ -265,17 +267,24 @@ historyFile = initHistory(ConvFile)
 conversation = []
 text_block  = ''
 
+def num_tokens_from_string(string: str, encoding_name: str) -> int:
+  """Returns the number of tokens in a text string."""
+  encoding = tiktoken.get_encoding(encoding_name)
+  num_tokens = len(encoding.encode(string))
+  return num_tokens
+
 def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop):
   """  GPT-3 Completion function ---------------------------------------------- """
+  used_tokens = num_tokens_from_string(prompt, 'gpt2')
+  if Verbose and cmdEcho: printinfo(f'{used_tokens} tokens in prompt')
   prompt = prompt.encode(encoding='ASCII',errors='ignore').decode()
-  sx = len(prompt)
-  tokens = max(16, int(4096 - (sx/3.5) - 100))
+#  tokens = max(16, int(4096 - (len(prompt.replace(' ',''))/4) - 100))
   try:
     gpt3_response = openai.Completion.create(
       engine=engine,
       prompt=prompt,
       temperature=temperature,
-      max_tokens=tokens,
+      max_tokens=max(16, 4096 - used_tokens - 100),
       top_p=top_p,
       frequency_penalty=freq_pen,
       presence_penalty=pres_pen,
@@ -315,6 +324,10 @@ def cmd_help():
     ['!summarize [conversation|prompt|all]', '',
                         'Summarise every conversation or prompt items.',
                         'Default is "conversation".'],
+    ['!awesome [select|list|update]', '',
+                        'Lists over a 100 prompt suggestions from prompts.chat.',
+                        'If no subcommand is specified, defaults to "select".',
+                        'Updating occurs directly from prompts.chat github page'],
     ['!save [file]',    'Save current conversation.  If "file" is not specified',
                         'then saves to current conversation file.'],
     ['!import [file]',  'Import "file" into the input prompt.',
@@ -341,9 +354,9 @@ def cmdstatus(showall=False):
   if showall:
     pp( 'History File',historyFile.replace(HOME,'~'))
     pp( 'AI Engine',   engine)
-    sx = len(Prompt)+len(''.join(conversation))
-    pp( 'Tokens Used', int(sx/3.5))
-    pp( 'Tokens Left', (max(16,int(4096-(sx/3.5)-100))))
+    sx = num_tokens_from_string(Prompt+''.join(conversation), 'gpt2')
+    pp( 'Tokens Used', int(sx))
+    pp( 'Tokens Left', int(4096-sx))
     pp( 'Temperature', temperature)
     pp( 'Frequency',   freq_pen)
     pp( 'Presence',    pres_pen)
@@ -700,14 +713,25 @@ if __name__ == '__main__':
           if value[0:7] == '<module': continue
           if varsearch and key[0:len(varsearch)] != varsearch: continue
           print(f"{key}={value}")
+        print('sys.path=', sys.path)
         print()
         print('Environment:')
         for env in ['USER', 'HOME', 'SHELL', 'EDITOR', 'BROWSER', 'TMPDIR', 'PATH', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
           print(f'{env}={str(os.getenv(env))}')
         continue
 
+      # awesome gpt prompts
+      if tok[0] == 'awes' or tok[0] == 'awesome':
+        curdir = os.getcwd()
+        os.chdir(ScriptDir)
+        awe_prompt = select_awesome_prompt(tok[0:])
+        os.chdir(curdir)
+        if awe_prompt == '': continue
+        print(awe_prompt)
+        userInput = awe_prompt
+
       # instruction [instruction]
-      if tok[0] == 'inst' or tok[0] == 'instruction':
+      elif tok[0] == 'inst' or tok[0] == 'instruction':
         if len(tok) > 1:
           userInput = ' '.join(tok[1:]).replace('\\n', '\n').strip()
         else:
@@ -795,7 +819,7 @@ if __name__ == '__main__':
     try:
       response = gpt3_completion(PromptReplace(text_block)+'\n'+AI_NAME+': ', \
             engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
-      if response == '': 
+      if response == '':
         conversation.pop()
         continue
     except Exception as e:

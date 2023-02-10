@@ -1,3 +1,4 @@
 colorama==0.4.6
 openai==0.26.4
-requests==2.25.1
+requests==2.28.2
+tiktoken==0.2.0
