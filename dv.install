@@ -38,7 +38,8 @@ cat <<-EOT
 	        : -a|--no-apt    Do not execute apt during installation.
 	        : -u|--upgrade   Upgrade $PRGNAME from git repository.
 	        : -V|--version   Print $PRGNAME version.
-	Requires: python 3, pip, git, openai API key/s, root access
+	Requires: python 3, pip, git, openai API key/s, root access for 
+	        : installation.
 	See Also: https://openai.com/api/, $REPOSITORY
 EOT
 }
