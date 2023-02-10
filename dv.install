@@ -116,6 +116,7 @@ main() {
 	cd "$SHAREDIR"
 
 	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/awesome* "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
 	sudo rsync -a "$PRGDIR"/*.dv "$SHAREDIR"/
