@@ -83,7 +83,6 @@ def select_awesome_prompt(aw_args):
     select_awesome_prompt(['list'])
     select_awesome_prompt(['select'])
   """
-  global ScreenColumns
   ChopLen=30  # max length for prompt title field
   try:
     for awarg in aw_args:
@@ -97,30 +96,22 @@ def select_awesome_prompt(aw_args):
         pass
       else:
         pass
-
     acts = key_values_list(readfile(JSON_FILE), 'act')
     awe_prompt = ''
     while True:
       while True:
-        ScreenColumns = getScreenColumns()
-        i = 0
-        maxlen = 0
-        for act in acts:
-          i += 1
-          nact = f'{i:3d} {act}'
-          if len(nact) > maxlen: maxlen = len(nact)
-        #maxlen += 1
+        maxlen = max(len(x) for x in acts)
         if(maxlen > ChopLen): maxlen = ChopLen
-        i = 0
-        column = 0
-        for act in acts:
-          i += 1
-          if column+maxlen > ScreenColumns: 
-            print()
-            column = 0
-          print(f'{i:3d} {act[0:maxlen-5]}'.ljust(maxlen, ' '),  end='')
-          column += maxlen
-        if column != 0: print()
+        numpad = len(str(maxlen))
+        totalpad = maxlen + numpad + 3
+        numrows = math.ceil(len(acts) / int(getScreenColumns()/totalpad))
+        output = [''] * numrows
+        row = 0
+        for index, act in enumerate(acts):
+          if row == numrows: row = 0
+          output[row] += (f'{index+1:{numpad}d}. {act[0:maxlen-5]}').ljust(totalpad, ' ')
+          row += 1
+        print('\n'.join(output))
         key = input(f'Select 1-{len(acts)}/q: ')
         if key == '0' or key == 'q': 
           key = 'q'

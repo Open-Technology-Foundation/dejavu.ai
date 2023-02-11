@@ -6,6 +6,8 @@ Generic functions
 # pylint: disable=wildcard-import
 # pylint: disable=line-too-long
 # pylint: disable=invalid-name
+# pylint: disable=multiple-statements
+# pylint: disable=broad-exception-caught
 
 import os
 import sys
@@ -232,6 +234,7 @@ def initHistory(filename, ext='.history'):
 
 
 def getfiles(dirs='.', globule='*', **kwargs):
+  """ get a list of files """ 
   shorten = kwargs.get('shorten', False)
   get_files = []
   for root in dirs:
@@ -254,11 +257,10 @@ def getfiles(dirs='.', globule='*', **kwargs):
   get_files.sort()
   return get_files
 
-
+# pylint: disable=too-many-locals
 def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
   """ Select a file from a list. """
-  shorten = kwargs.get('shorten', True)
-  dfiles = getfiles(dirs, globule, shorten=shorten)
+  dfiles = getfiles(dirs, globule, shorten=kwargs.get('shorten', True))
   if len(dfiles) == 0:
     printerr('No files found.')
     return ''
