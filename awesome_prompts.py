@@ -84,6 +84,7 @@ def select_awesome_prompt(aw_args):
     select_awesome_prompt(['select'])
   """
   global ScreenColumns
+  ChopLen=30  # max length for prompt title field
   try:
     for awarg in aw_args:
       if awarg in ('-u', '--update', 'update', 'upgrade'):
@@ -109,6 +110,7 @@ def select_awesome_prompt(aw_args):
           nact = f'{i:3d} {act}'
           if len(nact) > maxlen: maxlen = len(nact)
         #maxlen += 1
+        if(maxlen > ChopLen): maxlen = ChopLen
         i = 0
         column = 0
         for act in acts:
@@ -116,7 +118,7 @@ def select_awesome_prompt(aw_args):
           if column+maxlen > ScreenColumns: 
             print()
             column = 0
-          print(f'{i:3d} {act}'.ljust(maxlen, ' '),  end='')
+          print(f'{i:3d} {act[0:maxlen-5]}'.ljust(maxlen, ' '),  end='')
           column += maxlen
         if column != 0: print()
         key = input(f'Select 1-{len(acts)}/q: ')
@@ -134,11 +136,10 @@ def select_awesome_prompt(aw_args):
         break
       if key:
         awe_prompt = search_awesome_prompt(key)
-        if awe_prompt:
-          printinfo(f'{key}: {awe_prompt}')
-        else:
+        if not awe_prompt:
           printerr(f'{key} not found!')
-
+          continue
+        printinfo(f'{key}: {awe_prompt}', prefix='')
       key = input('Proceed with this prompt? y/n/q: ')
       if key == 'q':
          awe_prompt = ''

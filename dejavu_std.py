@@ -13,6 +13,7 @@ import readline
 import atexit
 import glob
 import random
+import math
 from shutil import get_terminal_size
 from colorama import init, deinit, Fore, Back, Style
 init()
@@ -258,18 +259,21 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
   """ Select a file from a list. """
   shorten = kwargs.get('shorten', True)
   dfiles = getfiles(dirs, globule, shorten=shorten)
+  if len(dfiles) == 0:
+    printerr('No files found.')
+    return ''
   maxlen = max(len(x) for x in dfiles)
   numpad = len(str(maxlen))
   totalpad = maxlen + numpad + 3
   ScreenColumns = getScreenColumns()-1
-  column = 0
+  numrows = math.ceil(len(dfiles) / int(ScreenColumns/totalpad))
+  output = [''] * numrows
+  row = 0
   for index, file in enumerate(dfiles):
-    if column+totalpad > ScreenColumns:
-      print()
-      column = 0
-    print((f'{index+1:{numpad}d}. {file}').ljust(totalpad, ' '),  end='')
-    column += totalpad
-  print()
+    if row == numrows: row = 0
+    output[row] += (f'{index+1:{numpad}d}. {file}').ljust(totalpad, ' ')
+    row += 1
+  print('\n'.join(output))
   selection = 0
   while True:
     try:
