@@ -83,7 +83,7 @@ def select_awesome_prompt(aw_args):
     select_awesome_prompt(['list'])
     select_awesome_prompt(['select'])
   """
-  ChopLen=30  # max length for prompt title field
+  ChopLen=32  # max length for prompt title field
   try:
     for awarg in aw_args:
       if awarg in ('-u', '--update', 'update', 'upgrade'):
