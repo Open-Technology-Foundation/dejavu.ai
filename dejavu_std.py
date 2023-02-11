@@ -230,26 +230,59 @@ def initHistory(filename, ext='.history'):
   return historyFile
 
 
-def selectFile(dirs, globule='**/*', prompt='Select File: ', home=''):
-  """ Select a file from a list. """
-  dfiles = [ '' ]; ffiles = [ '' ]
+def getfiles(dirs='.', globule='*', **kwargs):
+  shorten = kwargs.get('shorten', False)
+  get_files = []
   for root in dirs:
-    for file in glob.glob(globule, root_dir=root, recursive=True):
-      dfiles.append((root+'/'+file).replace(home, '~').replace('./',''))
-      ffiles.append(root+'/'+file)
-  selection = 0
+    for file in glob.glob(f'{root}/{globule}', recursive=True):
+      get_files.append(os.path.realpath(file))
+  arr = list(set(get_files))
+  if not shorten:
+    arr.sort()
+    return arr
+  # shorten
+  pwdfiles = os.getcwd()
+  HOME = os.environ.get('HOME', pwdfiles)
+  get_files = []
+  for farr in arr:
+    if farr.startswith(pwdfiles):
+      farr = '.'+farr[len(pwdfiles):]
+    elif farr.startswith(HOME):
+      farr = '~'+farr[len(HOME):]
+    get_files.append(farr)
+  get_files.sort()
+  return get_files
+
+
+def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
+  """ Select a file from a list. """
+  shorten = kwargs.get('shorten', True)
+  dfiles = getfiles(dirs, globule, shorten=shorten)
+  maxlen = max(len(x) for x in dfiles)
+  numpad = len(str(maxlen))
+  totalpad = maxlen + numpad + 3
+  ScreenColumns = getScreenColumns()-1
+  column = 0
   for index, file in enumerate(dfiles):
-    if index == 0: continue
-    printstd(str(index) + ': ' + file)
+    if column+totalpad > ScreenColumns:
+      print()
+      column = 0
+    print((f'{index+1:{numpad}d}. {file}').ljust(totalpad, ' '),  end='')
+    column += totalpad
+  print()
+  selection = 0
   while True:
     try:
-      selection = int(input(prompt))
+      selection = int(input(selprompt))
     except KeyboardInterrupt:
-      selection = 0; break
+      print()
+      return ''
     except Exception:
-      printerr('Select 0-'+str(len(dfiles)-1)); continue
-    if 0 <= selection < len(dfiles): break
-    printerr('Invalid selection.')
-  return ffiles[selection]
+      printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
+    if 0 <= selection <= len(dfiles): break
+    printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
+  if selection == 0: return ''
+  return os.path.realpath(dfiles[selection-1])
+
 
 #end

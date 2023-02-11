@@ -480,7 +480,7 @@ if __name__ == '__main__':
 
       # files
       if tok[0] == 'file' or tok[0] == 'files':
-        tmp = selectFile(['.', dvHome], '**/*.dv', 'Select File to Edit: ', dvHome)
+        tmp = selectFile(['.', dvHome], '*.dv', 'Select File to Edit: ')
         if tmp:
           modify_datestamp = os.path.getmtime(tmp)
           try:
