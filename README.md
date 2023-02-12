@@ -104,44 +104,48 @@ dejavu -xc 'in python, display syntax, options, usage and examples for .replace(
 ## OPERATION
 
 ### DéjàVu System Commands
-Note: All commands can be shortened to first four letters, eg, *!temp* for *!temperature*
+DéjàVu system commands are differentiated from GPT instructions by starting with a '/' character, or alternatively, a '!' character.
+
+For instance, `/status` will display all current DéjàVu and GPT settings. 
+
+Note that all commands can be shortened to their first four letters, eg, */temp* for *!temperature*
 
 *range* can be in the forms "1,2,3", "4-6", "7-", "-8", "all" and can be combined in any order.
 
 ```
-!status         : Show status of current environment.
-!temperature [f]: Display or Set Temperature.
-                  Valid value for "f" is 0.0 - 1.0.
-!list [long|short] [range]: 
-                  List current conversation.
-                  "short" for condenced list, "long" for full list.
-                  Default is "long".
-                  If "range" omitted, lists entire conversation.
-!delete range   : Delete conversation items in "range".
-!clear          : Clear all conversation.  Same as !delete 1-
-!files          : Display conversation scripts in current and user home
-                  directories, with option to edit.
-!edit           : Edit the current conversation prompt.dv file.
-!prompt [prompt]: Display current conversation set-up information.
-                  If "prompt" is specified, set the new conversion prompt.
-!tldr [range]   : Summarize all conversation responses in "range".
-                  Default is the previous response.
-!summarize [conversation|prompt|all]: 
-                  Summarise every conversation or prompt items.
-                  Default is "conversation".
-!awesome [select|list|update]: 
-                  Lists over a 100 prompt suggestions from prompts.chat.
-                  If no subcommand is specified, defaults to "select".
-                  Updating occurs directly from prompts.chat github page
-!save [file]    : Save current conversation.  If "file" is not specified
-                  then saves to current conversation file.
-!import [file]  : Import "file" into the input prompt.
-                  If "file" is not specified, opens EDITOR to enable 
-                  multi-line commands.
-!exec [cmd...]  : Execute a shell command.
-!echo [on|off]  : Turn command echo on|off.
-!help           : Open DéjàVu Help file.
-!exit|!quit     : Exit DéjàVu.  Pressing ^C will also exit.
+/status          Show status of current environment.
+/temperature [f] Display or Set Temperature.
+                 Valid value for "f" is 0.0 - 1.0.
+/list [long|short] [range] 
+                 List current conversation.
+                 "short" for condenced list, "long" for full list.
+                 Default is "long".
+                 If "range" omitted, lists entire conversation.
+/delete range    Delete conversation items in "range".
+/clear           Clear all conversation.  Same as /delete 1-
+/files           Display conversation scripts in current and user home
+                 directories, with option to edit.
+/edit            Edit the current conversation prompt.dv file.
+/prompt [prompt] Display current conversation set-up information.
+                 If "prompt" is specified, set the new conversion prompt.
+/tldr [range]    Summarize all conversation responses in "range".
+                 Default is the previous response.
+/summarize [conversation|prompt|all]
+                 Summarise every conversation or prompt items.
+                 Default is "conversation".
+/awesome [select|list|update]
+                 Lists over a 100 prompt suggestions from prompts.chat.
+                 If no subcommand is specified, defaults to "select".
+                 Updating occurs directly from prompts.chat github page
+/save [file]     Save current conversation.  If "file" is not specified
+                 then saves to current conversation file.
+/import [file]   Import "file" into the input prompt.
+                 If "file" is not specified, opens EDITOR to enable 
+                 multi-line commands.
+/exec [cmd...]   Execute a shell command.
+/echo [on|off]   Turn command echo on|off.
+/help            Open DéjàVu Help file.
+/exit|/quit      Exit DéjàVu.  Pressing ^C will also exit.
 ```
 
 ### Prompt Engineering
