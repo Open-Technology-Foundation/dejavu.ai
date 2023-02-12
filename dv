@@ -46,6 +46,7 @@ if not os.path.exists(dvHome+'/default.dv'):
   writefile(dvHome+'/default.dv', string)
 
 REPOSITORY = 'https://github.com/GaryDean/dejavu.ai.git'
+REPOSITORY_VERSION='https://raw.githubusercontent.com/GaryDean/dejavu.ai/master/dejavu.version'
 
 # Process command line and define ConvFile to use
 Version = readfile(f'{ScriptDir}/dejavu.version').strip()
@@ -387,6 +388,14 @@ def cmdstatus(showall=False):
     pp( 'Shell',       os.path.basename(SHELL))
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
+  try:
+    r = requests.get(REPOSITORY_VERSION, timeout=1)
+    data = trim(r.text)
+    if Version != data:
+      pp('Update:', f'Version {data} is now available')
+      pp('', f'Run {ScriptName} -q --update to update.')
+  except:
+    pass
 
 
 def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>>', USr=''):
