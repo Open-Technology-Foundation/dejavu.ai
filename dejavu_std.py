@@ -108,6 +108,10 @@ def is_num(string):
   except ValueError:
     return False
 
+def url_split(url):
+    protocol, remainder = url.split("://")
+    host, path = remainder.split("/", 1)
+    return protocol, host, path
 
 def int_list(input_string, minVal, maxVal, revSort=False):
   """ Return an ordered list of numbers. """

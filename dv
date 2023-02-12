@@ -391,7 +391,16 @@ def cmdstatus(showall=False):
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
   try:
-    r = requests.get(REPOSITORY_VERSION, timeout=3, headers={'Cache-Control': 'no-cache, no-store, must-revalidate'})
+    prot, host, path = url_split(REPOSITORY_VERSION)
+    headers = {
+      'GET': path + ' HTTP/1.1',
+      'Host': host,
+      'User-Agent': 'Wget/1.21.2',
+      'Accept': '*/*',
+      'Accept-Encoding': 'identity',
+      'Connection': 'Keep-Alive'
+    }
+    r = requests.get(REPOSITORY_VERSION, timeout=3, headers=headers)
     data = str(r.text).strip()
     pp('Git Ver', f'{data}')
     if Version < data:
@@ -460,7 +469,7 @@ if __name__ == '__main__':
     if len(cmdTypeAhead) > 0:
       userInput = cmdTypeAhead.pop(0)
       if userInput[0].rstrip() == '#' or userInput.strip() == '': continue
-      if cmdEcho and (userInput[0:5] != '/echo' or userInput[0:5] != '!echo'):
+      if cmdEcho and (userInput[0:5] != '/echo' and userInput[0:5] != '!echo'):
         printstd(USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
         print(userInput)
     else:
