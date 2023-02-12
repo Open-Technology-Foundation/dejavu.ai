@@ -38,12 +38,17 @@ def UseColor(color=None):
     else: deinit()
   return useColor
 
-ScreenColumns = get_terminal_size().columns - 1
+ScreenColumns, ScreenRows = get_terminal_size()
 def getScreenColumns():
   """ Get current screen columns. """
-  global ScreenColumns
-  ScreenColumns = get_terminal_size().columns - 1
+  global ScreenColumns, ScreenRows
+  ScreenColumns, ScreenRows = get_terminal_size()
   return ScreenColumns
+def getScreenRows():
+  """ Get current screen columns. """
+  global ScreenColumns, ScreenRows
+  ScreenColumns, ScreenRows = get_terminal_size()
+  return ScreenRows
 
 def printerr(*args, **kwargs):
   """ Print to stderr with optional color. """

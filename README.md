@@ -113,64 +113,64 @@ Note that all commands can be shortened to their first four letters, eg, */temp*
 *range* can be in the forms "1,2,3", "4-6", "7-", "-8", "all" and can be combined in any order.
 
 ```
-#### Help and Status
-/                Short command help.
-/help            Open DéjàVu help file. Can also use "//"
-/exit|/quit      Exit DéjàVu.  Pressing ^C will also exit.
-/status          Show status of current environment.
-/vars            Show current variables.
+Help and Status
+  /                Short command help.
+  /help            Open DéjàVu help file. Can also use "//"
+  /exit|/quit      Exit DéjàVu.  Pressing ^C will also exit.
+  /status          Show status of current environment.
+  /vars            Show current variables.
 
-#### Conversations
-/list [long|short] [range] 
-                 List current conversation.
-                 "short" for condenced list, "long" for full list.
-                 Default is "long".
-                 If "range" omitted, lists entire conversation.
-/delete range    Delete conversation items in "range".
-/clear           Clear all conversation.  Same as /delete 1-
-/tldr [range]    Summarize all conversation responses in "range".
-                 Default is the previous response.
-/summarize [conversation|prompt|all] 
-                 Summarise every conversation or prompt items.
-                 Default is "conversation".
-/autosave [on|off] 
-                 Save all conversation to current dv Script on exit.
-                 Default is Off.
-/save [file]     Save current conversation.  If "file" is not specified
-                 then saves to current conversation file.
-/awesome [select|list|update] 
-                 Lists over a 100 prompt suggestions from prompts.chat.
-                 If no subcommand is specified, defaults to "select".
-                 Updating occurs directly from prompts.chat github page
-/import [file]   Import "file" into the input prompt.
-                 If "file" is not specified, opens EDITOR to enable 
-                 multi-line commands.
+Conversations
+  /list [long|short] [range] 
+                   List current conversation.
+                   "short" for condenced list, "long" for full list.
+                   Default is "long".
+                   If "range" omitted, lists entire conversation.
+  /delete range    Delete conversation items in "range".
+  /clear           Clear all conversation.  Same as /delete 1-
+  /tldr [range]    Summarize all conversation responses in "range".
+                   Default is the previous response.
+  /summarize [conversation|prompt|all] 
+                   Summarise every conversation or prompt items.
+                   Default is "conversation".
+  /autosave [on|off] 
+                   Save all conversation to current dv Script on exit.
+                   Default is Off.
+  /save [file]     Save current conversation.  If "file" is not specified
+                   then saves to current conversation file.
+  /awesome [select|list|update] 
+                   Lists over a 100 prompt suggestions from prompts.chat.
+                   If no subcommand is specified, defaults to "select".
+                   Updating occurs directly from prompts.chat github page
+  /import [file]   Import "file" into the input prompt.
+                   If "file" is not specified, opens EDITOR to enable 
+                   multi-line commands.
 
-#### GPT Settings
-/user_name [name] Set/Display user name.
-/ai_name [name]  Set/Display AI name.
-/engine [engine] Set/Display GPT engine.
-/temperature [f] Set/Display temperature (0.0-1.0).
-/top_p [f]       Set/Display top_p (0.0-1.0).
-/tokens [n]      Set/Display tokens to use.
-/freq_pen        Set/Display frequency penalty (-2-2).
-/pres_pen        Set/Display presence penalty (-2-2).
-/prompt [prompt] Display current conversation set-up information.
-                 If "prompt" is specified, set the new conversion prompt.
+GPT Settings
+  /user_name [name] Set/Display user name.
+  /ai_name [name]  Set/Display AI name.
+  /engine [engine] Set/Display GPT engine.
+  /temperature [f] Set/Display temperature (0.0-1.0).
+  /top_p [f]       Set/Display top_p (0.0-1.0).
+  /tokens [n]      Set/Display tokens to use.
+  /freq_pen        Set/Display frequency penalty (-2-2).
+  /pres_pen        Set/Display presence penalty (-2-2).
+  /prompt [prompt] Display current conversation set-up information.
+                   If "prompt" is specified, set the new conversion prompt.
 
-#### Scripts
-/files           Display conversation scripts in current and user home
-                 directories, with option to edit.
-/edit [file]     Edit "file". If "file" not specified, edit the current
-                 script file.
-/run [file]      Run the "file" script. If not specified, display a list
-                 of available scripts.
-/instruction string 
-                 Insert an instruction. Usually only used in scripts.
-/conversation string 
-                 Add to conversation array. Usually only used in scripts.
-/echo [on|off]   Turn command echo on|off. Usually only used in scripts.
-/exec [cmd...]   Execute a shell command.
+Scripts
+  /files           Display conversation scripts in current and user home
+                   directories, with option to edit.
+  /edit [file]     Edit "file". If "file" not specified, edit the current
+                   script file.
+  /run [file]      Run the "file" script. If not specified, display a list
+                   of available scripts.
+  /instruction string 
+                   Insert an instruction. Usually only used in scripts.
+  /conversation string 
+                   Add to conversation array. Usually only used in scripts.
+  /echo [on|off]   Turn command echo on|off. Usually only used in scripts.
+  /exec [cmd...]   Execute a shell command.
 ```
 
 ### Prompt Engineering
