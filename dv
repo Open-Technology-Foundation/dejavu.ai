@@ -364,8 +364,8 @@ def cmd_help():
     ['/exit|/quit',     'Exit DéjàVu.  Pressing ^C will also exit.']
   ]
   for cmdhelp in cmds:
-    printinfo(f'{cmdhelp[0]:16s}: {cmdhelp[1]}')
-    for chelp in cmdhelp[2:]: printinfo(f'%16s  {chelp}' % '')
+    printinfo(f'{cmdhelp[0]:16s} {cmdhelp[1]}')
+    for chelp in cmdhelp[2:]: printinfo(f'%16s {chelp}' % '')
 
 def cmdstatus(showall=False):
   """ Print current parameters ----------------------------------------------- """
@@ -391,9 +391,9 @@ def cmdstatus(showall=False):
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
   try:
-    r = requests.get(REPOSITORY_VERSION, timeout=500)
+    r = requests.get(REPOSITORY_VERSION, timeout=3, headers={'Cache-Control': 'no-cache, no-store, must-revalidate'})
     data = str(r.text).strip()
-    #pp('Web Ver', f'{data}')
+    pp('Git Ver', f'{data}')
     if Version < data:
       pp('Update', f'Version {data} of DéjàVu is now available.')
       pp('', f"Run '{ScriptName} -q --update' to update.")
@@ -465,7 +465,7 @@ if __name__ == '__main__':
         print(userInput)
     else:
       cmdEcho = True
-      printstd(str(len(conversation)+1)+'. '+USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
+      printstd(f'{len(conversation)+1:d}. {USER_NAME}:', color=Fore.YELLOW+Style.BRIGHT)
       try:
         userInput = input().lstrip()
       except KeyboardInterrupt:
@@ -863,7 +863,7 @@ if __name__ == '__main__':
     # Add the response to the conversation list
     conversation.append(f'<<AI_NAME>>: {response}')
     # Print the response from GPT-3
-    printstd(f'{str(len(conversation))}. {AI_NAME}:', color=Fore.GREEN)
+    printstd(f'{len(conversation):d}. {AI_NAME}:', color=Fore.GREEN)
     for _line in response.splitlines():
       print(textwrap.fill(_line, width=ScreenColumns))
 
