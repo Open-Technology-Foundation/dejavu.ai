@@ -11,15 +11,15 @@ import requests
 if not '/usr/share/dejavu.ai' in sys.path: sys.path.append('/usr/share/dejavu.ai')
 from dejavu_std import *
 
-URL       = 'https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv'
-CSV_FILE  = 'awesome-gpt-prompts.csv'
-JSON_FILE = 'awesome-gpt-prompts.json'
+AWE_URL       = 'https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv'
+AWE_CSV_FILE  = 'awesome-gpt-prompts.csv'
+AWE_JSON_FILE = 'awesome-gpt-prompts.json'
 
 def convert_awesome_csv_to_json(csv_file, indent=2):
   """ convert_awesome_csv_to_json """
   csv_rows = []
-  with open(csv_file) as CSV_FILE:
-    reader = csv.DictReader(CSV_FILE)
+  with open(csv_file) as AWE_CSV_FILE:
+    reader = csv.DictReader(AWE_CSV_FILE)
     title = reader.fieldnames
     for row in reader:
       csv_rows.extend([{title[i]:row[title[i]] for i in range(len(title)) if title[i] == 'act' or title[i] == 'prompt'}])
@@ -41,7 +41,7 @@ def key_values_list(json_str, key):
 
 def search_awesome_prompt(act):
   """ search_awesome_prompt """
-  data = json.load(open(JSON_FILE))
+  data = json.load(open(AWE_JSON_FILE))
   for item in data:
     if item['act'] == act:
       return item['prompt']
@@ -49,7 +49,7 @@ def search_awesome_prompt(act):
 
 def list_awesome_prompt():
   """ list_awesome_prompt """
-  data = json.load(open(JSON_FILE))
+  data = json.load(open(AWE_JSON_FILE))
   i = 0
   for item in data:
     i += 1
@@ -58,22 +58,22 @@ def list_awesome_prompt():
 
 def update_awesome():
   """ update awesome prompts """
-#  global CSV_FILE, JSON_FILE, URL
-  printinfo(f'Updating {JSON_FILE}')
-  printinfo(f'  from {URL}')
-  response = requests.get(URL, timeout=5)
+#  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL
+  printinfo(f'Updating {AWE_JSON_FILE}')
+  printinfo(f'  from {AWE_URL}')
+  response = requests.get(AWE_URL, timeout=5)
   if str(response) != '<Response [200]>':
-    printerr(f'Could not obtain {CSV_FILE} from {URL}')
+    printerr(f'Could not obtain {AWE_CSV_FILE} from {AWE_URL}')
     return False
   try:
-    writefile(CSV_FILE, response.text)
+    writefile(AWE_CSV_FILE, response.text)
   except:
-    printerr(f'Error writing {CSV_FILE}')
+    printerr(f'Error writing {AWE_CSV_FILE}')
     return False
-  text = convert_awesome_csv_to_json(CSV_FILE)
-  os.remove(CSV_FILE)
-  writefile(JSON_FILE, alpha_sort_json(text, 'act'))
-  printinfo(f'{JSON_FILE} has been updated.')
+  text = convert_awesome_csv_to_json(AWE_CSV_FILE)
+  os.remove(AWE_CSV_FILE)
+  writefile(AWE_JSON_FILE, alpha_sort_json(text, 'act'))
+  printinfo(f'{AWE_JSON_FILE} has been updated.')
   return True
 
 def select_awesome_prompt(aw_args):
@@ -96,7 +96,7 @@ def select_awesome_prompt(aw_args):
         pass
       else:
         pass
-    acts = key_values_list(readfile(JSON_FILE), 'act')
+    acts = key_values_list(readfile(AWE_JSON_FILE), 'act')
     awe_prompt = ''
     while True:
       while True:

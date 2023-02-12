@@ -35,11 +35,43 @@ from awesome_prompts import *
 
 dvHome = f'{HOME}/.{ScriptName}'
 os.makedirs(dvHome, exist_ok=True)
+# Create dvHome dir contents if dvHome/default.dv does not exist.
+if not os.path.exists(dvHome+'/default.dv'):
+  subprocess.run(f'rsync -aq {ScriptDir}/*.dv {dvHome}/', shell=True, check=False)
+  string = readfile(dvHome+'/default.dv')
+  string = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), string)
+  writefile(dvHome+'/default.dv', string)
 
 REPOSITORY = 'https://github.com/GaryDean/dejavu.ai.git'
 
 # Process command line and define ConvFile to use
 Version = readfile(f'{ScriptDir}/dejavu.version').strip()
+
+def find_dv_file(filename, **kwargs):
+  """ 
+  Finds/Creates fqfn for dv filename. 
+
+  If not mustexist and file does not exist 
+  then defaults to sys.path[0]+'/'+filename.ext 
+  and creates file with contents of /usr/share/dejavu.ai/default.dv.
+
+  Return '' if fail.
+  """
+  mustexist = kwargs.get('mustexist', True)
+  searchpaths = kwargs.get('searchpaths', [ dvHome, './', HOME ])
+  filename = find_file(filename, mustexist=mustexist, searchpaths=searchpaths, ext='.dv')
+  if filename == '':
+    return ''
+  if not os.path.exists(filename):
+    try:
+      text = readfile(ScriptDir + '/default.dv')
+      text = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), text)
+      writefile(filename, text)
+    except:
+      printerr('Could not create '+filename)
+      return ''
+    printinfo('New dv file '+filename+' created.')
+  return filename
 
 ConvFile      = ''
 cmdTypeAhead  = []
@@ -54,12 +86,10 @@ def read_dvfile(dvfile):
   """  Read .dv script ------------------------------------------------------- """
   global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
-  if not '.dv' in dvfile: dvfile += '.dv'
-  if not os.path.exists(dvfile):
-    if not '/' in dvfile: dvfile = f'{dvHome}/{dvfile}'
-    if not os.path.exists(dvfile):
-      printerr(f'File "{dvfile}" does not exist.')
-      return False
+  dvfile = find_dv_file(dvfile, mustexist=True, ext='.dv')
+  if dvfile == '':
+    printerr(f'File "{dvfile}" does not exist.')
+    return False
   lne = readfile(dvfile)
   Lines = lne.split('\n')
   lne   = ''
@@ -206,27 +236,14 @@ while len(sys.argv) > 0:
 # Conversation file validation and default --------------------------------------
 if len(ConvFile) == 0:
   ConvFile = dvHome+'/default.dv'
-  # Create default conversation file if not exist
-  # and copy sample .dv files
-  if not os.path.exists(ConvFile):
-    subprocess.run(f'rsync -aq {ScriptDir}/*.dv {dvHome}/', shell=True, check=False)
-    string = readfile(ConvFile)
-    string = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), string)
-    writefile(ConvFile, string)
-    subprocess.run('rsync -aq --exclude default.dv ' + ScriptDir + '/*.dv ' \
-      + dvHome + '/', shell=True, check=False)
-if not ConvFile.endswith('.dv'): ConvFile += '.dv'
-if not os.path.exists(ConvFile):
-  if os.path.exists(f'{dvHome}/{ConvFile}'):
-    ConvFile = f'{dvHome}/{ConvFile}'
-  else:
-    try:
-      ConvFile = os.path.realpath(ConvFile)
-      writefile(ConvFile, readfile(dvHome+'/default.dv'))
-    except Exception as e:
-      printerr('DéjàVu file "' + ConvFile + '" could not be created!', str(e))
-      sys.exit()
-ConvFile = os.path.realpath(ConvFile)
+try:
+  ConvFile =  find_dv_file(ConvFile, mustexist=False)
+  if ConvFile == '':
+    printerr('DéjàVu file "' + ConvFile + '" could not be opened!', str(e))
+    sys.exit()
+except Exception as e:
+  printerr('DéjàVu file "' + ConvFile + '" could not be created!', str(e))
+  sys.exit()
 ConvFileName = os.path.basename(ConvFile)
 
 def getOpenAIKeys():
@@ -508,26 +525,6 @@ if __name__ == '__main__':
             historyFile = initHistory(ConvFile)
         continue
 
-      # run
-      if tok[0] == 'run':
-        if len(tok) < 2:
-          file = selectFile(['.', dvHome], '**/*.dv', 'Select File to Run: ', dvHome)
-          if not file: continue
-        else:
-          file = ' '.join(tok[1:])
-          if not os.path.exists(file):
-            printerr('!run: File '+file+' does not exist.')
-            continue
-        try:
-          readline.write_history_file(historyFile)
-          read_dvfile(file)
-          ConvFile = file
-          historyFile = initHistory(ConvFile)
-        except Exception:
-          read_dvfile(ConvFile)
-          historyFile = initHistory(ConvFile)
-        continue
-
       # exec
       if tok[0] == 'exec':
         try:
@@ -686,8 +683,7 @@ if __name__ == '__main__':
       if tok[0] == 'save':
         if len(tok) < 2: filename = ConvFile
         else: filename = tok[1].replace('"', '').replace('"', '')
-        if not '.dv' in filename: filename += '.dv'
-        if not '/' in filename: filename = f'{dvHome}/{filename}'
+        filename = find_dv_file(filename, mustexist=False)
         if os.path.exists(filename):
           try:
             userInput = input(f'\n{filename} exists. Overwrite? (y/n) ')
@@ -729,6 +725,26 @@ if __name__ == '__main__':
         if awe_prompt == '': continue
         print(awe_prompt)
         userInput = awe_prompt
+
+      # run
+      elif tok[0] == 'run':
+        if len(tok) < 2:
+          file = selectFile(['.', dvHome], '**/*.dv', 'Select dvScript to Run: ')
+          if not file: continue
+        else:
+          file = find_dv_file(' '.join(tok[1:]), mustexist=True)
+          if file == '':
+            printerr('dvScript '+file+' does not exist.')
+            continue
+        try:
+          readline.write_history_file(historyFile)
+          read_dvfile(file)
+          ConvFile = file
+          historyFile = initHistory(ConvFile)
+        except Exception:
+          read_dvfile(ConvFile)
+          historyFile = initHistory(ConvFile)
+        continue
 
       # instruction [instruction]
       elif tok[0] == 'inst' or tok[0] == 'instruction':
@@ -830,7 +846,6 @@ if __name__ == '__main__':
     conversation.append(f'<<AI_NAME>>: {response}')
     # Print the response from GPT-3
     printstd(f'{str(len(conversation))}. {AI_NAME}:', color=Fore.GREEN)
-#    printstd(str(len(conversation))+'. '+AI_NAME+':', color=Fore.GREEN)
     for _line in response.splitlines():
       print(textwrap.fill(_line, width=ScreenColumns))
 

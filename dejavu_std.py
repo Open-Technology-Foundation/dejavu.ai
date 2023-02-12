@@ -290,5 +290,43 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
   if selection == 0: return ''
   return os.path.realpath(dfiles[selection-1])
 
+def find_file(filename, **kwargs):
+  """
+  fqfn = find_file(filename, 
+                    ext='.dv', 
+                    mustexist=True, 
+                    searchpaths=sys.path)
+  # if not mustexist and file does not exist 
+  # then defaults to sys.path[0]+'/'+filename.ext
+  # return '' if fail.
+  """
+  if len(filename) == 0: return ''
+  mustexist = kwargs.get('mustexist', True)
+  searchpaths = kwargs.get('searchpaths', sys.path)
+  ext = kwargs.get('ext', '')
+  if ext and not ext.startswith('.'): ext = '.' + ext
+  if ext and not filename.endswith(ext): filename += ext
+
+  if '/' in filename:
+    try:
+      return os.path.realpath(filename, strict=mustexist)
+    except:
+      return ''
+
+  if not os.path.exists(filename):
+    for path in searchpaths:
+      # if not must exist, then default path is first entry in searchpaths[]
+      if not mustexist:
+        filename = f'{path}/{filename}'
+        break
+      if os.path.exists(f'{path}/{filename}'):
+        filename = f'{path}/{filename}'
+        break
+
+  try:
+    return os.path.realpath(filename, strict=mustexist)
+  except:
+    return ''
+
 
 #end
