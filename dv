@@ -391,16 +391,7 @@ def cmdstatus(showall=False):
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
   try:
-    prot, host, path = url_split(REPOSITORY_VERSION)
-    headers = {
-      'GET': path + ' HTTP/1.1',
-      'Host': host,
-      'User-Agent': 'Wget/1.21.2',
-      'Accept': '*/*',
-      'Accept-Encoding': 'identity',
-      'Connection': 'Keep-Alive'
-    }
-    r = requests.get(REPOSITORY_VERSION, timeout=3, headers=headers)
+    r = requests.get(REPOSITORY_VERSION, timeout=3, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
     data = str(r.text).strip()
     pp('Git Ver', f'{data}')
     if Version < data:
