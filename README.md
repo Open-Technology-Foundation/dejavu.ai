@@ -113,14 +113,14 @@ Note that all commands can be shortened to their first four letters, eg, */temp*
 *range* can be in the forms "1,2,3", "4-6", "7-", "-8", "all" and can be combined in any order.
 
 ```
-Help and Status
+#### Help and Status
 /                Short command help.
 /help            Open DéjàVu help file. Can also use "//"
 /exit|/quit      Exit DéjàVu.  Pressing ^C will also exit.
 /status          Show status of current environment.
 /vars            Show current variables.
 
-Conversations
+#### Conversations
 /list [long|short] [range] 
                  List current conversation.
                  "short" for condenced list, "long" for full list.
@@ -146,7 +146,7 @@ Conversations
                  If "file" is not specified, opens EDITOR to enable 
                  multi-line commands.
 
-GPT Settings
+#### GPT Settings
 /user_name [name] Set/Display user name.
 /ai_name [name]  Set/Display AI name.
 /engine [engine] Set/Display GPT engine.
@@ -158,7 +158,7 @@ GPT Settings
 /prompt [prompt] Display current conversation set-up information.
                  If "prompt" is specified, set the new conversion prompt.
 
-Scripts
+#### Scripts
 /files           Display conversation scripts in current and user home
                  directories, with option to edit.
 /edit [file]     Edit "file". If "file" not specified, edit the current
