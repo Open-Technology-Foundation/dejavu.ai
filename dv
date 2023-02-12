@@ -389,12 +389,13 @@ def cmdstatus(showall=False):
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
   try:
-    r = requests.get(REPOSITORY_VERSION, timeout=1)
-    data = trim(r.text)
-    if Version != data:
+    r = requests.get(REPOSITORY_VERSION, timeout=2)
+    data = str(r.text).strip()
+    if Version < data:
       pp('Update:', f'Version {data} is now available')
       pp('', f'Run {ScriptName} -q --update to update.')
-  except:
+  except Exception as e:
+    printerr('timeout?', e)
     pass
 
 
