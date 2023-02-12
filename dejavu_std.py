@@ -12,6 +12,8 @@ Generic functions
 import os
 import sys
 import readline
+import fnmatch
+import shutil
 import atexit
 import glob
 import random
@@ -231,6 +233,34 @@ def initHistory(filename, ext='.history'):
     writefile(historyFile, '')
   atexit.register(readline.write_history_file, historyFile)
   return historyFile
+
+
+def copy_files_recursive(src_dir, dest_dir, wildcard='*', **kwargs):
+  """
+  success = copy_files_recursive(src_dir, dest_dir, wildcard='*', **kwargs):
+  Copy all files matching wildcard from src_dir to dest_dir,
+  recursively, but only if these files are newer or do not exist in dest_dir.
+  # Usage example
+  if not copy_files_recursive('/usr/share/dejavu.ai', '/home/sysadmin/.dv', '*.dv', verbose=True):
+    printerr('Copy error')
+  """
+  copy_verbose = kwargs.get('verbose', False)
+  success = False
+  try:
+    for root, dirs, files in os.walk(src_dir):
+      for filename in files:
+        if fnmatch.fnmatch(filename, wildcard):
+          src_file = os.path.join(root, filename)
+          dest_file = os.path.join(dest_dir, filename)
+          if not os.path.exists(dest_file) or os.stat(src_file).st_mtime > os.stat(dest_file).st_mtime:
+            if copy_verbose: printinfo(f'Copying {src_file} to {dest_file}')
+            shutil.copy2(src_file, dest_file)
+    success = True
+  except (shutil.Error, shutil.SameFileError):
+    printerr('Error: Source and destination are the same file.')
+  except OSError:
+    printerr('Error: Invalid source or destination path.')
+  return success
 
 
 def getfiles(dirs='.', globule='*', **kwargs):

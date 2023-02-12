@@ -37,7 +37,10 @@ dvHome = f'{HOME}/.{ScriptName}'
 os.makedirs(dvHome, exist_ok=True)
 # Create dvHome dir contents if dvHome/default.dv does not exist.
 if not os.path.exists(dvHome+'/default.dv'):
-  subprocess.run(f'rsync -aq {ScriptDir}/*.dv {dvHome}/', shell=True, check=False)
+  printinfo(f'Welcome to DéjàVu, {USER.title()}.')
+  if not copy_files_recursive(ScriptDir, dvHome, '*.dv', verbose=True):
+    printerr('Default files copy error.')
+    sys.exit()
   string = readfile(dvHome+'/default.dv')
   string = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), string)
   writefile(dvHome+'/default.dv', string)
