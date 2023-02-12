@@ -393,9 +393,9 @@ def cmdstatus(showall=False):
     data = str(r.text).strip()
     if Version < data:
       pp('Update:', f'Version {data} is now available')
-      pp('', f'Run {ScriptName} -q --update to update.')
+      pp('', f"Run '{ScriptName} -q --update' to update.")
   except Exception as e:
-    printerr('timeout?', e)
+    printerr('timeout?', str(e))
     pass
 
 
