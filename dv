@@ -333,6 +333,8 @@ def cmd_help():
                         'Default is "long".',
                         'If "range" omitted, lists entire conversation.'],
     ['!delete range',   'Delete conversation items in "range".'],
+    ['!autosave [on|off]', '',
+                        'Save all conversation to current dv Script on exit.', 'Default is Off.'],
     ['!clear',          'Clear all conversation.  Same as !delete 1-'],
     ['!files',          'Display conversation scripts in current and user home',
                         'directories, with option to edit.'],
@@ -371,6 +373,7 @@ def cmdstatus(showall=False):
   pp(   'Your Name',   USER_NAME)
   pp(   'AI Name',     AI_NAME)
   pp(   'Conversation',ConvFile.replace(HOME,'~'))
+  pp(   'AutoSave',    'On' if AutoSave else 'Off')
   if showall:
     pp( 'History File',historyFile.replace(HOME,'~'))
     pp( 'AI Engine',   engine)

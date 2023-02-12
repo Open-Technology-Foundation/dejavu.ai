@@ -34,10 +34,6 @@ CONVERSATION
 
 """
 
-
-
-
-
 !conversation <<USER_NAME>>: How much do you know about Stephen Bachelor and his teachings?
 !conversation <<AI_NAME>>: I have a good understanding of Stephen Bachelor and his teachings. I am familiar with his philosophy of secular dharma, which is based on the idea that we should strive to be mindful and compassionate in all aspects of life. I also understand his views on the importance of living in the present moment, and his emphasis on developing a deeper understanding of one's self and the world around them. Finally, I am aware of his advice on how to cultivate inner peace and contentment.
 !conversation <<USER_NAME>>: explain his approach to secular dharma
@@ -56,11 +52,3 @@ CONVERSATION
 !conversation <<AI_NAME>>: Generally speaking, a nerd is someone who is passionate and knowledgeable about a particular subject or activity, while a geek is someone who is highly knowledgeable and enthusiastic about a particular subject or activity.\nGeeks tend to be more focused on the technical aspects of a subject, while nerds are more likely to be interested in the theoretical aspects. Additionally, geeks are often seen as being more socially outgoing than nerds.
 !conversation <<USER_NAME>>: what is a novice monk in a Zen monastary called?
 !conversation <<AI_NAME>>: A novice monk in a Zen monastery is called a shukke, which means “one who has left the home life”. Shukke are expected to follow the teachings of the monastery and practice meditation and other forms of spiritual practice. They are also expected to help with the daily tasks of the monastery, such as cooking, cleaning, and gardening.
-!conversation <<USER_NAME>>: create a google search url that will find this on the web
-!conversation <<AI_NAME>>: https://www.google.com/search?q=novice+monk+in+a+Zen+monastery
-!conversation <<USER_NAME>>: create a bing search url that will find this on the web
-!conversation <<AI_NAME>>: https://www.bing.com/search?q=novice+monk+in+a+Zen+monastery
-!conversation <<USER_NAME>>: write an essay on secular dharma
-!conversation <<AI_NAME>>: Secular dharma is a philosophy that emphasizes the importance of living in the present moment and cultivating mindfulness and compassion in all aspects of life. It is based on the teachings of Stephen Bachelor, who advocates for the practice of self-reflection and self-compassion in order to gain insight into one's own thoughts and feelings. Additionally, he encourages people to cultivate inner peace and contentment by developing a deeper understanding of the interconnectedness of all things.\n\nSecular dharma is a way of life that encourages people to be mindful and compassionate in their actions and interactions with others. It emphasizes the importance of living in the present moment and being aware of one's thoughts, feelings, and actions. Additionally, it encourages people to practice self-reflection and self-compassion in order to gain insight into their own thoughts and feelings. This can help to cultivate inner peace and contentment, as well as a deeper understanding of the interconnectedness of all things.\n\nSecular dharma also encourages people to be mindful and compassionate in their interactions with others. This includes being respectful of other people's beliefs and opinions, as well as being open to learning from different perspectives. Additionally, it encourages people to be kind and understanding towards themselves and others.\n\nIn conclusion, secular dharma is a philosophy that emphasizes the importance of living in the present moment and cultivating mindfulness and compassion in all aspects of life. It encourages people to practice self-reflection and self-compassion in order to gain insight into their own thoughts and feelings, as well as to be mindful and compassionate in their interactions with others. Ultimately, it is a way of life that can help to cultivate inner peace and contentment, as well as a deeper understanding of the interconnectedness of all things.
-!conversation <<USER_NAME>>: from the content in this essay, create a google search url that will find information about this topic on the web
-!conversation <<AI_NAME>>: https://www.google.com/search?q=secular+dharma+mindfulness+compassion
