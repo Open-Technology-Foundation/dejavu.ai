@@ -114,22 +114,29 @@ def is_num(string):
     return False
 
 def url_split(url):
-    protocol, remainder = url.split("://")
-    host, path = remainder.split("/", 1)
-    return protocol, host, path
+  """ split url into protocol, host, path """
+  protocol, remainder = url.split("://")
+  host, path = remainder.split("/", 1)
+  return protocol, host, path
 
-def int_list(input_string, minVal, maxVal, revSort=False):
+def int_list(input_string, minVal: int, maxVal: int, revSort=False):
   """ Return an ordered list of numbers. """
   range_list = []
+  if type(input_string) == list:
+    string = ' '.join(input_string).strip()
+  else:
+    string = input_string.strip()
+  string = string.replace(' ', ',').replace(',,', ',').lower()
   try:
-    numlist = input_string.lower().split(',')
+    numlist = string.split(',')
     for numC in numlist:
       if numC.strip() == '': continue
-      if numC.strip() == 'all': numC = str(minVal)+'-'+str(maxVal)
+      if numC.strip() == 'all':
+        numC = str(minVal)+'-'+str(maxVal)
       if '-' in numC:
         stnum, endnum = numC.split('-')
         if stnum == '':   stnum = int(minVal)
-        if endnum == '':  endnum   = int(maxVal)
+        if endnum == '':  endnum = int(maxVal)
         stnum, endnum = int(stnum), int(endnum)
         if stnum < minVal or endnum > maxVal:
           printerr('Error out of range'+str(stnum)+'-'+str(endnum))
@@ -141,10 +148,12 @@ def int_list(input_string, minVal, maxVal, revSort=False):
   except Exception as e:
     printerr('Exception error in int_list '+str(e))
     return False
-  if len(range_list) == 0: return False
+  if len(range_list) == 0:
+    return False
   range_list = list(set(range_list))
   range_list.sort()
-  if revSort: return range_list[::-1]
+  if revSort:
+    return range_list[::-1]
   return range_list
 
 

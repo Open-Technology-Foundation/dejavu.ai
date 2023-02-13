@@ -19,7 +19,6 @@ import os
 import datetime
 import re
 import readline
-import getpass
 import subprocess
 import sys
 import textwrap
@@ -53,7 +52,7 @@ REPOSITORY_VERSION='https://raw.githubusercontent.com/GaryDean/dejavu.ai/master/
 # Process command line and define ConvFile to use
 Version = readfile(f'{ScriptDir}/dejavu.version').strip()
 
-def find_dv_file(filename, **kwargs):
+def find_dv_file(dvfilename, **kwargs):
   """ 
   Finds/Creates fqfn for dv filename. 
 
@@ -65,20 +64,20 @@ def find_dv_file(filename, **kwargs):
   """
   mustexist = kwargs.get('mustexist', True)
   searchpaths = kwargs.get('searchpaths', [ dvHome, './', HOME ])
-  filename = find_file(filename, mustexist=mustexist, searchpaths=searchpaths, ext='.dv')
-  if filename == '':
+  dvfilename = find_file(dvfilename, mustexist=mustexist, searchpaths=searchpaths, ext='.dv')
+  if dvfilename == '':
     return ''
-  if not os.path.exists(filename):
+  if not os.path.exists(dvfilename):
     try:
-      text = readfile(ScriptDir + '/default.dv')
-      text = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), text)
-      text = re.sub(r'\n/USER_NAME \S+', '\n/USER_NAME '+USER.upper(), text)
-      writefile(filename, text)
+      dvtext = readfile(ScriptDir + '/default.dv')
+      dvtext = re.sub(r'\n!USER_NAME \S+', '\n!USER_NAME '+USER.upper(), dvtext)
+      dvtext = re.sub(r'\n/USER_NAME \S+', '\n/USER_NAME '+USER.upper(), dvtext)
+      writefile(dvfilename, dvtext)
     except:
-      printerr('Could not create '+filename)
+      printerr('Could not create '+dvfilename)
       return ''
-    printinfo('New dv file '+filename+' created.')
-  return filename
+    printinfo('New dv file '+dvfilename+' created.')
+  return dvfilename
 
 ConvFile      = ''
 cmdTypeAhead  = []
@@ -246,7 +245,7 @@ if len(ConvFile) == 0:
 try:
   ConvFile =  find_dv_file(ConvFile, mustexist=False)
   if ConvFile == '':
-    printerr('DéjàVu file "' + ConvFile + '" could not be opened.', str(e))
+    printerr('DéjàVu file "' + ConvFile + '" could not be opened.')
     sys.exit()
 except Exception as e:
   printerr('DéjàVu file "' + ConvFile + '" could not be created.', str(e))
@@ -291,10 +290,10 @@ historyFile = initHistory(ConvFile)
 conversation = []
 text_block  = ''
 
-def num_tokens_from_string(string: str, encoding_name: str) -> int:
-  """Returns the number of tokens in a text string."""
+def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
+  """Returns the number of tokens in a text gpt string."""
   encoding = tiktoken.get_encoding(encoding_name)
-  num_tokens = len(encoding.encode(string))
+  num_tokens = len(encoding.encode(gptstring))
   return num_tokens
 
 def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop):
@@ -315,92 +314,110 @@ def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_p
       stop=stop,
       timeout=90)
   except Exception as gpte:
-    printerr('GPT-3 experienced an error: '+str(gpte))
+    printerr('GPT-3 experienced an error: ' + str(gpte))
     return ''
   return gpt3_response['choices'][0]['text'].strip('\n')
 
 def cmd_help():
   """ dejavu command help ----------------------------------------------------- """
-  printinfo('DéjàVu System Commands', '', style=Style.BRIGHT)
-  printinfo('Note: All commands can be shortened to first four letters,',
-            'eg, /temp for /temperature', '',
-            '"range" can be in the forms "1,2,3", "4-6", "7-", "-8", "all"',
-            'and can be combined in any order.', '',
-            "For more comprehensive help, enter '/help' or '//'", '')
-  cmds = [
-    ['Help and Status'],
-    ['/',               'Short command help.'],
-    ['/help',           'Open DéjàVu help file. Can also use "//"'],
-    ['/exit|/quit',     'Exit DéjàVu.  Pressing ^C will also exit.'],
-    ['/status',         'Show status of current environment.'],
-    ['/vars',           'Show current variables.'],
-    ['Conversations'],
-    ['/list [long|short] [range]', '',
-                        'List current conversation.',
-                        '"short" for condenced list, "long" for full list.',
-                        'Default is "long".',
-                        'If "range" omitted, lists entire conversation.'],
-    ['/delete range',   'Delete conversation items in "range".'],
-    ['/clear',          'Clear all conversation.  Same as /delete 1-'],
-    ['/tldr [range]',   'Summarize all conversation responses in "range".',
-                        'Default is the previous response.'],
-    ['/summarize [conversation|prompt|all]', '',
-                        'Summarise every conversation or prompt items.',
-                        'Default is "conversation".'],
-    ['/autosave [on|off]', '',
-                         'Save all conversation to current dv Script on exit.', 
-                         'Default is Off.'],
-    ['/save [file]',     'Save current conversation.  If "file" is not specified',
-                         'then saves to current conversation file.'],
-    ['/awesome [select|list|update]', '',
-                         'Lists over a 100 prompt suggestions from prompts.chat.',
-                         'If no subcommand is specified, defaults to "select".',
-                         'Updating occurs directly from prompts.chat github page'],
-    ['/import [file]',  'Import "file" into the input prompt.',
-                         'If "file" is not specified, opens EDITOR to enable ',
-                         'multi-line commands.'],
-    ['GPT Settings'],
-    ['/user_name [name]','Set/Display user name.'],
-    ['/ai_name [name]',  'Set/Display AI name.'],
-    ['/engine [engine]', 'Set/Display GPT engine.'],
-    ['/temperature [f]', 'Set/Display temperature (0.0-1.0).'],
-    ['/top_p [f]',       'Set/Display top_p (0.0-1.0).'], 
-    ['/tokens [n]',      'Set/Display tokens to use.'],
-    ['/freq_pen',        'Set/Display frequency penalty (-2-2).'],
-    ['/pres_pen',        'Set/Display presence penalty (-2-2).'],
-    ['/prompt [prompt]', 'Display current conversation set-up information.',
-                         'If "prompt" is specified, set the new conversion prompt.'],
-    ['Scripts'],
-    ['/files',           'Display conversation scripts in current and user home',
-                         'directories, with option to edit.'],
-    ['/edit [file]',     'Edit "file". If "file" not specified, edit the current',
-                         'script file.'],
-    ['/run [file]',      'Run the "file" script. If not specified, display a list',
-                         'of available scripts.'],
-    ['/instruction string', '',
-                          'Insert an instruction. Usually only used in scripts.'],
-    ['/conversation string', '',
-                          'Add to conversation array. Usually only used in scripts.'],
-    ['/echo [on|off]',   'Turn command echo on|off. Usually only used in scripts.'],
-    ['/exec [cmd...]',   'Execute a shell command.']
-    ]
-  rowcount = 10
-  for cmdhelp in cmds:
-    if (rowcount+len(cmdhelp)) >= getScreenRows():
+  printinfo('DéjàVu System Commands', style=Style.BRIGHT)
+#  cmds = [
+#    ['Help and Status'],
+#    ['/',               'Short command help.'],
+#    ['/help',           'Open DéjàVu help file. Can also use "//"'],
+#    ['/exit|/quit',     'Exit DéjàVu.  Pressing ^C will also exit.'],
+#    ['/status',         'Show status of current environment.'],
+#    ['/vars',           'Show current variables.'],
+#    ['Conversations'],
+#    ['/list [long|short] [range]', '',
+#                        'List current conversation.',
+#                        '"short" for condenced list, "long" for full list.',
+#                        'Default is "long".',
+#                        'If "range" omitted, lists entire conversation.'],
+#    ['/delete range',   'Delete conversation items in "range".'],
+#    ['/clear',          'Clear all conversation.  Same as /delete 1-'],
+#    ['/tldr [range]',   'Summarize all conversation responses in "range".',
+#                        'Default is the previous response.'],
+#    ['/summarize [conversation|prompt|all]', '',
+#                        'Summarise every conversation or prompt items.',
+#                        'Default is "conversation".'],
+#    ['/autosave [on|off]', '',
+#                         'Save all conversation to current dv Script on exit.', 
+#                         'Default is Off.'],
+#    ['/save [file]',     'Save current conversation.  If "file" is not specified',
+#                         'then saves to current conversation file.'],
+#    ['/awesome [select|list|update]', '',
+#                         'Lists over a 100 prompt suggestions from prompts.chat.',
+#                         'If no subcommand is specified, defaults to "select".',
+#                         'Updating occurs directly from prompts.chat github page'],
+#    ['/import [file]',  'Import "file" into the input prompt.',
+#                         'If "file" is not specified, opens EDITOR to enable ',
+#                         'multi-line commands.'],
+#    ['GPT Settings'],
+#    ['/user_name [name]','Set/Display user name.'],
+#    ['/ai_name [name]',  'Set/Display AI name.'],
+#    ['/engine [engine]', 'Set/Display GPT engine.'],
+#    ['/temperature [f]', 'Set/Display temperature (0.0-1.0).'],
+#    ['/top_p [f]',       'Set/Display top_p (0.0-1.0).'], 
+#    ['/tokens [n]',      'Set/Display tokens to use.'],
+#    ['/freq_pen',        'Set/Display frequency penalty (-2-2).'],
+#    ['/pres_pen',        'Set/Display presence penalty (-2-2).'],
+#    ['/prompt [prompt]', 'Display current conversation set-up information.',
+#                         'If "prompt" is specified, set the new conversion prompt.'],
+#    ['Scripts'],
+#    ['/files',           'Display conversation scripts in current and user home',
+#                         'directories, with option to edit.'],
+#    ['/edit [file]',     'Edit "file". If "file" not specified, edit the current',
+#                         'script file.'],
+#    ['/run [file]',      'Run the "file" script. If not specified, display a list',
+#                         'of available scripts.'],
+#    ['/instruction string', '',
+#                          'Insert an instruction. Usually only used in scripts.'],
+#    ['/conversation string', '',
+#                          'Add to conversation array. Usually only used in scripts.'],
+#    ['/echo [on|off]',   'Turn command echo on|off. Usually only used in scripts.'],
+#    ['/exec [cmd...]',   'Execute a shell command.']
+#    ]
+
+  json_data = json.loads(readfile(ScriptDir+'/dejavu-command-help.json'))
+  rowcount = 1
+  for cmdhelp in json_data:
+    if (rowcount + len(cmdhelp)) >= getScreenRows():
       rowcount = 0
-      try: input('More...')
-      except KeyboardInterrupt:
-        print(file=sys.stderr)
-        break
+      if has_color(sys.stdout):
+        try:
+          input(Style.RESET_ALL+'More...')
+          print('\r\x1b[2K', end='')
+        except KeyboardInterrupt:
+          print(file=sys.stderr)
+          break
     if len(cmdhelp) == 1:
       printinfo(cmdhelp[0], style=Style.BRIGHT)
       rowcount += 1
       continue
     printinfo(f' {cmdhelp[0]:16s} {cmdhelp[1]}')
     rowcount += 1
-    for chelp in cmdhelp[2:]: 
+    for chelp in cmdhelp[2:]:
       printinfo(f' %16s {chelp}' % '')
       rowcount += 1
+
+#  rowcount = 10
+#  for cmdhelp in cmds:
+#    if (rowcount+len(cmdhelp)) >= getScreenRows():
+#      rowcount = 0
+#      try: input('More...')
+#      except KeyboardInterrupt:
+#        print(file=sys.stderr)
+#        break
+#    if len(cmdhelp) == 1:
+#      printinfo(cmdhelp[0], style=Style.BRIGHT)
+#      rowcount += 1
+#      continue
+#    printinfo(f' {cmdhelp[0]:16s} {cmdhelp[1]}')
+#    rowcount += 1
+#    for chelp in cmdhelp[2:]: 
+#      printinfo(f' %16s {chelp}' % '')
+#      rowcount += 1
 
 def cmdstatus(showall=False):
   """ Print current parameters ----------------------------------------------- """
@@ -578,6 +595,7 @@ if __name__ == '__main__':
             historyFile = initHistory(ConvFile)
         continue
 
+
       # exec
       if tok[0] == 'exec':
         try:
@@ -674,23 +692,21 @@ if __name__ == '__main__':
           if   tok[1][0:4] == 'shor': short = True; tok.pop(1)
           elif tok[1][0:4] == 'long': short = False; tok.pop(1)
         if len(tok) < 2: tok.append('all')
-        rnge = int_list(','.join(tok[1:]), 1, len(conversation), False)
-        if not rnge: printerr('Invalid range /list ' + tok[1]); continue
-        i = int(0)
+        rnge = int_list(tok[1:], 1, len(conversation), False)
+        if not rnge: continue
         for r in rnge:
           text = conversation[r-1].replace('<<USER_NAME>>', USER_NAME).replace('<<AI_NAME>>', AI_NAME)
           if text[0:len(USER_NAME)+2] == USER_NAME+': ':
-            printstd(str(i+1)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
+            printstd(str(r)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
             text = text[len(USER_NAME)+2:]
           elif text[0:len(AI_NAME)+2] == AI_NAME+': ':
-            printstd(str(i+1)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
+            printstd(str(r)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME)+2:] +'\n\n'
           for _line in text.splitlines():
             if short:
               printinfo(_line[0:ScreenColumns-3]+'...',prefix='')
               break
             printinfo(textwrap.fill(_line, width=ScreenColumns), prefix='')
-          i += 1
         continue
 
       # clear
@@ -701,8 +717,8 @@ if __name__ == '__main__':
       # delete [0-0]
       if tok[0] == 'dele' or tok[0] == 'delete':
         if len(tok) < 2: continue
-        rnge = int_list(tok[1], 1, len(conversation), True)
-        if not rnge: printerr('Invalid range /delete ' + tok[1]); continue
+        rnge = int_list(tok[1:], 1, len(conversation), True)
+        if not rnge: continue
         i = int(0)
         for r in rnge:
           del conversation[r-1]
@@ -713,8 +729,8 @@ if __name__ == '__main__':
       # tldr [range]
       if tok[0] == 'tldr' or tok[0] == 'tl;dr':
         if len(tok) < 2: tok.append(str(len(conversation)))
-        rnge = int_list(tok[1], 1, len(conversation), False)
-        if not rnge: printerr('Invalid range /tldr ' + tok[1]); continue
+        rnge = int_list(tok[1:], 1, len(conversation), False)
+        if not rnge: continue
         i=0
         for r in rnge:
           text = conversation[r-1]
@@ -723,8 +739,8 @@ if __name__ == '__main__':
           try:
             tldr_response = gpt3_completion(text+'\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
             if tldr_response == '': continue
-          except Exception as e:
-            printerr('GPT-3 experienced an error. Possibly overloaded.', str(e))
+          except:
+            printerr('GPT-3 experienced an error. Possibly overloaded.')
             continue
           printstd(AI_NAME+' TL;DR'+ ('' if len(rnge)==1 else '['+str(i+1)+']') + ':', color=Fore.GREEN)
           printinfo(tldr_response, prefix='')
@@ -767,6 +783,33 @@ if __name__ == '__main__':
         print('Environment:')
         for env in ['USER', 'HOME', 'SHELL', 'EDITOR', 'BROWSER', 'TMPDIR', 'PATH', 'OPENAI_API_KEY', 'OPENAI_ORGANIZATION_ID']:
           print(f'{env}={str(os.getenv(env))}')
+        continue
+
+      # history
+      if tok[0] == 'hist' or tok[0] == 'history':
+        if len(tok) > 1:
+          if is_num(tok[1][0]):
+            rnge = int_list(tok[1:], 1, readline.get_current_history_length(), False)
+            if not rnge: continue
+            for r in rnge:
+              cmdTypeAhead.append(readline.get_history_item(int(r)))
+          else:
+            printerr(f'Unknown parameter {tok[1]}.')
+          continue
+        history_length = readline.get_current_history_length()
+        prev_item = ''
+        for i in range(history_length, 0, -1):
+          item = readline.get_history_item(i)
+          if len(item) <= 2:
+            readline.remove_history_item(i-1)
+            continue
+          if item == prev_item:
+            readline.remove_history_item(i-1)
+            continue
+          prev_item = item            
+        history_length = readline.get_current_history_length()
+        for i in range(1, history_length+1):
+          print(i, readline.get_history_item(i))
         continue
 
       # awesome gpt prompts
@@ -891,8 +934,8 @@ if __name__ == '__main__':
       if response == '':
         conversation.pop()
         continue
-    except Exception as e:
-      printerr('GPT-3 experienced an error. Possibly overloaded.', str(e))
+    except:
+      printerr('GPT-3 experienced an error. Possibly overloaded.')
       conversation.pop()
       continue
     # Add the response to the conversation list
