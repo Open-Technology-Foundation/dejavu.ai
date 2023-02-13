@@ -56,7 +56,7 @@ def printerr(*args, **kwargs):
   if useColor:
     print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
   for arg in args:
-    print(kwargs.get('prefix', '!!')+arg, end=kwargs.get('end', '\n'), file=output)
+    print(kwargs.get('prefix', '!!'), arg, end=kwargs.get('end', '\n'), file=output)
   if useColor: print(Style.RESET_ALL, end='', file=output)
 
 def printinfo(*args, **kwargs):
@@ -65,7 +65,7 @@ def printinfo(*args, **kwargs):
   if useColor:
     print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
   for arg in args:
-    print(kwargs.get('prefix', '# ')+arg, end=kwargs.get('end', '\n'), file=output)
+    print(kwargs.get('prefix', '#'), arg, end=kwargs.get('end', '\n'), file=output)
   if useColor: print(Style.RESET_ALL, end='', file=output)
 
 def printstd(*args, **kwargs):
@@ -139,14 +139,14 @@ def int_list(input_string, minVal: int, maxVal: int, revSort=False):
         if endnum == '':  endnum = int(maxVal)
         stnum, endnum = int(stnum), int(endnum)
         if stnum < minVal or endnum > maxVal:
-          printerr('Error out of range'+str(stnum)+'-'+str(endnum))
+          printerr(f'Error: out of range {stnum:d}-{endnum:d}')
           continue
         range_list += range(stnum, endnum+1)
       else:
         if int(numC) < minVal or int(numC) > maxVal: continue
         range_list.append(int(numC))
   except Exception as e:
-    printerr('Exception error in int_list '+str(e))
+    printerr('Exception error in int_list', str(e))
     return False
   if len(range_list) == 0:
     return False
