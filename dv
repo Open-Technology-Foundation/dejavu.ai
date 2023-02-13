@@ -48,6 +48,7 @@ if not os.path.exists(dvHome+'/default.dv'):
 
 REPOSITORY = 'https://github.com/GaryDean/dejavu.ai.git'
 REPOSITORY_VERSION='https://raw.githubusercontent.com/GaryDean/dejavu.ai/master/dejavu.version?xyz=123'
+UpdateCheck = False
 
 # Process command line and define ConvFile to use
 Version = readfile(f'{ScriptDir}/dejavu.version').strip()
@@ -346,6 +347,7 @@ def cmd_help():
 def cmdstatus(showall=False):
   """ Print current parameters ----------------------------------------------- """
   #global Prompt, conversation
+  global UpdateCheck
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
   def pp(pref, suff):
     printinfo(f'%13s: {suff}' % pref)
@@ -366,15 +368,17 @@ def cmdstatus(showall=False):
     pp( 'Shell',       os.path.basename(SHELL))
     pp( 'Editor',      os.path.basename(EDITOR))
     pp( 'Browser',     os.path.basename(BROWSER))
-  try:
-    r = requests.get(REPOSITORY_VERSION, timeout=3, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
-    data = str(r.text).strip()
-    #pp('Git Ver', f'{data}')
-    if Version < data:
-      pp('Update', f'Version {data} of DéjàVu is now available.')
-      pp('', f"Run '{ScriptName} -q --update' to update.")
-  except:
-    pass
+  if not UpdateCheck:
+    try:
+      r = requests.get(REPOSITORY_VERSION, timeout=2, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
+      data = str(r.text).strip()
+      #pp('Git Ver', f'{data}')
+      if Version < data:
+        pp('Update', f'Version {data} of DéjàVu is now available.')
+        pp('', f"Run '{ScriptName} -q --update' to update.")
+      UpdateCheck = True
+    except:
+      pass
 
 
 def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>>', USr=''):
