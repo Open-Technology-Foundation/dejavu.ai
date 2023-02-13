@@ -48,6 +48,7 @@ CONVERSATION
 
 
 
+
 /conversation <<USER_NAME>>: How much do you know about Stephen Bachelor and his teachings?
 /conversation <<AI_NAME>>: I have a good understanding of Stephen Bachelor and his teachings. I am familiar with his philosophy of secular dharma, which is based on the idea that we should strive to be mindful and compassionate in all aspects of life. I also understand his views on the importance of living in the present moment, and his emphasis on developing a deeper understanding of one's self and the world around them. Finally, I am aware of his advice on how to cultivate inner peace and contentment.
 /conversation <<USER_NAME>>: explain his approach to secular dharma
@@ -66,12 +67,3 @@ CONVERSATION
 /conversation <<AI_NAME>>: Generally speaking, a nerd is someone who is passionate and knowledgeable about a particular subject or activity, while a geek is someone who is highly knowledgeable and enthusiastic about a particular subject or activity.\nGeeks tend to be more focused on the technical aspects of a subject, while nerds are more likely to be interested in the theoretical aspects. Additionally, geeks are often seen as being more socially outgoing than nerds.
 /conversation <<USER_NAME>>: what is a novice monk in a Zen monastary called?
 /conversation <<AI_NAME>>: A novice monk in a Zen monastery is called a shukke, which means “one who has left the home life”. Shukke are expected to follow the teachings of the monastery and practice meditation and other forms of spiritual practice. They are also expected to help with the daily tasks of the monastery, such as cooking, cleaning, and gardening.
-/conversation <<USER_NAME>>: is there a python function to test for a digit value?
-/conversation <<AI_NAME>>: Yes, there is a python function to test for a digit value. The function is called isdigit(), and it returns True if all characters in the string are digits, and False otherwise. For example, isdigit("123") would return True, while isdigit("abc") would return False.
-/conversation <<USER_NAME>>: in python, print the first character of array varable tt[1]
-/conversation <<AI_NAME>>: print(tt[1][0])
-/conversation <<USER_NAME>>: is there a python function to test for a digit value?
-/conversation <<AI_NAME>>: Yes, there is a python function to test for a digit value. The function is called isdigit(), and it returns True if all characters in the string are digits, and False otherwise. For example, isdigit("123") would return True, while isdigit("abc") would return False.
-/conversation <<USER_NAME>>: in python, print the first character of array varable tt[1]
-/conversation <<AI_NAME>>: print(tt[1][0])
-/conversation <<AI_NAME>>: The isdigit() function returns True if all characters in a string are digits, and False otherwise.

@@ -210,7 +210,7 @@ while len(sys.argv) > 0:
       if argvparam[0] == '\\': argvparam = argvparam[1:]
       argvTypeAhead.append(argvparam)
     else:
-      printerr('Command was not specified for', sysargv)
+      printerr('Command was not specified for ' + sysargv)
       sys.exit()
 
   elif sysargv in ['-a', '--autosave']:
@@ -245,10 +245,10 @@ if len(ConvFile) == 0:
 try:
   ConvFile =  find_dv_file(ConvFile, mustexist=False)
   if ConvFile == '':
-    printerr('DéjàVu file "' + ConvFile + '" could not be opened.')
+    printerr(f'DéjàVu file "{ConvFile}" could not be opened.')
     sys.exit()
 except Exception as e:
-  printerr('DéjàVu file "' + ConvFile + '" could not be created.', str(e))
+  printerr(f'DéjàVu file "{ConvFile}" could not be created.', str(e))
   sys.exit()
 ConvFileName = os.path.basename(ConvFile)
 
@@ -342,24 +342,6 @@ def cmd_help():
     for chelp in cmdhelp[2:]:
       printinfo(f' %17s {chelp}' % '')
       rowcount += 1
-
-#  rowcount = 10
-#  for cmdhelp in cmds:
-#    if (rowcount+len(cmdhelp)) >= getScreenRows():
-#      rowcount = 0
-#      try: input('More...')
-#      except KeyboardInterrupt:
-#        print(file=sys.stderr)
-#        break
-#    if len(cmdhelp) == 1:
-#      printinfo(cmdhelp[0], style=Style.BRIGHT)
-#      rowcount += 1
-#      continue
-#    printinfo(f' {cmdhelp[0]:16s} {cmdhelp[1]}')
-#    rowcount += 1
-#    for chelp in cmdhelp[2:]: 
-#      printinfo(f' %16s {chelp}' % '')
-#      rowcount += 1
 
 def cmdstatus(showall=False):
   """ Print current parameters ----------------------------------------------- """
@@ -510,33 +492,26 @@ if __name__ == '__main__':
       # files
       if tok[0] == 'file' or tok[0] == 'files':
         tmp = selectFile(['.', dvHome], '*.dv', 'Select File to Edit: ')
-        if tmp:
-          modify_datestamp = os.path.getmtime(tmp)
-          try:
-            subprocess.run(EDITOR +' '+ tmp, shell=True, executable=SHELL, check=False)
-          except Exception as e:
-            printerr('ERROR in editor.', str(e)); continue
-          if modify_datestamp != os.path.getmtime(tmp):
-            if input('Run '+tmp+'? y/n ') != 'y': continue
-            readline.write_history_file(historyFile)
-            read_dvfile(ConvFile)
-            historyFile = initHistory(ConvFile)
+        if not tmp: continue
+        try:
+          subprocess.run(EDITOR +' '+ tmp, shell=True, executable=SHELL, check=False)
+        except Exception as e:
+          printerr('ERROR in editor.', str(e)); continue
+        if input('Run '+tmp+'? y/n ') != 'y': continue
+        cmdTypeAhead = '/run '+tmp
         continue
 
       # edit
       if tok[0] == 'edit':
         modify_datestamp = os.path.getmtime(ConvFile)
         try:
-          subprocess.run(EDITOR +' '+ ConvFile, shell=True, executable=SHELL, check=False)
+          subprocess.run(f'{EDITOR} {ConvFile}', shell=True, executable=SHELL, check=False)
         except Exception as e:
           printerr('Edit error '+str(e)); continue
         if modify_datestamp != os.path.getmtime(ConvFile):
-          if input('Re-Load '+ConvFile+'? y/n ') == 'y':
-            readline.write_history_file(historyFile)
-            read_dvfile(ConvFile)
-            historyFile = initHistory(ConvFile)
+          if input(f'Re-Load {ConvFile}? y/n ') == 'y':
+            cmdTypeAhead = '/run ' + ConvFile
         continue
-
 
       # exec
       if tok[0] == 'exec':
@@ -639,10 +614,12 @@ if __name__ == '__main__':
         for r in rnge:
           text = conversation[r-1].replace('<<USER_NAME>>', USER_NAME).replace('<<AI_NAME>>', AI_NAME)
           if text[0:len(USER_NAME)+2] == USER_NAME+': ':
-            printstd(str(r)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
+            printstd(f'{r:d}. {USER_NAME}:', color=Fore.YELLOW, style=Style.DIM)
+#           printstd(str(r)+'. '+USER_NAME+':', color=Fore.YELLOW, style=Style.DIM)
             text = text[len(USER_NAME)+2:]
           elif text[0:len(AI_NAME)+2] == AI_NAME+': ':
-            printstd(str(r)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
+            printstd(f'{r:d}. {AI_NAME}:', color=Fore.GREEN, style=Style.DIM)
+#           printstd(str(r)+'. '+AI_NAME+':', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME)+2:] +'\n\n'
           for _line in text.splitlines():
             if short:
@@ -665,7 +642,7 @@ if __name__ == '__main__':
         for r in rnge:
           del conversation[r-1]
           i += 1
-        if cmdEcho: printinfo(str(i) +' entries deleted')
+        if cmdEcho: printinfo(f'{i:d} entries deleted')
         continue
 
       # tldr [range]
@@ -700,7 +677,8 @@ if __name__ == '__main__':
             userInput = input(f'\n{filename} exists. Overwrite? (y/n) ')
             if userInput != 'y': continue
           except KeyboardInterrupt: continue
-        p = 'engine='+engine+'\ntemperature='+str(temperature)+'\ntop_p='+str(top_p)+'\ntokens=4096'+'\nfreq_pen='+str(freq_pen)+'\npres_pen='+str(pres_pen)+'\nAI_NAME='+AI_NAME+'\nUSER_NAME='+USER_NAME+'\n'
+        p = f'engine={engine}\ntemperature={temperature:f}\ntop_p={top_p:f}\ntokens=4096\nfreq_pen={freq_pen:f}\npres_pen={pres_pen:f}\nAI_NAME={AI_NAME}\nUSER_NAME={USER_NAME}\n'
+#        p = 'engine='+engine+'\ntemperature='+str(temperature)+'\ntop_p='+str(top_p)+'\ntokens=4096'+'\nfreq_pen='+str(freq_pen)+'\npres_pen='+str(pres_pen)+'\nAI_NAME='+AI_NAME+'\nUSER_NAME='+USER_NAME+'\n'
         try:
           writefile(filename,
             p+'prompt=\n' \
@@ -767,12 +745,12 @@ if __name__ == '__main__':
       # run
       elif tok[0] == 'run':
         if len(tok) < 2:
-          file = selectFile(['.', dvHome], '**/*.dv', 'Select dvScript to Run: ')
+          file = selectFile(['.', dvHome], '*.dv', 'Select dvScript to Run: ')
           if not file: continue
         else:
           file = find_dv_file(' '.join(tok[1:]), mustexist=True)
           if file == '':
-            printerr('dvScript '+file+' does not exist.')
+            printerr(f'dvScript {file} does not exist.')
             continue
         try:
           readline.write_history_file(historyFile)
@@ -780,6 +758,7 @@ if __name__ == '__main__':
           ConvFile = file
           historyFile = initHistory(ConvFile)
         except Exception:
+          printerr(f'Run failed for {file}. Reloading {ConvFile}.')
           read_dvfile(ConvFile)
           historyFile = initHistory(ConvFile)
         continue
@@ -817,7 +796,7 @@ if __name__ == '__main__':
             userInput = readfile(tmpfile)
             if not userInput: break
             while True:
-              ynr = input('Execute command in '+tmpfile+'? yes/no/re-edit ').lower()
+              ynr = input(f'Execute instructions in {tmpfile}? yes/no/re-edit ').lower()
               if ynr in ['y', 'n', 'r']: break
               printerr('Valid input y, n, or r.')
             if ynr == 'y': break
@@ -847,13 +826,16 @@ if __name__ == '__main__':
         else: what = tok[1]
         if what[0:4] == 'prom' or what == 'prompt':
           userInput = PromptReplace('') \
-              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+              + f'\n\n{USER_NAME}: Write a detailed summary of all the above: '
+#              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         elif what[0:4] == 'conv' or what == 'conversation':
           userInput = text_block \
-              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+              + f'\n\n{USER_NAME}: Write a detailed summary of all the above: '
+#              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         elif what == 'all':
           userInput = PromptReplace(text_block) \
-              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
+              + f'\n\n{USER_NAME}: Write a detailed summary of all the above: '
+#              +'\n\n' + USER_NAME + ': Write a detailed summary of all the above: '
         else:
           printerr('Invalid option. Valid options for /summarize are prompt|conv|all.')
           continue
@@ -862,7 +844,7 @@ if __name__ == '__main__':
       # invalid command
       else:
         printerr('Invalid command: /' + cmd)
-        if Verbose: printinfo("Enter '!' for command help")
+        if Verbose: printinfo("Enter '/help' for command help")
         continue
 
     # Prepend username to user input
