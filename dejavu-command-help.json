@@ -31,9 +31,9 @@
     "/history [range]",
     "",
     "List current readline history.",
-    "If 'range' is omitted, lists entire conversation."
+    "If 'range' is omitted, lists entire conversation.",
     "If 'range' is specified, then DéjàVu re-executes all",  
-    "these instructions.",
+    "these instructions."
   ],
   [
     "/vars",
