@@ -498,7 +498,7 @@ if __name__ == '__main__':
         except Exception as e:
           printerr('ERROR in editor.', str(e)); continue
         if input('Run '+tmp+'? y/n ') != 'y': continue
-        cmdTypeAhead = '/run '+tmp
+        cmdTypeAhead = [ '/run ' + tmp ]
         continue
 
       # edit
@@ -510,7 +510,7 @@ if __name__ == '__main__':
           printerr('Edit error '+str(e)); continue
         if modify_datestamp != os.path.getmtime(ConvFile):
           if input(f'Re-Load {ConvFile}? y/n ') == 'y':
-            cmdTypeAhead = '/run ' + ConvFile
+            cmdTypeAhead = [ '/run ' + ConvFile ]
         continue
 
       # exec
