@@ -357,13 +357,10 @@ def find_file(filename, **kwargs):
 
   if '/' in filename:
     try:
-      if float(f'{sys.version_info.major}.{sys.version_info.minor}') >= 3.10:
-        return os.path.realpath(filename, strict=mustexist)
-      else:
-        filename = os.path.realpath(filename)
-        if mustexist and not sys.path.exists(filename): return ''
-        return filename
-    except:
+      filename = os.path.realpath(filename)
+      if mustexist and not os.path.exists(filename): return ''
+      return filename
+    except Exception as e:
       return ''
 
   if not os.path.exists(filename):
@@ -377,12 +374,9 @@ def find_file(filename, **kwargs):
         break
 
   try:
-    if float(f'{sys.version_info.major}.{sys.version_info.minor}') >= 3.10:
-      return os.path.realpath(filename, strict=mustexist)
-    else:
-      filename = os.path.realpath(filename)
-      if mustexist and not sys.path.exists(filename): return ''
-      return filename
+    filename = os.path.realpath(filename)
+    if mustexist and not sys.path.exists(filename): return ''
+    return filename
   except:
     return ''
 
