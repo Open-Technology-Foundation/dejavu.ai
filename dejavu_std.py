@@ -36,6 +36,7 @@ def UseColor(color=None):
     useColor = color
     if useColor: init()
     else: deinit()
+    print(Style.RESET_ALL, end='')
   return useColor
 
 ScreenColumns, ScreenRows = get_terminal_size()
@@ -50,32 +51,74 @@ def getScreenRows():
   ScreenColumns, ScreenRows = get_terminal_size()
   return ScreenRows
 
+#def printerr(*args, **kwargs):
+#  """ Print to stderr with optional color. """
+#  output=kwargs.get('file', sys.stderr)
+#  if useColor:
+#    print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
+#  for arg in args:
+#    print(kwargs.get('prefix', '!!'), arg, end=kwargs.get('end', '\n'), file=output)
+#  if useColor: print(Style.RESET_ALL, end='', file=output)
 def printerr(*args, **kwargs):
-  """ Print to stderr with optional color. """
-  output=kwargs.get('file', sys.stderr)
-  if useColor:
-    print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
+  """
+  printerr(*args, prefix='!!', sep='\n', end='', back=Black.BLACK, 
+      color=Fore.RED, style=Style.NORMAL)
+  """
+  # global useColor
+  prefix = kwargs.get('prefix', '!! ')
+  sep = kwargs.get('sep', '\n')
+  end = kwargs.get('end', '')
+  if useColor: print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), sep='', end='', file=sys.stderr)
   for arg in args:
-    print(kwargs.get('prefix', '!!'), arg, end=kwargs.get('end', '\n'), file=output)
-  if useColor: print(Style.RESET_ALL, end='', file=output)
+    if prefix: print(prefix, end='', file=sys.stderr)
+    print(arg, sep, end='', file=sys.stderr)
+  if useColor: print(Style.RESET_ALL, sep='', end='', file=sys.stderr)
 
+#def printinfo(*args, **kwargs):
+#  """ Print info to std with optional color. """
+#  output=kwargs.get('file', sys.stdout)
+#  if useColor:
+#    print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
+#  for arg in args:
+#    print(kwargs.get('prefix', '#'), arg, end=kwargs.get('end', '\n'), file=output)
+#  if useColor: print(Style.RESET_ALL, end='', file=output)
 def printinfo(*args, **kwargs):
-  """ Print info to std with optional color. """
-  output=kwargs.get('file', sys.stdout)
-  if useColor:
-    print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
+  """
+  printinfo(*args, prefix='# ', sep='\n', end='', back=Black.BLACK, 
+      color=Fore.WHITE, style=Style.DIM)
+  """
+  # global useColor
+  prefix = kwargs.get('prefix', '# ')
+  sep = kwargs.get('sep', '\n')
+  end = kwargs.get('end', '')
+  if useColor: print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), sep='', end='')
   for arg in args:
-    print(kwargs.get('prefix', '#'), arg, end=kwargs.get('end', '\n'), file=output)
-  if useColor: print(Style.RESET_ALL, end='', file=output)
+    if prefix: print(prefix, end='')
+    print(arg, sep, end='')
+  if useColor: print(Style.RESET_ALL, sep='', end='')
 
+#def printstd(*args, **kwargs):
+#  """ Print to std with optional color. """
+#  output=kwargs.get('file', sys.stdout)
+#  if useColor:
+#    print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), end='', file=output)
+#  for arg in args:
+#    print(arg, end=kwargs.get('end', '\n'), file=output)
+#  if useColor: print(Style.RESET_ALL, end='', file=output)
 def printstd(*args, **kwargs):
-  """ Print to std with optional color. """
-  output=kwargs.get('file', sys.stdout)
-  if useColor:
-    print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), end='', file=output)
+  """
+  printstd(*args, prefix='', sep='\n', end='', back=Black.BLACK, 
+      color=Fore.WHITE, style=Style.NORMAL)
+  """
+  # global useColor
+  prefix = kwargs.get('prefix', '')
+  sep = kwargs.get('sep', '\n')
+  end = kwargs.get('end', '')
+  if useColor: print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), sep='', end='')
   for arg in args:
-    print(arg, end=kwargs.get('end', '\n'), file=output)
-  if useColor: print(Style.RESET_ALL, end='', file=output)
+    if prefix: print(prefix, end='')
+    print(arg, sep, end='')
+  if useColor: print(Style.RESET_ALL, sep='', end='')
 
 
 def readfile(filepath, encoding='utf-8'):
