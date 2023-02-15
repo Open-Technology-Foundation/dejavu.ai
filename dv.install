@@ -132,7 +132,7 @@ main() {
 	sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
 	sudo ln -s --force "$SHAREDIR"/dv dv
 	sudo ln -s --force "$SHAREDIR"/dv dejavu
-	sudo ln -s --force "$SHAREDIR"/webscrape/webscrape.py webscrape
+	sudo ln -s --force "$SHAREDIR"/webscrape/webscrape webscrape
 
 	# manpages
 	cd "$SHAREDIR"
