@@ -53,7 +53,7 @@ UpdateCheck = False
 # Process command line and define ConvFile to use
 Version = readfile(f'{ScriptDir}/dejavu.version').strip()
 
-def find_dv_file(dvfilename, **kwargs):
+def find_dv_file(dvfilename:str, **kwargs) -> str:
   """ 
   Finds/Creates fqfn for dv filename. 
 
@@ -89,7 +89,7 @@ AutoSave      = False
 cmdExit       = 0
 Verbose       = True
 
-def read_dvfile(dvfile):
+def read_dvfile(dvfile:str) -> bool:
   """  Read .dv script ------------------------------------------------------- """
   global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
@@ -299,7 +299,7 @@ def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
   return num_tokens
 
 
-def gpt3_completion(prompt, engine, temperature, top_p, tokens, freq_pen, pres_pen, stop):
+def gpt3_completion(prompt:str, engine:str, temperature:float, top_p:float, tokens:int, freq_pen:float, pres_pen:float, stop:list) -> str:
   """  GPT-3 Completion function ---------------------------------------------- """
   used_tokens = num_tokens_from_string(prompt, 'gpt2')
   if Verbose and cmdEcho: printinfo(f'{used_tokens} tokens in prompt')
@@ -348,12 +348,12 @@ def cmd_help():
       rowcount += 1
 
 
-def cmdstatus(showall=False):
+def cmdstatus(showall:bool=False):
   """ Print current parameters ----------------------------------------------- """
   #global Prompt, conversation
   global UpdateCheck
   printinfo('DéjàVu GPT-3 Terminal vs '+ Version +' |  Enter ! for help.')
-  def pp(pref, suff):
+  def pp(pref:str, suff:str):
     printinfo(f'%13s: {suff}' % pref)
   pp(   'Your Name',   USER_NAME)
   pp(   'AI Name',     AI_NAME)
@@ -384,7 +384,7 @@ def cmdstatus(showall=False):
       pass
 
 
-def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>>', USr=''):
+def PromptReplace(conversationText:str, AIs:str='<<AI_NAME>>', AIr:str='', USs:str='<<USER_NAME>>', USr:str='') -> str:
   """ ---------------------------------------------------------------------------
   Replace <<>> markers in prompt and conversation
   with the appropriate text
@@ -398,7 +398,7 @@ def PromptReplace(conversationText, AIs='<<AI_NAME>>', AIr='', USs='<<USER_NAME>
   return newp.strip() + '\n'
 
 
-def autoSave(dv_filename):
+def autoSave(dv_filename:str):
   """ Autosave current chat -------------------------------------------------- """
   #global conversation, Instructions
   printinfo('AutoSaving '+dv_filename, end='')

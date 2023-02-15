@@ -15,7 +15,7 @@ AWE_URL       = 'https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/mai
 AWE_CSV_FILE  = 'awesome-gpt-prompts.csv'
 AWE_JSON_FILE = 'awesome-gpt-prompts.json'
 
-def convert_awesome_csv_to_json(csv_file, indent=2):
+def convert_awesome_csv_to_json(csv_file:str, indent:int=2):
   """ convert_awesome_csv_to_json """
   csv_rows = []
   with open(csv_file) as AWE_CSV_FILE:
@@ -25,7 +25,7 @@ def convert_awesome_csv_to_json(csv_file, indent=2):
       csv_rows.extend([{title[i]:row[title[i]] for i in range(len(title)) if title[i] == 'act' or title[i] == 'prompt'}])
   return json.dumps(csv_rows, indent=indent)
 
-def alpha_sort_json(json_str, key, indent=2):
+def alpha_sort_json(json_str, key, indent:int=2):
   """ alpha_sort_json """
   json_data = json.loads(json_str)
   sorted_json = sorted(json_data, key=lambda j: j[key])
@@ -39,7 +39,7 @@ def key_values_list(json_str, key):
     key_list.append(item[key])
   return key_list
 
-def search_awesome_prompt(act):
+def search_awesome_prompt(act:str):
   """ search_awesome_prompt """
   data = json.load(open(AWE_JSON_FILE))
   for item in data:
@@ -56,7 +56,7 @@ def list_awesome_prompt():
     print(str(i) + '. ' + item['act'] + ':', item['prompt'], '\n---')
   return None
 
-def update_awesome():
+def update_awesome() -> bool:
   """ update awesome prompts """
 #  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL
   printinfo(f'Updating {AWE_JSON_FILE}')
@@ -76,7 +76,7 @@ def update_awesome():
   printinfo(f'{AWE_JSON_FILE} has been updated.')
   return True
 
-def select_awesome_prompt(aw_args):
+def select_awesome_prompt(aw_args) -> str:
   """ 
   Select an awesome prompt from list. 
     select_awesome_prompt(['update'])

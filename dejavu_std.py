@@ -22,14 +22,14 @@ from shutil import get_terminal_size
 from colorama import init, deinit, Fore, Back, Style
 init()
 
-def has_color(stream):
+def has_color(stream) -> bool:
   """ Is there a terminal attached? """
   if not hasattr(stream, 'isatty'): return False
   if not stream.isatty(): return False
   return True
 
 useColor = has_color(sys.stdout)
-def UseColor(color=None):
+def UseColor(color=None) -> bool:
   """ Print in Color or Not flag. """
   global useColor
   if color is not None:
@@ -40,12 +40,12 @@ def UseColor(color=None):
   return useColor
 
 ScreenColumns, ScreenRows = get_terminal_size()
-def getScreenColumns():
+def getScreenColumns() -> int:
   """ Get current screen columns. """
   global ScreenColumns, ScreenRows
   ScreenColumns, ScreenRows = get_terminal_size()
   return ScreenColumns
-def getScreenRows():
+def getScreenRows() -> int:
   """ Get current screen columns. """
   global ScreenColumns, ScreenRows
   ScreenColumns, ScreenRows = get_terminal_size()
@@ -121,18 +121,18 @@ def printstd(*args, **kwargs):
   if useColor: print(Style.RESET_ALL, sep='', end='')
 
 
-def readfile(filepath, encoding='utf-8'):
+def readfile(filepath:str, encoding='utf-8') -> str:
   """ Read contents of filename into string. """
   with open(filepath, 'r', encoding=encoding) as infile:
     return infile.read()
 
-def writefile(filename, string, mode='w', encoding='utf-8'):
+def writefile(filename:str, string:str, mode='w', encoding='utf-8'):
   """ Write string to filename. """
   with open(filename, mode, encoding=encoding) as f:
     f.write(string)
 
 
-def tempname(label='tmp', ext='.tmp'):
+def tempname(label='tmp', ext='.tmp') -> str:
   """ Return a temporary dirname/filename located in TMPDIR or /tmp. """
   tmpdir = os.getenv('TMPDIR')
   if not tmpdir: tmpdir = '/tmp'
@@ -143,12 +143,12 @@ def tempname(label='tmp', ext='.tmp'):
   return f"{tmpdir}/{base}-{label}-{rand}{ext}"
 
 
-def escstr(string):
+def escstr(string:str) -> str:
   """ Escape \n\t\r in string. """
   return string.replace('\n','\\n').replace('\r','\\r').replace('\t','\\t')
 
 
-def is_num(string):
+def is_num(string:str) -> bool:
   """ Is this string a number? """
   try:
     float(string)
@@ -156,13 +156,13 @@ def is_num(string):
   except ValueError:
     return False
 
-def url_split(url):
+def url_split(url:str):
   """ split url into protocol, host, path """
   protocol, remainder = url.split("://")
   host, path = remainder.split("/", 1)
   return protocol, host, path
 
-def int_list(input_string, minVal: int, maxVal: int, revSort=False):
+def int_list(input_string, minVal:int, maxVal:int, revSort=False):
   """ Return an ordered list of numbers. """
   range_list = []
   if type(input_string) == list:
@@ -201,7 +201,7 @@ def int_list(input_string, minVal: int, maxVal: int, revSort=False):
 
 
 SHELL = ''
-def getShell():
+def getShell() -> str:
   """ Define SHELL to use. """
   global SHELL
   SHELL = os.environ.get('SHELL')
@@ -212,7 +212,7 @@ def getShell():
 getShell()
 
 HOME = ''
-def getHome():
+def getHome() -> str:
   """ Define HOME to use. """
   global HOME
   HOME = os.environ.get('HOME')
@@ -223,7 +223,7 @@ def getHome():
 getHome()
 
 USER = ''
-def getUser():
+def getUser() -> str:
   """ Define SHELL to use. """
   global USER
   USER = os.environ.get('USER')
@@ -237,7 +237,7 @@ def getUser():
 getUser()
 
 EDITOR = ''
-def getEditor():
+def getEditor() -> str:
   """ Define EDITOR to use. """
   global EDITOR
   EDITOR = os.environ.get('EDITOR')
@@ -264,7 +264,7 @@ def getEditor():
 getEditor()
 
 BROWSER = ''
-def getBrowser():
+def getBrowser() -> str:
   """ Define BROWSER to use. """
   global BROWSER
   BROWSER = os.environ.get('BROWSER')
@@ -284,7 +284,7 @@ def getBrowser():
 getBrowser()
 
 
-def initHistory(filename, ext='.history'):
+def initHistory(filename:str, ext='.history') -> str:
   """ readline() history file +atExit """
   historyFile = os.path.dirname(filename)+'/.'+os.path.basename(filename)+ext
   try:
@@ -296,7 +296,7 @@ def initHistory(filename, ext='.history'):
   return historyFile
 
 
-def copy_files_recursive(src_dir, dest_dir, wildcard='*', **kwargs):
+def copy_files_recursive(src_dir:str, dest_dir:str, wildcard='*', **kwargs) -> bool:
   """
   success = copy_files_recursive(src_dir, dest_dir, wildcard='*', **kwargs):
   Copy all files matching wildcard from src_dir to dest_dir,
@@ -349,7 +349,7 @@ def getfiles(dirs='.', globule='*', **kwargs):
   return get_files
 
 # pylint: disable=too-many-locals
-def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
+def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs) -> str:
   """ Select a file from a list. """
   dfiles = getfiles(dirs, globule, shorten=kwargs.get('shorten', True))
   if len(dfiles) == 0:
@@ -381,7 +381,7 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
   if selection == 0: return ''
   return os.path.realpath(os.path.expanduser(dfiles[selection-1]))
 
-def find_file(filename, **kwargs):
+def find_file(filename:str, **kwargs) -> str:
   """
   fqfn = find_file(filename, 
                     ext='.dv', 

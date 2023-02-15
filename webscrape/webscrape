@@ -27,7 +27,7 @@ except FileNotFoundError:
   printerr(f'{script_dir}/scrape_profiles.json could not be opened.')
   sys.exit()
 
-def get_domain_name(url):
+def get_domain_name(url:str):
   """ get domain name from url """
   host = urllib.parse.urlparse(url).hostname
   if host:
@@ -37,11 +37,11 @@ def get_domain_name(url):
     return '.'.join(hostname)
   return False
 
-def htmd(string):
+def htmd(string:str) -> str:
   """ unescape escaped html """
   return html.unescape(string)
 
-def strip_tags(string):
+def strip_tags(string:str) -> str:
   """This function removes all HTML tags from a given string.
     Args:
         string (str): The string to be stripped of HTML tags.
@@ -52,18 +52,18 @@ def strip_tags(string):
   return regex.sub('', string)
 
 
-def remsp(string):
+def remsp(string:str) -> str:
   """ remove all double occurances of space """
   return re.sub(r'\ +', ' ', string)
 
-def match_tag(string, tag, stpos):
+def match_tag(string:str, tag:str, stpos:int) -> int:
   """ match html tag in string """
   pattern = re.compile(r'<' + tag + r'[ >]')
   result = pattern.search(string, stpos)
   if result: return result.start()
   return -1
 
-def remove_tag(htmlstring, start_tag, stTag_keyword, **kwargs):
+def remove_tag(htmlstring:str, start_tag:str, stTag_keyword:str, **kwargs) -> str:
   """ remove html tag from string """
   verbose = kwargs.get('verbose', 0)
   stTag = f'<{start_tag}'
@@ -101,7 +101,7 @@ def remove_tag(htmlstring, start_tag, stTag_keyword, **kwargs):
     stTag_index = match_tag(htmlstring, start_tag, stTag_index)
   return htmlstring
 
-def scrape_page(webpage, **kwargs):
+def scrape_page(webpage:str, **kwargs) -> str:
   """ scrape webpage """
   scVerbose = kwargs.get('verbose', 0)
   def vprint(*string):
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     webscrape_help()
   try:
     scrape = scrape_page(webpage, profile=profile, verbose=verbose)
-    print(scrape)
+    print(scrape.rstrip())
   except KeyboardInterrupt:
     print('^C')
   except FileNotFoundError:
