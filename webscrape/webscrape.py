@@ -168,6 +168,18 @@ def scrape_page(webpage, **kwargs):
         + f'# Profile: {scraper_profile}\n' \
         + string
 
+def webscrape_help():
+  printstd(f'{script_name} vs {script_version}',
+      f'Usage: {script_name} [options] url|file',
+      '  Where url|file is the object to scrape.',
+      '    -s|--scraper [url|file]',
+      '                   If url|file not specified, lists available scraper profiles.',
+      '    -v|--verbose   Increase verbosity.',
+      '    -q|--quiet     No verbosity.',
+      '    -V|--version   Print version.'
+    )
+  sys.exit()
+
 # --------------------------------------------------------------------
 if __name__ == '__main__':
   verbose = 0
@@ -176,16 +188,7 @@ if __name__ == '__main__':
   while len(sys.argv):
     arg = sys.argv.pop(0)
     if arg in ['-h', '--help']:
-      printstd(f'{script_name} vs {script_version}',
-        f'Usage: {script_name} [options] url|file',
-        '  Where url|file is the object to scrape.',
-        '    -s|--scraper [url|file]',
-        '                   If url|file not specified, lists available scraper profiles.',
-        '    -v|--verbose   Increase verbosity.',
-        '    -q|--quiet     No verbosity.',
-        '    -V|--version   Print version.'
-      )
-      sys.exit()
+      webscrape_help()
     elif arg in ['-V', '--version']:
       print(script_version)
       sys.exit()
@@ -217,6 +220,7 @@ if __name__ == '__main__':
     print('^C')
   except FileNotFoundError:
     printerr('Input url|file was not found.')
+    webscrape_help()
   except Exception as e:
     printerr(e)
 
