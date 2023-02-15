@@ -372,14 +372,14 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs):
     try:
       selection = int(input(selprompt))
     except KeyboardInterrupt:
-      print()
+      print('^C')
       return ''
     except Exception:
       printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
     if 0 <= selection <= len(dfiles): break
     printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
   if selection == 0: return ''
-  return os.path.realpath(dfiles[selection-1])
+  return os.path.realpath(os.path.expanduser(dfiles[selection-1]))
 
 def find_file(filename, **kwargs):
   """
