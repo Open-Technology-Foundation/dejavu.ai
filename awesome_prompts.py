@@ -61,20 +61,29 @@ def update_awesome() -> bool:
 #  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL
   printinfo(f'Updating {AWE_JSON_FILE}')
   printinfo(f'  from {AWE_URL}')
-  response = requests.get(AWE_URL, timeout=5)
+  try:
+    response = requests.get(AWE_URL, timeout=5)
+  except Exception as e:
+    printerr(f'Could not obtain {AWE_CSV_FILE} from {AWE_URL}')
+    printerr(e)
+    return False
+
   if str(response) != '<Response [200]>':
     printerr(f'Could not obtain {AWE_CSV_FILE} from {AWE_URL}')
     return False
+  
   try:
     writefile(AWE_CSV_FILE, response.text)
   except:
     printerr(f'Error writing {AWE_CSV_FILE}')
     return False
+  
   text = convert_awesome_csv_to_json(AWE_CSV_FILE)
   os.remove(AWE_CSV_FILE)
   writefile(AWE_JSON_FILE, alpha_sort_json(text, 'act'))
   printinfo(f'{AWE_JSON_FILE} has been updated.')
   return True
+
 
 def select_awesome_prompt(aw_args) -> str:
   """ 
