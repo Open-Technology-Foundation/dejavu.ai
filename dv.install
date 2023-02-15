@@ -120,15 +120,19 @@ main() {
 	sudo cp -p "$PRGDIR"/awesome* "$PRGDIR"/dejavu-command-help.json "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
-	sudo rsync -a "$PRGDIR"/*.dv "$SHAREDIR"/
+	sudo rsync -al "$PRGDIR"/*.dv "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
 	sudo chmod 775 "$PRGDIR"/dv
 	
+	sudo mkdir -p $SHAREDIR/webscrape
+	sudo rsync -al --exclude="*.html" "$PRGDIR"/webscrape "$SHAREDIR"/
+
 	sudo mkdir -p -m 755 /usr/local/bin
 	cd /usr/local/bin
 	sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
 	sudo ln -s --force "$SHAREDIR"/dv dv
 	sudo ln -s --force "$SHAREDIR"/dv dejavu
+	sudo ln -s --force "$SHAREDIR"/webscrape/webscrape.py webscrape
 
 	# manpages
 	cd "$SHAREDIR"
