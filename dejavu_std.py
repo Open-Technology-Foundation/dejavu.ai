@@ -173,13 +173,13 @@ def int_list(input_string, minVal:int, maxVal:int, revSort=False):
   try:
     numlist = string.split(',')
     for numC in numlist:
-      if numC.strip() == '': continue
+      if len(numC.strip()) == 0: continue
       if numC.strip() == 'all':
         numC = str(minVal)+'-'+str(maxVal)
       if '-' in numC:
         stnum, endnum = numC.split('-')
-        if stnum == '':   stnum = int(minVal)
-        if endnum == '':  endnum = int(maxVal)
+        if len(stnum) == 0:   stnum = int(minVal)
+        if len(endnum) == 0:  endnum = int(maxVal)
         stnum, endnum = int(stnum), int(endnum)
         if stnum < minVal or endnum > maxVal:
           printerr(f'Error: out of range {stnum:d}-{endnum:d}')
@@ -227,9 +227,9 @@ def getUser() -> str:
   """ Define SHELL to use. """
   global USER
   USER = os.environ.get('USER')
-  if USER == '': USER = os.getenv('LOGNAME')
-  if USER == '': USER = os.getenv('USERNAME')
-  if USER == '': USER = os.getenv('USER_NAME')
+  if len(USER) == 0: USER = os.getenv('LOGNAME')
+  if len(USER) == 0: USER = os.getenv('USERNAME')
+  if len(USER) == 0: USER = os.getenv('USER_NAME')
   if not USER: USER = 'USER'
   USER = USER.strip()
   os.environ['USER'] = USER

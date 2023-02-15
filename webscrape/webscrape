@@ -160,7 +160,7 @@ def scrape_page(webpage:str, **kwargs) -> str:
   str1 = ''
   for line in arr:
     line = line.strip()
-    if not line or line == "": continue
+    if not line or len(line) == 0: continue
     str1 += line + "\n\n"
   string = htmd(str1)
 

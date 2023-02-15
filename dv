@@ -66,7 +66,7 @@ def find_dv_file(dvfilename:str, **kwargs) -> str:
   mustexist = kwargs.get('mustexist', True)
   searchpaths = kwargs.get('searchpaths', [ dvHome, './', HOME ])
   dvfilename = find_file(dvfilename, mustexist=mustexist, searchpaths=searchpaths, ext='.dv')
-  if dvfilename == '':
+  if len(dvfilename) == 0:
     return ''
   if not os.path.exists(dvfilename):
     try:
@@ -94,7 +94,7 @@ def read_dvfile(dvfile:str) -> bool:
   global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
   dvfile = find_dv_file(dvfile, mustexist=True, ext='.dv')
-  if dvfile == '':
+  if len(dvfile) == 0:
     printerr(f'File "{dvfile}" does not exist.')
     return False
   lne = readfile(dvfile)
@@ -245,7 +245,7 @@ if len(ConvFile) == 0:
   ConvFile = dvHome+'/default.dv'
 try:
   ConvFile =  find_dv_file(ConvFile, mustexist=False)
-  if ConvFile == '':
+  if len(ConvFile) == 0:
     printerr(f'DéjàVu file "{ConvFile}" could not be opened.')
     sys.exit()
 except Exception as e:
@@ -253,7 +253,7 @@ except Exception as e:
   sys.exit()
 ConvFileName = os.path.basename(ConvFile)
 
-def getOpenAIKeys():
+def getOpenAIKeys() -> bool:
   """ # Get OpenAI API keys -------------------------------------------------- """
   try:
     openai.api_key = os.environ['OPENAI_API_KEY']
@@ -267,8 +267,11 @@ def getOpenAIKeys():
       'Both these environment variables should be set in your ~/.bashrc',
       'file or in /etc/bash.bashrc.')
     sys.exit()
-  try:  openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
-  except KeyError: openai.organization = ''
+  try:
+    openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
+  except KeyError:
+    openai.organization = ''
+  return True
 getOpenAIKeys()
 
 engine      = 'text-davinci-003'
@@ -292,7 +295,7 @@ conversation = []
 text_block  = ''
 
 
-def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
+def num_tokens_from_string(gptstring:str, encoding_name:str) -> int:
   """Returns the number of tokens in a text gpt string."""
   encoding = tiktoken.get_encoding(encoding_name)
   num_tokens = len(encoding.encode(gptstring))
@@ -445,7 +448,7 @@ if __name__ == '__main__':
     getScreenColumns()
     if len(cmdTypeAhead) > 0:
       userInput = cmdTypeAhead.pop(0)
-      if userInput[0].rstrip() == '#' or userInput.strip() == '': continue
+      if userInput[0].rstrip() == '#' or len(userInput.strip()) == 0: continue
       if cmdEcho and (userInput[0:5] != '/echo' and userInput[0:5] != '!echo'):
         printstd(USER_NAME+':', color=Fore.YELLOW+Style.BRIGHT)
         print(userInput)
@@ -457,7 +460,7 @@ if __name__ == '__main__':
       except KeyboardInterrupt:
         orderly_exit()
 
-    if userInput.strip() == '' or userInput[0].rstrip() == '#': continue
+    if len(userInput.strip()) == 0 or userInput[0].rstrip() == '#': continue
 
     # Process commands
     if userInput[0] == '!' or userInput[0] == '/':
@@ -665,7 +668,7 @@ if __name__ == '__main__':
           text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
           try:
             tldr_response = gpt3_completion(text+'\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
-            if tldr_response == '': continue
+            if len(tldr_response) == 0: continue
           except:
             printerr('GPT-3 experienced an error. Possibly overloaded.')
             continue
@@ -745,7 +748,7 @@ if __name__ == '__main__':
         os.chdir(ScriptDir)
         awe_prompt = select_awesome_prompt(tok[0:])
         os.chdir(curdir)
-        if awe_prompt == '': continue
+        if len(awe_prompt) == 0: continue
         print(awe_prompt)
         userInput = awe_prompt
 
@@ -756,7 +759,7 @@ if __name__ == '__main__':
           if not file: continue
         else:
           file = find_dv_file(' '.join(tok[1:]), mustexist=True)
-          if file == '':
+          if len(file) == 0:
             printerr(f'dvScript {file} does not exist.')
             continue
         try:
@@ -859,7 +862,7 @@ if __name__ == '__main__':
     try:
       response = gpt3_completion(PromptReplace(text_block)+'\n'+AI_NAME+': ', \
             engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
-      if response == '':
+      if len(response) == 0:
         conversation.pop()
         continue
     except:
