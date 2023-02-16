@@ -58,9 +58,10 @@ def list_awesome_prompt():
 
 def update_awesome() -> bool:
   """ update awesome prompts """
-#  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL
-  printinfo(f'Updating {AWE_JSON_FILE}')
-  printinfo(f'  from {AWE_URL}')
+#  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL, Verbose
+  if Verbose:
+    printinfo(f'Updating {AWE_JSON_FILE}')
+    printinfo(f'  from {AWE_URL}')
   try:
     response = requests.get(AWE_URL, timeout=5)
   except Exception as e:
@@ -81,7 +82,8 @@ def update_awesome() -> bool:
   text = convert_awesome_csv_to_json(AWE_CSV_FILE)
   os.remove(AWE_CSV_FILE)
   writefile(AWE_JSON_FILE, alpha_sort_json(text, 'act'))
-  printinfo(f'{AWE_JSON_FILE} has been updated.')
+  if Verbose:
+    printinfo(f'{AWE_JSON_FILE} has been updated.')
   return True
 
 
