@@ -82,41 +82,8 @@
         "div topdate",
         "div quote_old"
     ],
-    "finance.detik.com": [
-        "news.detik.com"
-    ],
-    "inet.detik.com": [
-        "news.detik.com"
-    ],
-    "hot.detik.com": [
-        "news.detik.com"
-    ],
-    "sport.detik.com": [
-        "news.detik.com"
-    ],
-    "oto.detik.com": [
-        "news.detik.com"
-    ],
-    "travel.detik.com": [
-        "news.detik.com"
-    ],
-    "food.detik.com": [
-        "news.detik.com"
-    ],
-    "health.detik.com": [
-        "news.detik.com"
-    ],
-    "wolipop.detik.com": [
-        "news.detik.com"
-    ],
-    "20.detik.com": [
-        "news.detik.com"
-    ],
-    "foto.detik.com": [
-        "news.detik.com"
-    ],
-    "detik.com": [
-        "news.detik.com"
+    "id.antaranews.com": [
+        "en.antaranews.com"
     ],
     "news.detik.com": [
         "head",
@@ -156,6 +123,42 @@
         "a dtr-evt=",
         "table linksisip",
         "div detikads"
+    ],
+    "finance.detik.com": [
+        "news.detik.com"
+    ],
+    "inet.detik.com": [
+        "news.detik.com"
+    ],
+    "hot.detik.com": [
+        "news.detik.com"
+    ],
+    "sport.detik.com": [
+        "news.detik.com"
+    ],
+    "oto.detik.com": [
+        "news.detik.com"
+    ],
+    "travel.detik.com": [
+        "news.detik.com"
+    ],
+    "food.detik.com": [
+        "news.detik.com"
+    ],
+    "health.detik.com": [
+        "news.detik.com"
+    ],
+    "wolipop.detik.com": [
+        "news.detik.com"
+    ],
+    "20.detik.com": [
+        "news.detik.com"
+    ],
+    "foto.detik.com": [
+        "news.detik.com"
+    ],
+    "detik.com": [
+        "news.detik.com"
     ],
     "nytimes.com": [
         "head",
