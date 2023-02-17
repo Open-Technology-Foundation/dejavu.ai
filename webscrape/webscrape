@@ -114,16 +114,19 @@ def scrape_page(webpage:str, **kwargs) -> str:
 
   scraper_profile = kwargs.get('profile', 'auto')
   if scraper_profile == 'auto':
-    scraper_profile = next((key for key, value in scrapeProfiles.items() \
-        if get_domain_name(webpage) == key), None)
-  if scraper_profile is None: scraper_profile = '_generic_'
+    domain = get_domain_name(webpage)
+    for key, value in scrapeProfiles.items():
+      if domain == key:
+        if (len(value) == 1): scraper_profile = value[0]
+        else:                 scraper_profile = key
+        break
   vprint(f'Profile: {scraper_profile}')
 
   if webpage.startswith('http'):
     string = requests.get(webpage, timeout=10).text
   else:
     string = readfile(webpage)
-  if not string:
+  if len(string) == 0:
     vprint(f'Failed to load {webpage}')
     return ''
 
@@ -172,8 +175,12 @@ def webscrape_help():
   printstd(f'{script_name} vs {script_version}',
       f'Usage: {script_name} [options] url|file',
       '  Where url|file is the object to scrape.',
-      '    -s|--scraper [url|file]',
-      '                   If url|file not specified, lists available scraper profiles.',
+      '    -s|--scraper [profile]',
+      '                   If "profile" not specified, lists available ',
+      '                   scraper profiles.  "profile" defaults to the',
+      '                   generic profile if a pre-defined profile is ',
+      '                   not found.  Profile file is ',
+      '                   '+ script_dir + '/scrape_profiles.json',
       '    -v|--verbose   Increase verbosity.',
       '    -q|--quiet     No verbosity.',
       '    -V|--version   Print version.'
