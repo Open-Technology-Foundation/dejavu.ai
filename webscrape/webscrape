@@ -116,7 +116,7 @@ def scrape_page(webpage:str, **kwargs) -> str:
   if scraper_profile == 'auto':
     scraper_profile = next((key for key, value in scrapeProfiles.items() \
         if get_domain_name(webpage) == key), None)
-  if scraper_profile is None: scraper_profile = 'generic'
+  if scraper_profile is None: scraper_profile = '_generic_'
   vprint(f'Profile: {scraper_profile}')
 
   if webpage.startswith('http'):
