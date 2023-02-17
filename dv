@@ -529,7 +529,12 @@ if __name__ == '__main__':
       # exec
       if tok[0] == 'exec':
         try:
-          subprocess.run(' '.join(tok[1:]), shell=True, executable=SHELL, check=False)
+          if len(tok) == 1:
+            execstr = SHELL
+            os.environ['PS1'] = "\rDejaVu:"+os.environ['PS1']
+          else:
+            execstr = ' '.join(tok[1:])
+          subprocess.run(execstr, shell=True, executable=SHELL, check=False)
         except Exception as e:
           printerr('Exec error '+str(e))
         continue
