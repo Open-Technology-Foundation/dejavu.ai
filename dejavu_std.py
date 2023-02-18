@@ -22,11 +22,13 @@ from shutil import get_terminal_size
 from colorama import init, deinit, Fore, Back, Style
 init()
 
+
 def has_color(stream) -> bool:
   """ Is there a terminal attached? """
   if not hasattr(stream, 'isatty'): return False
   if not stream.isatty(): return False
   return True
+
 
 useColor = has_color(sys.stdout)
 def UseColor(color=None) -> bool:
@@ -51,7 +53,7 @@ def getScreenRows() -> int:
   ScreenColumns, ScreenRows = get_terminal_size()
   return ScreenRows
 
-#def printerr(*args, **kwargs):
+# def printerr(*args, **kwargs):
 #  """ Print to stderr with optional color. """
 #  output=kwargs.get('file', sys.stderr)
 #  if useColor:
@@ -61,72 +63,55 @@ def getScreenRows() -> int:
 #  if useColor: print(Style.RESET_ALL, end='', file=output)
 def printerr(*args, **kwargs):
   """
-  printerr(*args, prefix='!!', sep='\n', end='', back=Black.BLACK, 
+  printerr(*args, prefix='!!', sep='\n', end='', back=Black.BLACK,
       color=Fore.RED, style=Style.NORMAL)
   """
   # global useColor
   prefix = kwargs.get('prefix', '!! ')
   sep = kwargs.get('sep', '\n')
-  end = kwargs.get('end', '')
-  if useColor: print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), sep='', end='', file=sys.stderr)
+  if useColor: print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), sep='', end='', file=sys.stderr)
   for arg in args:
     if prefix: print(prefix, end='', file=sys.stderr)
     print(arg, sep, end='', file=sys.stderr)
   if useColor: print(Style.RESET_ALL, sep='', end='', file=sys.stderr)
 
-#def printinfo(*args, **kwargs):
-#  """ Print info to std with optional color. """
-#  output=kwargs.get('file', sys.stdout)
-#  if useColor:
-#    print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), end='', file=output)
-#  for arg in args:
-#    print(kwargs.get('prefix', '#'), arg, end=kwargs.get('end', '\n'), file=output)
-#  if useColor: print(Style.RESET_ALL, end='', file=output)
+
 def printinfo(*args, **kwargs):
   """
-  printinfo(*args, prefix='# ', sep='\n', end='', back=Black.BLACK, 
+  printinfo(*args, prefix='# ', sep='\n', end='', back=Black.BLACK,
       color=Fore.WHITE, style=Style.DIM)
   """
   # global useColor
   prefix = kwargs.get('prefix', '# ')
   sep = kwargs.get('sep', '\n')
-  end = kwargs.get('end', '')
-  if useColor: print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), sep='', end='')
+  if useColor: print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.DIM), sep='', end='')
   for arg in args:
     if prefix: print(prefix, end='')
     print(arg, sep, end='')
   if useColor: print(Style.RESET_ALL, sep='', end='')
 
-#def printstd(*args, **kwargs):
-#  """ Print to std with optional color. """
-#  output=kwargs.get('file', sys.stdout)
-#  if useColor:
-#    print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), end='', file=output)
-#  for arg in args:
-#    print(arg, end=kwargs.get('end', '\n'), file=output)
-#  if useColor: print(Style.RESET_ALL, end='', file=output)
+
 def printstd(*args, **kwargs):
   """
-  printstd(*args, prefix='', sep='\n', end='', back=Black.BLACK, 
+  printstd(*args, prefix='', sep='\n', end='', back=Black.BLACK,
       color=Fore.WHITE, style=Style.NORMAL)
   """
   # global useColor
   prefix = kwargs.get('prefix', '')
   sep = kwargs.get('sep', '\n')
-  end = kwargs.get('end', '')
-  if useColor: print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), sep='', end='')
+  if useColor: print(kwargs.get('back', Back.BLACK) + kwargs.get('color', Fore.WHITE) + kwargs.get('style', Style.NORMAL), sep='', end='')
   for arg in args:
     if prefix: print(prefix, end='')
     print(arg, sep, end='')
   if useColor: print(Style.RESET_ALL, sep='', end='')
 
 
-def readfile(filepath:str, encoding='utf-8') -> str:
+def readfile(filepath: str, encoding='utf-8') -> str:
   """ Read contents of filename into string. """
   with open(filepath, 'r', encoding=encoding) as infile:
     return infile.read()
 
-def writefile(filename:str, string:str, mode='w', encoding='utf-8'):
+def writefile(filename: str, string: str, mode='w', encoding='utf-8'):
   """ Write string to filename. """
   with open(filename, mode, encoding=encoding) as f:
     f.write(string)
@@ -137,18 +122,18 @@ def tempname(label='tmp', ext='.tmp') -> str:
   tmpdir = os.getenv('TMPDIR')
   if not tmpdir: tmpdir = '/tmp'
   os.makedirs(tmpdir, exist_ok=True)
-  rand = random.randint(11420,99420)
+  rand = random.randint(11420, 99420)
   base = os.path.basename(__file__)
-  #return "{0}/dv-{1}-{2}{3}".format(tmpdir, label, , ext)
+  # return "{0}/dv-{1}-{2}{3}".format(tmpdir, label, , ext)
   return f"{tmpdir}/{base}-{label}-{rand}{ext}"
 
 
-def escstr(string:str) -> str:
+def escstr(string: str) -> str:
   """ Escape \n\t\r in string. """
-  return string.replace('\n','\\n').replace('\r','\\r').replace('\t','\\t')
+  return string.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
 
 
-def is_num(string:str) -> bool:
+def is_num(string: str) -> bool:
   """ Is this string a number? """
   try:
     float(string)
@@ -156,13 +141,14 @@ def is_num(string:str) -> bool:
   except ValueError:
     return False
 
-def url_split(url:str):
+def url_split(url: str):
   """ split url into protocol, host, path """
   protocol, remainder = url.split("://")
   host, path = remainder.split("/", 1)
   return protocol, host, path
 
-def int_list(input_string, minVal:int, maxVal:int, revSort=False):
+
+def int_list(input_string, minVal: int, maxVal: int, revSort=False):
   """ Return an ordered list of numbers. """
   range_list = []
   if type(input_string) == list:
@@ -175,7 +161,7 @@ def int_list(input_string, minVal:int, maxVal:int, revSort=False):
     for numC in numlist:
       if len(numC.strip()) == 0: continue
       if numC.strip() == 'all':
-        numC = str(minVal)+'-'+str(maxVal)
+        numC = str(minVal) + '-' + str(maxVal)
       if '-' in numC:
         stnum, endnum = numC.split('-')
         if len(stnum) == 0:   stnum = int(minVal)
@@ -184,7 +170,7 @@ def int_list(input_string, minVal:int, maxVal:int, revSort=False):
         if stnum < minVal or endnum > maxVal:
           printerr(f'Error: out of range {stnum:d}-{endnum:d}')
           continue
-        range_list += range(stnum, endnum+1)
+        range_list += range(stnum, endnum + 1)
       else:
         if int(numC) < minVal or int(numC) > maxVal: continue
         range_list.append(int(numC))
@@ -284,9 +270,9 @@ def getBrowser() -> str:
 getBrowser()
 
 
-def initHistory(filename:str, ext='.history') -> str:
+def initHistory(filename: str, ext='.history') -> str:
   """ readline() history file +atExit """
-  historyFile = os.path.dirname(filename)+'/.'+os.path.basename(filename)+ext
+  historyFile = os.path.dirname(filename) + '/.' + os.path.basename(filename) + ext
   try:
     readline.read_history_file(historyFile)
     readline.set_history_length(200)
@@ -296,7 +282,7 @@ def initHistory(filename:str, ext='.history') -> str:
   return historyFile
 
 
-def copy_files_recursive(src_dir:str, dest_dir:str, wildcard='*', **kwargs) -> bool:
+def copy_files_recursive(src_dir: str, dest_dir: str, wildcard='*', **kwargs) -> bool:
   """
   success = copy_files_recursive(src_dir, dest_dir, wildcard='*', **kwargs):
   Copy all files matching wildcard from src_dir to dest_dir,
@@ -325,7 +311,7 @@ def copy_files_recursive(src_dir:str, dest_dir:str, wildcard='*', **kwargs) -> b
 
 
 def getfiles(dirs='.', globule='*', **kwargs):
-  """ get a list of files """ 
+  """ get a list of files """
   shorten = kwargs.get('shorten', False)
   get_files = []
   for root in dirs:
@@ -341,9 +327,9 @@ def getfiles(dirs='.', globule='*', **kwargs):
   get_files = []
   for farr in arr:
     if farr.startswith(pwdfiles):
-      farr = '.'+farr[len(pwdfiles):]
+      farr = '.' + farr[len(pwdfiles):]
     elif farr.startswith(HOME):
-      farr = '~'+farr[len(HOME):]
+      farr = '~' + farr[len(HOME):]
     get_files.append(farr)
   get_files.sort()
   return get_files
@@ -358,8 +344,8 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs) -> str:
   maxlen = max(len(x) for x in dfiles)
   numpad = len(str(maxlen))
   totalpad = maxlen + numpad + 3
-  ScreenColumns = getScreenColumns()-1
-  numrows = math.ceil(len(dfiles) / int(ScreenColumns/totalpad))
+  ScreenColumns = getScreenColumns() - 1
+  numrows = math.ceil(len(dfiles) / int(ScreenColumns / totalpad))
   output = [''] * numrows
   row = 0
   for index, file in enumerate(dfiles):
@@ -379,15 +365,15 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs) -> str:
     if 0 <= selection <= len(dfiles): break
     printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
   if selection == 0: return ''
-  return os.path.realpath(os.path.expanduser(dfiles[selection-1]))
+  return os.path.realpath(os.path.expanduser(dfiles[selection - 1]))
 
-def find_file(filename:str, **kwargs) -> str:
+def find_file(filename: str, **kwargs) -> str:
   """
-  fqfn = find_file(filename, 
-                    ext='.dv', 
-                    mustexist=True, 
+  fqfn = find_file(filename,
+                    ext='.dv',
+                    mustexist=True,
                     searchpaths=sys.path)
-  # if not mustexist and file does not exist 
+  # if not mustexist and file does not exist
   # then defaults to sys.path[0]+'/'+filename.ext
   # return '' if fail.
   """
@@ -403,7 +389,7 @@ def find_file(filename:str, **kwargs) -> str:
       filename = os.path.realpath(filename)
       if mustexist and not os.path.exists(filename): return ''
       return filename
-    except Exception as e:
+    except Exception:
       return ''
 
   if not os.path.exists(filename):
@@ -424,4 +410,4 @@ def find_file(filename:str, **kwargs) -> str:
     return ''
 
 
-#end
+# end

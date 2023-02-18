@@ -15,7 +15,7 @@ import json
 script_version  = '1.0'
 script_name     = os.path.realpath(sys.argv.pop(0))
 script_dir      = os.path.dirname(script_name)
-if not script_dir in sys.path: sys.path.append(script_dir)
+if script_dir not in sys.path: sys.path.append(script_dir)
 script_name     = os.path.basename(script_name)
 
 from dejavu_std import printerr, printstd, printinfo, UseColor, readfile
@@ -25,9 +25,9 @@ try:
       scrapeProfiles = json.load(f)
 except FileNotFoundError:
   printerr(f'{script_dir}/scrape_profiles.json could not be opened.')
-  sys.exit()
+  sys.exit(1)
 
-def get_domain_name(url:str):
+def get_domain_name(url: str):
   """ get domain name from url """
   host = urllib.parse.urlparse(url).hostname
   if host:
@@ -35,13 +35,13 @@ def get_domain_name(url:str):
     if hostname[0] == 'www':
       del hostname[0]
     return '.'.join(hostname)
-  return False
+  return ''
 
-def htmd(string:str) -> str:
+def htmd(string: str) -> str:
   """ unescape escaped html """
   return html.unescape(string)
 
-def strip_tags(string:str) -> str:
+def strip_tags(string: str) -> str:
   """This function removes all HTML tags from a given string.
     Args:
         string (str): The string to be stripped of HTML tags.
@@ -52,18 +52,18 @@ def strip_tags(string:str) -> str:
   return regex.sub('', string)
 
 
-def remsp(string:str) -> str:
+def remsp(string: str) -> str:
   """ remove all double occurances of space """
   return re.sub(r'\ +', ' ', string)
 
-def match_tag(string:str, tag:str, stpos:int) -> int:
+def match_tag(string: str, tag: str, stpos: int) -> int:
   """ match html tag in string """
   pattern = re.compile(r'<' + tag + r'[ >]')
   result = pattern.search(string, stpos)
   if result: return result.start()
   return -1
 
-def remove_tag(htmlstring:str, start_tag:str, stTag_keyword:str, **kwargs) -> str:
+def remove_tag(htmlstring: str, start_tag: str, stTag_keyword: str, **kwargs) -> str:
   """ remove html tag from string """
   verbose = kwargs.get('verbose', 0)
   stTag = f'<{start_tag}'
@@ -72,38 +72,39 @@ def remove_tag(htmlstring:str, start_tag:str, stTag_keyword:str, **kwargs) -> st
   if verbose > 1: printstd(f'{stTag},{endTag},{stTag_index}, {stTag_keyword}')
   while stTag_index != -1:
     # find end > of start tag
-    eot = htmlstring.find('>', stTag_index+1)
+    eot = htmlstring.find('>', stTag_index + 1)
     if eot == -1:
       if verbose: printerr(f'end of start tag {stTag} not found')
       break
-    endTag_index = htmlstring.find(endTag, stTag_index+1)
+    endTag_index = htmlstring.find(endTag, stTag_index + 1)
     if endTag_index == -1:
       if verbose: printerr(f'end tag {endTag} not found')
       break
     if stTag_keyword \
-        and not stTag_keyword in htmlstring[stTag_index: eot]:
+            and stTag_keyword not in htmlstring[stTag_index: eot]:
       stTag_index = match_tag(htmlstring, start_tag, eot)
       if verbose > 1: printerr(f'keyword {stTag_keyword} not found')
       continue
     # find real endTag_index
-    start_sub = match_tag(htmlstring, start_tag, eot+1)
+    start_sub = match_tag(htmlstring, start_tag, eot + 1)
     while start_sub < endTag_index and start_sub != -1:
-      end_sub = htmlstring.find(endTag, start_sub+1)
+      end_sub = htmlstring.find(endTag, start_sub + 1)
       if end_sub > endTag_index or end_sub == -1: break
-      endTag_index = htmlstring.find(endTag, end_sub+1)
+      endTag_index = htmlstring.find(endTag, end_sub + 1)
       if endTag_index == -1:
         if verbose: printerr(f'end tag {endTag} not found')
         break
-      start_sub = match_tag(htmlstring, start_tag, endTag_index+1)
+      start_sub = match_tag(htmlstring, start_tag, endTag_index + 1)
 
     htmlstring = htmlstring[:stTag_index] + htmlstring[endTag_index + len(endTag):]
 
     stTag_index = match_tag(htmlstring, start_tag, stTag_index)
   return htmlstring
 
-def scrape_page(webpage:str, **kwargs) -> str:
+def scrape_page(webpage: str, **kwargs) -> str:
   """ scrape webpage """
   scVerbose = kwargs.get('verbose', 0)
+
   def vprint(*string):
     if scVerbose:
       list(map(printinfo, string))
@@ -134,7 +135,7 @@ def scrape_page(webpage:str, **kwargs) -> str:
   string = string.replace('\r\n',     '\n')
   string = string.replace('\r',       '\n')
 
-  for tag in ['p','div','h1','h2','h3','h4','h5','h6','blockquote','ol','ul','dl','code' ]:
+  for tag in ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'ol', 'ul', 'dl', 'code']:
     string = string.replace(f'</{tag}>', f'</{tag}>\n\n')
   string = string.replace('<br>',     '\n\n')
   string = string.replace('<br />',   '\n\n')
@@ -149,7 +150,7 @@ def scrape_page(webpage:str, **kwargs) -> str:
     sx = tag.find(' ')
     if sx != -1:
       stag = tag[:sx]
-      skw = tag[sx+1:]
+      skw = tag[sx + 1:]
     else:
       stag = tag
       skw = ''
@@ -167,12 +168,13 @@ def scrape_page(webpage:str, **kwargs) -> str:
     str1 += line + "\n\n"
   string = htmd(str1)
 
-  return  f'# Source: {webpage}\n' \
-        + f'# Profile: {scraper_profile}\n' \
-        + string
+  return f'# Source: {webpage}\n' \
+         + f'# Profile: {scraper_profile}\n' \
+         + string
 
 def webscrape_help():
-  printstd(f'{script_name} vs {script_version}',
+  printstd(
+      f'{script_name} vs {script_version}',
       f'Usage: {script_name} [options] url|file',
       '  Where url|file is the object to scrape.',
       '    -s|--scraper [profile]',
@@ -180,12 +182,12 @@ def webscrape_help():
       '                   scraper profiles.  "profile" defaults to the',
       '                   generic profile if a pre-defined profile is ',
       '                   not found.  Profile file is ',
-      '                   '+ script_dir + '/scrape_profiles.json',
+      '                   ' + script_dir + '/scrape_profiles.json',
       '    -v|--verbose   Increase verbosity.',
       '    -q|--quiet     No verbosity.',
       '    -V|--version   Print version.'
-    )
-  sys.exit()
+  )
+  sys.exit(0)
 
 # --------------------------------------------------------------------
 if __name__ == '__main__':
@@ -198,7 +200,7 @@ if __name__ == '__main__':
       webscrape_help()
     elif arg in ['-V', '--version']:
       print(script_version)
-      sys.exit()
+      sys.exit(0)
     elif arg in ['-v', '--verbose']:
       verbose += 1
     elif arg in ['-q', '--quiet']:
@@ -213,24 +215,30 @@ if __name__ == '__main__':
       printstd('Scrape profiles are located in:', f'  {script_dir}/scrape_profiles.json', '')
       printstd('Available Scrape Profiles:')
       for arg in list(scrapeProfiles.keys()):
-        printstd('  '+arg)
-      sys.exit()
+        printstd('  ' + arg)
+      sys.exit(0)
     elif arg.startswith('-'):
       printerr(f'Invalid option {arg}.')
+      sys.exit(1)
     else:
       webpage = arg
-  if not webpage:
+  if len(webpage) == 0:
     printerr('url|file to scrape was not specified.')
-    webscrape_help()
+    sys.exit(1)
   try:
     scrape = scrape_page(webpage, profile=profile, verbose=verbose)
     print(scrape.rstrip())
   except KeyboardInterrupt:
     print('^C')
+    sys.exit(1)
   except FileNotFoundError:
     printerr('Input url|file was not found.')
     webscrape_help()
+    sys.exit(1)
   except Exception as e:
     printerr(e)
+    sys.exit(1)
 
-  sys.exit()
+  sys.exit(0)
+
+# end

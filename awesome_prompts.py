@@ -8,14 +8,15 @@ import sys
 import csv
 import json
 import requests
-if not '/usr/share/dejavu.ai' in sys.path: sys.path.append('/usr/share/dejavu.ai')
+if '/usr/share/dejavu.ai' not in sys.path: sys.path.append('/usr/share/dejavu.ai')
 from dejavu_std import *
 
 AWE_URL       = 'https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv'
 AWE_CSV_FILE  = 'awesome-gpt-prompts.csv'
 AWE_JSON_FILE = 'awesome-gpt-prompts.json'
 
-def convert_awesome_csv_to_json(csv_file:str, indent:int=2):
+
+def convert_awesome_csv_to_json(csv_file: str, indent: int = 2):
   """ convert_awesome_csv_to_json """
   csv_rows = []
   with open(csv_file) as AWE_CSV_FILE:
@@ -25,11 +26,13 @@ def convert_awesome_csv_to_json(csv_file:str, indent:int=2):
       csv_rows.extend([{title[i]:row[title[i]] for i in range(len(title)) if title[i] == 'act' or title[i] == 'prompt'}])
   return json.dumps(csv_rows, indent=indent)
 
-def alpha_sort_json(json_str, key, indent:int=2):
+
+def alpha_sort_json(json_str, key, indent: int = 2):
   """ alpha_sort_json """
   json_data = json.loads(json_str)
   sorted_json = sorted(json_data, key=lambda j: j[key])
   return json.dumps(sorted_json, indent=indent)
+
 
 def key_values_list(json_str, key):
   """ key_values_list """
@@ -39,13 +42,15 @@ def key_values_list(json_str, key):
     key_list.append(item[key])
   return key_list
 
-def search_awesome_prompt(act:str):
+
+def search_awesome_prompt(act: str):
   """ search_awesome_prompt """
   data = json.load(open(AWE_JSON_FILE))
   for item in data:
     if item['act'] == act:
       return item['prompt']
   return None
+
 
 def list_awesome_prompt():
   """ list_awesome_prompt """
@@ -55,6 +60,7 @@ def list_awesome_prompt():
     i += 1
     print(str(i) + '. ' + item['act'] + ':', item['prompt'], '\n---')
   return None
+
 
 def update_awesome() -> bool:
   """ update awesome prompts """
@@ -72,13 +78,13 @@ def update_awesome() -> bool:
   if str(response) != '<Response [200]>':
     printerr(f'Could not obtain {AWE_CSV_FILE} from {AWE_URL}')
     return False
-  
+
   try:
     writefile(AWE_CSV_FILE, response.text)
   except:
     printerr(f'Error writing {AWE_CSV_FILE}')
     return False
-  
+
   text = convert_awesome_csv_to_json(AWE_CSV_FILE)
   os.remove(AWE_CSV_FILE)
   writefile(AWE_JSON_FILE, alpha_sort_json(text, 'act'))
@@ -88,13 +94,13 @@ def update_awesome() -> bool:
 
 
 def select_awesome_prompt(aw_args) -> str:
-  """ 
-  Select an awesome prompt from list. 
+  """
+  Select an awesome prompt from list.
     select_awesome_prompt(['update'])
     select_awesome_prompt(['list'])
     select_awesome_prompt(['select'])
   """
-  ChopLen=32  # max length for prompt title field
+  ChopLen = 32  # max length for prompt title field
   try:
     for awarg in aw_args:
       if awarg in ('-u', '--update', 'update', 'upgrade'):
@@ -115,7 +121,7 @@ def select_awesome_prompt(aw_args) -> str:
         if(maxlen > ChopLen): maxlen = ChopLen
         numpad = len(str(maxlen))
         totalpad = maxlen + numpad + 3
-        numrows = math.ceil(len(acts) / int(getScreenColumns()/totalpad))
+        numrows = math.ceil(len(acts) / int(getScreenColumns() / totalpad))
         output = [''] * numrows
         row = 0
         for index, act in enumerate(acts):
@@ -124,15 +130,15 @@ def select_awesome_prompt(aw_args) -> str:
           row += 1
         print('\n'.join(output))
         key = input(f'Select 1-{len(acts)}/q: ')
-        if key == '0' or key == 'q': 
+        if key == '0' or key == 'q':
           key = 'q'
           break
         if not is_num(key): continue
         nkey = int(str(key))
-        if nkey == 0: continue 
-        key = acts[nkey-1]
+        if nkey == 0: continue
+        key = acts[nkey - 1]
         break
-      
+
       if key == 'q':
         awe_prompt = ''
         break
@@ -153,4 +159,5 @@ def select_awesome_prompt(aw_args) -> str:
     return ''
   return awe_prompt
 
-#end
+
+# end
