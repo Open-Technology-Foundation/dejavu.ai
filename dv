@@ -350,7 +350,7 @@ def cmd_help():
           input(Style.RESET_ALL + 'More...')
           print('\r\x1b[2K', end='')
         except KeyboardInterrupt:
-          print(file=sys.stderr)
+          print('^C', file=sys.stderr)
           break
     if len(cmdhelp) == 1:
       printinfo(cmdhelp[0], style=Style.BRIGHT)
@@ -478,6 +478,7 @@ if __name__ == '__main__':
       try:
         userInput = input().lstrip()
       except KeyboardInterrupt:
+        print('^C', file=sys.stderr)
         orderly_exit()
 
     if len(userInput.strip()) == 0 or userInput[0].rstrip() == '#': continue
@@ -485,7 +486,7 @@ if __name__ == '__main__':
     # Process /command
     if userInput[0] == '!' or userInput[0] == '/':
       command = userInput[1:].strip()
-      tok = command.split()
+      tok = tokenize(command)
 
       # help
       if len(tok) == 0:
@@ -500,6 +501,7 @@ if __name__ == '__main__':
         try:
           subprocess.run(['man', 'dv'], check=False)
         except KeyboardInterrupt:
+          print('^C', file=sys.stderr)
           pass
         except Exception as e:
           printerr('Error running man.', e)
@@ -507,7 +509,7 @@ if __name__ == '__main__':
         continue
 
       # /exit
-      if tok[0] == 'exit' or tok[0] == 'quit':
+      if tok[0] in ['exit', 'quit']:
         orderly_exit()
         continue
 
@@ -534,7 +536,7 @@ if __name__ == '__main__':
         continue
 
       # /autosave [on|off]
-      if tok[0] == 'auto' or tok[0] == 'autosave':
+      if tok[0] in ['auto', 'autosave']:
         if len(tok) > 1:
           tok[1] = tok[1].lower()
           if tok[1] in ['1', 'on', 'true']:
@@ -555,6 +557,7 @@ if __name__ == '__main__':
           if input(f'Run {script}? y/n ') != 'y': continue
           cmdTypeAhead = [f'/run {script}']
         except KeyboardInterrupt:
+          print('^C', file=sys.stderr)
           continue
         except Exception as e:
           printerr('ERROR in editor.', str(e)); continue
@@ -573,7 +576,7 @@ if __name__ == '__main__':
         continue
 
       # /exec||!! [program [args]]
-      if tok[0] == 'exec' or tok[0] == '!':
+      if tok[0] in ['exec', '!']:
         try:
           if len(tok) == 1:
             execstr = SHELL
@@ -582,13 +585,14 @@ if __name__ == '__main__':
             execstr = ' '.join(tok[1:])
           subprocess.run(execstr, shell=True, executable=SHELL, check=False)
         except KeyboardInterrupt:
+          print('^C', file=sys.stderr)
           continue
         except Exception as e:
           printerr('Exec error ' + str(e))
         continue
 
       # /status [short|long]
-      if tok[0] == 'stat' or tok[0] == 'status':
+      if tok[0] in ['stat', 'status']:
         longstatus = True
         if len(tok) > 1:
           if tok[1] == 'short': longstatus = False
@@ -596,7 +600,7 @@ if __name__ == '__main__':
         continue
 
       # /username [name]
-      if tok[0] == 'user' or tok[0] == 'user_name':
+      if tok[0] in ['user', 'user_name']:
         if len(tok) > 1:
           tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).strip().upper()
           if len(tmp) < 4 or len(tmp) > 16:
@@ -606,7 +610,7 @@ if __name__ == '__main__':
         if cmdEcho: printinfo('USER_NAME is now ' + USER_NAME)
         continue
       # /ai_name [name]
-      if tok[0] == 'ai_n' or tok[0] == 'ai_name':
+      if tok[0] in ['ai_n', 'ai_name']:
         if len(tok) > 1:
           tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).strip().upper()
           if len(tmp) < 4 or len(tmp) > 16:
@@ -654,19 +658,19 @@ if __name__ == '__main__':
           printinfo('Max Allowed Tokens: {token_limit}, Max Response Tokens: {response_tokens}')
         continue
       # /temperature [1.0]
-      if tok[0] == 'temp' or tok[0] == 'temperature':
+      if tok[0] in ['temp', 'temperature']:
         if len(tok) > 1 and is_num(tok[1]):
           temperature = max(0.0, min(1.0, float(tok[1])))
         if cmdEcho: printinfo('Temperature is now ' + str(temperature))
         continue
       # /top_p [1.0]
-      if tok[0] == 'top_' or tok[0] == 'top_p':
+      if tok[0] in ['top_', 'top_p']:
         if len(tok) > 1 and is_num(tok[1]):
           top_p = max(0.0, min(1.0, float(tok[1])))
         if cmdEcho: printinfo('Top_p is now ' + str(top_p))
         continue
       # /tokens [number]
-      if tok[0] == 'toke' or tok[0] == 'tokens':
+      if tok[0] in ['toke', 'tokens']:
         if len(tok) > 1 and is_num(tok[1]):
           if int(tok[1]) > 0:
             response_tokens = max(16, min(token_limit - used_tokens - 16, int(tok[1])))
@@ -676,27 +680,27 @@ if __name__ == '__main__':
           printinfo('Max Tokens is now ' + str(response_tokens))
         continue
       # /freq_pen [0.0]
-      if tok[0] == 'freq' or tok[0] == 'freq_pen':
+      if tok[0] in ['freq', 'freq_pen']:
         if len(tok) > 1 and is_num(tok[1]):
           freq_pen = max(-2, min(2, float(tok[1])))
         if cmdEcho: printinfo('Frequency Penalty is now ' + str(freq_pen))
         continue
       # /pres_pen [0.0]
-      if tok[0] == 'pres' or tok[0] == 'pres_pen':
+      if tok[0] in ['pres', 'pres_pen']:
         if len(tok) > 1 and is_num(tok[1]):
           pres_pen = max(-2, min(2, float(tok[1])))
         if cmdEcho: printinfo('Presence Penalty is now ' + str(pres_pen))
         continue
 
       # /prompt [newprompt]
-      if tok[0] == 'prom' or tok[0] == 'prompt':
+      if tok[0] in ['prom', 'prompt']:
         if len(tok) > 1:
           Prompt = ' '.join(tok[1:]).replace('\\n', '\n').strip()
         elif cmdEcho: printinfo(Prompt, prefix='')
         continue
 
       # /conversation [conversation]
-      if tok[0] == 'conv' or tok[0] == 'conversation':
+      if tok[0] in ['conv', 'conversation']:
         if len(tok) > 1:
           conversation.append(' '.join(tok[1:]).replace('\\n', '\n'))
         else:
@@ -745,7 +749,7 @@ if __name__ == '__main__':
         continue
 
       # /tldr [range]
-      if tok[0] == 'tldr' or tok[0] == 'tl;dr':
+      if tok[0] in ['tldr', 'tl;dr']:
         if len(tok) < 2: tok.append(str(len(conversation)))
         rnge = int_list(tok[1:], 1, len(conversation), False)
         if not rnge: continue
@@ -796,7 +800,7 @@ if __name__ == '__main__':
         if cmdEcho: printinfo('Session saved to ' + filename)
         continue
 
-      if tok[0] == 'vars' or tok[0] == 'locals':
+      if tok[0] in ['vars', 'locals']:
         varsearch = tok[1] if len(tok) > 1 else ''
         locals_list = [(key, value) for key, value in locals().items() if not callable(value)]
         for key, value in locals_list:
@@ -812,7 +816,7 @@ if __name__ == '__main__':
         continue
 
       # /history [range]
-      if tok[0] == 'hist' or tok[0] == 'history':
+      if tok[0] in ['hist', 'history']:
         if len(tok) > 1:
           if is_num(tok[1][0]):
             rnge = int_list(tok[1:], 1, readline.get_current_history_length(), False)
@@ -839,7 +843,7 @@ if __name__ == '__main__':
         continue
 
       # /awesome [update]
-      if tok[0] == 'awes' or tok[0] == 'awesome':
+      if tok[0] in ['awes', 'awesome']:
         curdir = os.getcwd()
         os.chdir(ScriptDir)
         awe_prompt = select_awesome_prompt(tok[0:])
@@ -870,7 +874,7 @@ if __name__ == '__main__':
         continue
 
       # /instruction [instruction]
-      elif tok[0] == 'inst' or tok[0] == 'instruction':
+      elif tok[0] in ['inst', 'instruction']:
         if len(tok) > 1:
           userInput = ' '.join(tok[1:]).replace('\\n', '\n').strip()
         else:
@@ -888,7 +892,7 @@ if __name__ == '__main__':
         # proceed to gpt
 
       # /import [filename]
-      elif tok[0] == 'impo' or tok[0] == 'import':
+      elif tok[0] in ['impo', 'import']:
         if len(tok) < 2:
           tmpfile = tempname('command', '.dv')
           writefile(tmpfile, '')
@@ -950,7 +954,7 @@ if __name__ == '__main__':
         continue
 
     # Prepend username to user input
-    conversation.append(f'<<USER_NAME>>: {userInput}')
+    conversation.append(f'<<USER_NAME>>/run: {userInput}')
     # Aggregate the entire conversation
     text_block = ('\n'.join(conversation)).strip()
     # Send the entire conversation to GPT-3

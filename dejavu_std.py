@@ -121,6 +121,30 @@ def tempname(label: str='tmp', ext:str ='.tmp') -> str:
   return f"{tmpdir}/{base}-{label}-{rand}{ext}"
 
 
+def tokenize(cmd_line: str) -> list:
+  """ command line tokenizer """
+  tokens = []
+  curr_token = ''
+  q_mark = None
+  for c in cmd_line:
+    if c == '"' or c == "'":
+      if q_mark is None:
+        q_mark = c
+      elif q_mark == c:
+        q_mark = None
+      else:
+        curr_token += c
+    elif c in [' ', ',', '\t'] and q_mark is None:
+      if curr_token:
+        tokens.append(curr_token)
+        curr_token = ''
+    else:
+      curr_token += c
+  if curr_token:
+    tokens.append(curr_token)
+  return tokens
+
+
 def escstr(string: str) -> str:
   """ Escape \n\t\r in string. """
   return string.replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t')
@@ -133,6 +157,7 @@ def is_num(string: str) -> bool:
     return True
   except ValueError:
     return False
+
 
 def url_split(url: str):
   """ split url into protocol, host, path """
@@ -168,7 +193,7 @@ def int_list(input_string, minVal: int, maxVal: int, revSort: bool=False):
         if int(numC) < minVal or int(numC) > maxVal: continue
         range_list.append(int(numC))
   except Exception as e:
-    printerr('Exception error in int_list', str(e))
+    printerr('Error in int_list', str(e))
     return False
   if len(range_list) == 0:
     return False
@@ -183,9 +208,8 @@ SHELL = ''
 def getShell() -> str:
   """ Define SHELL to use. """
   global SHELL
-  SHELL = os.environ.get('SHELL')
+  SHELL = os.environ.get('SHELL').strip()
   if not SHELL: SHELL = '/bin/bash'
-  SHELL = SHELL.strip()
   os.environ['SHELL'] = SHELL
   return SHELL
 getShell()
@@ -194,9 +218,8 @@ HOME = ''
 def getHome() -> str:
   """ Define HOME to use. """
   global HOME
-  HOME = os.environ.get('HOME')
+  HOME = os.environ.get('HOME').strip()
   if not HOME: HOME = os.getcwd()
-  HOME = HOME.strip()
   os.environ['HOME'] = HOME
   return HOME
 getHome()
@@ -210,8 +233,7 @@ def getUser() -> str:
   if len(USER) == 0: USER = os.getenv('USERNAME')
   if len(USER) == 0: USER = os.getenv('USER_NAME')
   if not USER: USER = 'USER'
-  USER = USER.strip()
-  os.environ['USER'] = USER
+  os.environ['USER'] = USER.strip()
   return USER
 getUser()
 
@@ -321,7 +343,7 @@ def selectList(itemlist, sel_prompt):
     try:
       selection = int(input(sel_prompt))
     except KeyboardInterrupt:
-      print('^C')
+      print('^C', file=sys.stderr)
       return ''
     except Exception:
       printerr('Select 1-' + str(len(itemlist)) + ', 0 to exit.'); continue
@@ -363,31 +385,9 @@ def selectFile(dirs: str, globule: str='*', selprompt: str='Select File: ', **kw
   if len(dfiles) == 0:
     printerr('No files found.')
     return ''
-  maxlen = max(len(x) for x in dfiles)
-  numpad = len(str(maxlen))
-  totalpad = maxlen + numpad + 3
-  ScreenColumns = getScreenColumns() - 1
-  numrows = math.ceil(len(dfiles) / int(ScreenColumns / totalpad))
-  output = [''] * numrows
-  row = 0
-  for index, file in enumerate(dfiles):
-    if row == numrows: row = 0
-    output[row] += (f'{index+1:{numpad}d}. {file}').ljust(totalpad, ' ')
-    row += 1
-  print('\n'.join(output))
-  selection = 0
-  while True:
-    try:
-      selection = int(input(selprompt))
-    except KeyboardInterrupt:
-      print('^C')
-      return ''
-    except Exception:
-      printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
-    if 0 <= selection <= len(dfiles): break
-    printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
-  if selection == 0: return ''
-  return os.path.realpath(os.path.expanduser(dfiles[selection - 1]))
+  dfile = selectList(dfiles, selprompt)
+  if len(dfile) == 0: return ''
+  return os.path.realpath(os.path.expanduser(dfile))
 
 
 def find_file(filename: str, **kwargs) -> str:
@@ -414,7 +414,6 @@ def find_file(filename: str, **kwargs) -> str:
       return filename
     except Exception:
       return ''
-
   if not os.path.exists(filename):
     for path in searchpaths:
       # if not must exist, then default path is first entry in searchpaths[]
@@ -424,7 +423,6 @@ def find_file(filename: str, **kwargs) -> str:
       if os.path.exists(f'{path}/{filename}'):
         filename = f'{path}/{filename}'
         break
-
   try:
     filename = os.path.realpath(filename)
     if mustexist and not os.path.exists(filename): return ''
