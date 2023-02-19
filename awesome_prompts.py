@@ -8,13 +8,13 @@ import sys
 import csv
 import json
 import requests
-if '/usr/share/dejavu.ai' not in sys.path: sys.path.append('/usr/share/dejavu.ai')
+if '/usr/share/dejavu.ai' not in sys.path:
+  sys.path.append('/usr/share/dejavu.ai')
 from dejavu_std import *
 
 AWE_URL       = 'https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv'
 AWE_CSV_FILE  = 'awesome-gpt-prompts.csv'
 AWE_JSON_FILE = 'awesome-gpt-prompts.json'
-
 
 def convert_awesome_csv_to_json(csv_file: str, indent: int = 2):
   """ convert_awesome_csv_to_json """
@@ -49,7 +49,7 @@ def search_awesome_prompt(act: str):
   for item in data:
     if item['act'] == act:
       return item['prompt']
-  return None
+  return ''
 
 
 def list_awesome_prompt():
@@ -59,13 +59,13 @@ def list_awesome_prompt():
   for item in data:
     i += 1
     print(str(i) + '. ' + item['act'] + ':', item['prompt'], '\n---')
-  return None
+  return ''
 
 
-def update_awesome() -> bool:
+def update_awesome(verbose=True) -> bool:
   """ update awesome prompts """
-#  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL, Verbose
-  if Verbose:
+#  global AWE_CSV_FILE, AWE_JSON_FILE, AWE_URL
+  if verbose:
     printinfo(f'Updating {AWE_JSON_FILE}')
     printinfo(f'  from {AWE_URL}')
   try:
@@ -88,7 +88,7 @@ def update_awesome() -> bool:
   text = convert_awesome_csv_to_json(AWE_CSV_FILE)
   os.remove(AWE_CSV_FILE)
   writefile(AWE_JSON_FILE, alpha_sort_json(text, 'act'))
-  if Verbose:
+  if verbose:
     printinfo(f'{AWE_JSON_FILE} has been updated.')
   return True
 
@@ -100,16 +100,16 @@ def select_awesome_prompt(aw_args) -> str:
     select_awesome_prompt(['list'])
     select_awesome_prompt(['select'])
   """
-  ChopLen = 32  # max length for prompt title field
+  chop_len = 32  # max length for prompt title field
   try:
     for awarg in aw_args:
       if awarg in ('-u', '--update', 'update', 'upgrade'):
         update_awesome()
         return ''
-      elif awarg in ('-l', '--list', 'list'):
+      if awarg in ('-l', '--list', 'list'):
         list_awesome_prompt()
         return ''
-      elif awarg in ('-s', '--select', 'select'):
+      if awarg in ('-s', '--select', 'select'):
         pass
       else:
         pass
@@ -118,7 +118,7 @@ def select_awesome_prompt(aw_args) -> str:
     while True:
       while True:
         maxlen = max(len(x) for x in acts)
-        if(maxlen > ChopLen): maxlen = ChopLen
+        maxlen = min(chop_len, maxlen)
         numpad = len(str(maxlen))
         totalpad = maxlen + numpad + 3
         numrows = math.ceil(len(acts) / int(getScreenColumns() / totalpad))
@@ -130,7 +130,7 @@ def select_awesome_prompt(aw_args) -> str:
           row += 1
         print('\n'.join(output))
         key = input(f'Select 1-{len(acts)}/q: ')
-        if key == '0' or key == 'q':
+        if key in ['0', 'q']:
           key = 'q'
           break
         if not is_num(key): continue
@@ -144,14 +144,14 @@ def select_awesome_prompt(aw_args) -> str:
         break
       if key:
         awe_prompt = search_awesome_prompt(key)
-        if not awe_prompt:
+        if len(awe_prompt) == 0:
           printerr(f'{key} not found!')
           continue
         printinfo(f'{key}: {awe_prompt}', prefix='')
       key = input('Proceed with this prompt? y/n/q: ')
       if key == 'q':
-         awe_prompt = ''
-         break
+        awe_prompt = ''
+        break
       if key == 'y':
         break
   except:

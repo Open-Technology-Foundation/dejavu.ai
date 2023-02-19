@@ -75,9 +75,9 @@ def find_dv_file(dvfilename: str, **kwargs) -> str:
       dvtext = re.sub(r'\n/USER_NAME \S+', '\n/USER_NAME ' + USER.upper(), dvtext)
       writefile(dvfilename, dvtext)
     except:
-      printerr('Could not create ' + dvfilename)
+      printerr('Could not create script ' + dvfilename)
       return ''
-    printinfo('New dv file ' + dvfilename + ' created.')
+    printinfo('New dv script ' + dvfilename + ' created.')
   return dvfilename
 
 ConvFile      = ''
@@ -95,7 +95,7 @@ def read_dvfile(dvfile: str) -> bool:
   cmdTypeAhead = []; Instructions = []
   dvfile = find_dv_file(dvfile, mustexist=True, ext='.dv')
   if len(dvfile) == 0:
-    printerr(f'File "{dvfile}" does not exist.')
+    printerr(f'Script "{dvfile}" does not exist.')
     return False
   lne = readfile(dvfile)
   Lines = lne.split('\n')
@@ -161,10 +161,10 @@ def dvUsage():
   """ dv short invocation help ----------------------------------------------- """
   print('DéjàVu - GPT-3 Terminal and Chatbot vs ' + Version)
   print("Usage: " + ScriptName + """ [-vqlfxuV] [-c cmd] [dvfile]
-Where 'dvfile' is a conversation.dv file. Default '~/.dv/default.dv'
- -l|--list      List dvfiles in '~/.dv/'.
+Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
+ -l|--list      List dv scripts in '~/.dv/'.
  -a|--autosave on|off
-                On exit, save conversation to current dvfile. Default is off.
+                On exit, save conversation to current dv script. Default is off.
  -c|--cmd 'cmd' Execute 'cmd' on entry to DéjàVu.
  -x|--exit      Immediately exit DéjàVu after first command has been executed.
  -v|--verbose   Verbose on. Default is on.
@@ -187,9 +187,10 @@ while len(sys.argv) > 0:
     installcmd = f'{tempdir_upgrade}/{ScriptName}.install'
     installargs = [installcmd, qqq, '-a' if qqq == '-q' else '']
     os.execvp(installcmd, installargs)
-    sys.exit()
+    sys.exit(0) # should never get here.
   elif sysargv in ['-V', '--version']:
-    print(f'{ScriptName} vs {Version}'); sys.exit()
+    print(f'{ScriptName} vs {Version}')
+    sys.exit(0)
   elif sysargv in ['-v', '--verbose']:
     Verbose = 1; cmdEcho = 1
   elif sysargv in ['-q', '--quiet']:
@@ -202,7 +203,7 @@ while len(sys.argv) > 0:
         filesize = os.stat(f'{dvHome}/{listfile}').st_size / 1024
         modified_date = datetime.datetime.fromtimestamp(os.stat(dvHome + '/' + listfile).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
         printstd(f'{listfile:12s} {filesize:7.2f}KB {modified_date:20s}')
-    sys.exit()
+    sys.exit(0)
 
   elif sysargv in ['-c', '--cmd']:
     if len(sys.argv) > 0:
@@ -211,7 +212,7 @@ while len(sys.argv) > 0:
       argvTypeAhead.append(argvparam)
     else:
       printerr('Command was not specified for ' + sysargv)
-      sys.exit()
+      sys.exit(1)
 
   elif sysargv in ['-a', '--autosave']:
     AutoSave = 1
@@ -232,24 +233,26 @@ while len(sys.argv) > 0:
   elif re.match(r'^-[caCfvqVhuxl]', sysargv):
     sys.argv = [''] + [f'-{c}' for c in sysargv[1:]] + sys.argv
   elif re.match(r'^--', sysargv):
-    printerr('Invalid option ' + sysargv); sys.exit()
+    printerr('Invalid option ' + sysargv)
+    sys.exit(1)
   elif sysargv[0:1] == '-':
-    printerr('Invalid option ' + sysargv); sys.exit()
+    printerr('Invalid option ' + sysargv)
+    sys.exit(1)
   else:
     ConvFile = sysargv
 
 
-# Conversation file validation and default --------------------------------------
+# Conversation script validation and default --------------------------------------
 if len(ConvFile) == 0:
   ConvFile = dvHome + '/default.dv'
 try:
   ConvFile = find_dv_file(ConvFile, mustexist=False)
   if len(ConvFile) == 0:
-    printerr(f'DéjàVu file "{ConvFile}" could not be opened.')
-    sys.exit()
+    printerr(f'DéjàVu script "{ConvFile}" could not be opened.')
+    sys.exit(1)
 except Exception as e:
-  printerr(f'DéjàVu file "{ConvFile}" could not be created.', str(e))
-  sys.exit()
+  printerr(f'DéjàVu script "{ConvFile}" could not be created.', str(e))
+  sys.exit(1)
 ConvFileName = os.path.basename(ConvFile)
 
 def getOpenAIKeys() -> bool:
@@ -265,7 +268,7 @@ def getOpenAIKeys() -> bool:
               '  $ export OPENAI_ORGANIZATION_ID="your_organization"',
               'Both these environment variables should be set in your ~/.bashrc',
               'file or in /etc/bash.bashrc.')
-    sys.exit()
+    sys.exit(1)
   try:
     openai.organization = os.environ['OPENAI_ORGANIZATION_ID']
   except KeyError:
@@ -287,7 +290,7 @@ stop        = ''
 
 if not read_dvfile(ConvFile):
   printerr('Error reading ' + ConvFile)
-  sys.exit()
+  sys.exit(1)
 historyFile = initHistory(ConvFile)
 
 conversation = []
@@ -332,7 +335,7 @@ def cmd_help():
   for cmdhelp in json_data:
     if (rowcount + len(cmdhelp)) >= getScreenRows():
       rowcount = 0
-      if has_color(sys.stdout):
+      if is_terminal(sys.stdout):
         try:
           input(Style.RESET_ALL + 'More...')
           print('\r\x1b[2K', end='')
@@ -360,10 +363,10 @@ def cmdstatus(showall: bool = False):
     printinfo(f'%13s: {suff}' % pref)
   pp(   'Your Name',   USER_NAME)
   pp(   'AI Name',     AI_NAME)
-  pp(   'Conversation', ConvFile.replace(HOME, '~'))
+  pp(   'Conversation',ConvFile.replace(HOME, '~'))
   pp(   'AutoSave',    'On' if AutoSave else 'Off')
   if showall:
-    pp( 'History File', historyFile.replace(HOME, '~'))
+    pp( 'History',     historyFile.replace(HOME, '~'))
     pp( 'AI Engine',   engine)
     sx = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
     pp( 'Tokens Used', int(sx))
@@ -377,8 +380,8 @@ def cmdstatus(showall: bool = False):
     pp( 'Browser',     os.path.basename(BROWSER))
   if not UpdateCheck:
     try:
-      r = requests.get(REPOSITORY_VERSION, timeout=2, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
-      data = str(r.text).strip()
+      rstat = requests.get(REPOSITORY_VERSION, timeout=2, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
+      data = str(rstat.text).strip()
       if Version < data:
         pp('Update', f'Version {data} of DéjàVu is now available.')
         pp('', f"Run '{ScriptName} -q --update' to update.")
@@ -437,14 +440,14 @@ def orderly_exit():
   if AutoSave: autoSave(ConvFile)
   print(Style.RESET_ALL if UseColor() else '')
   if Verbose: printinfo(f'Exiting {ScriptName} {ConvFile}')
-  sys.exit()
+  sys.exit(0)
 
 
 # ----------------------------------------------------------------------------
 if __name__ == '__main__':
   conversation = []
   while True:
-    if len(cmdTypeAhead) == 0 and cmdExit: sys.exit()
+    if len(cmdTypeAhead) == 0 and cmdExit: sys.exit(0)
     getScreenColumns()
     if len(cmdTypeAhead) > 0:
       userInput = cmdTypeAhead.pop(0)
@@ -462,59 +465,69 @@ if __name__ == '__main__':
 
     if len(userInput.strip()) == 0 or userInput[0].rstrip() == '#': continue
 
-    # Process commands
+    # Process /command
     if userInput[0] == '!' or userInput[0] == '/':
-      cmd = userInput[1:].strip()
-      tok = cmd.split()
+      command = userInput[1:].strip()
+      tok = command.split()
 
       # help
-      if len(tok) == 0: cmd_help(); continue
+      if len(tok) == 0:
+        cmd_help()
+        continue
 
       tok[0] = tok[0].lower()
 
-      # man page - README.md
-      if tok[0] == 'help' or tok[0] == '?' or tok[0] == '!' or tok[0] == '/':
+      # /help|/?|/!|//
+      if tok[0] in ['help', '?', '!', '/']:
         subprocess.run(['man', 'dv'], check=False)
         continue
 
-      # exit
+      # /exit
       if tok[0] == 'exit' or tok[0] == 'quit':
         orderly_exit()
         continue
 
+      # /echo [on|off]
       if tok[0] == 'echo':
         if len(tok) > 1:
           tok[1] = tok[1].lower()
-          if tok[1] == '1' or tok[1] == 'on' or tok[1] == 'true':
+          if tok[1] in ['1', 'on', 'true']:
             cmdEcho = True
-          elif tok[1] == '0' or tok[1] == 'off' or tok[1] == 'false':
+          elif tok[1] in ['0', 'off', 'false']:
             cmdEcho = False
+          else:
+            printerr('Invalid argument')
         else: printinfo('Command Echo is ' + str('On' if cmdEcho else 'Off'))
         continue
 
+      # /autosave [on|off]
       if tok[0] == 'auto' or tok[0] == 'autosave':
         if len(tok) > 1:
           tok[1] = tok[1].lower()
-          if tok[1] == '1' or tok[1] == 'on' or tok[1] == 'true':
+          if tok[1] in ['1', 'on', 'true']:
             AutoSave = True
-          elif tok[1] == '0' or tok[1] == 'off' or tok[1] == 'false':
+          elif tok[1] in ['0', 'off', 'false']:
             AutoSave = False
+          else:
+            printerr('Invalid argument')
         else: printinfo('AutoSave is ' + str('On' if AutoSave else 'Off'))
         continue
 
-      # files
-      if tok[0] == 'file' or tok[0] == 'files':
-        tmp = selectFile(['.', dvHome], '*.dv', 'Select File to Edit: ')
-        if not tmp: continue
+      # /files|/scripts
+      if tok[0] in ['file', 'files', 'scri', 'scripts']:
+        script = selectFile(['.', dvHome], '*.dv', 'Select Script to Edit: ')
+        if not script: continue
         try:
-          subprocess.run(EDITOR + ' ' + tmp, shell=True, executable=SHELL, check=False)
+          subprocess.run(f'{EDITOR} "{script}"', shell=True, executable=SHELL, check=False)
+          if input(f'Run {script}? y/n ') != 'y': continue
+          cmdTypeAhead = [f'/run {script}']
+        except KeyboardInterrupt:
+          continue
         except Exception as e:
           printerr('ERROR in editor.', str(e)); continue
-        if input('Run ' + tmp + '? y/n ') != 'y': continue
-        cmdTypeAhead = ['/run ' + tmp]
         continue
 
-      # edit
+      # /edit
       if tok[0] == 'edit':
         modify_datestamp = os.path.getmtime(ConvFile)
         try:
@@ -526,7 +539,7 @@ if __name__ == '__main__':
             cmdTypeAhead = ['/run ' + ConvFile]
         continue
 
-      # exec
+      # /exec [program [args]]
       if tok[0] == 'exec':
         try:
           if len(tok) == 1:
@@ -535,11 +548,13 @@ if __name__ == '__main__':
           else:
             execstr = ' '.join(tok[1:])
           subprocess.run(execstr, shell=True, executable=SHELL, check=False)
+        except KeyboardInterrupt:
+          continue
         except Exception as e:
           printerr('Exec error ' + str(e))
         continue
 
-      # status
+      # /status [short|long]
       if tok[0] == 'stat' or tok[0] == 'status':
         longstatus = True
         if len(tok) > 1:
@@ -547,7 +562,7 @@ if __name__ == '__main__':
         cmdstatus(longstatus)
         continue
 
-      # username
+      # /username [name]
       if tok[0] == 'user' or tok[0] == 'user_name':
         if len(tok) > 1:
           tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).strip().upper()
@@ -557,7 +572,7 @@ if __name__ == '__main__':
           USER_NAME = tmp
         elif cmdEcho: printinfo('USER_NAME is now ' + USER_NAME)
         continue
-      # ai_name
+      # /ai_name [name]
       if tok[0] == 'ai_n' or tok[0] == 'ai_name':
         if len(tok) > 1:
           tmp = re.sub(r'[^a-zA-Z0-9_-]', '', '-'.join(tok[1:])).strip().upper()
@@ -567,51 +582,51 @@ if __name__ == '__main__':
           AI_NAME = tmp
         elif cmdEcho: printinfo('AI_NAME is now ' + AI_NAME)
         continue
-      # engine=text-davinci-003
+      # /engine [text-davinci-003]
       if tok[0] == 'engi' or tok[0] == 'engine':
         if len(tok) > 1:
           engine = tok[1]
         elif cmdEcho: printinfo('Engine is now ' + engine)
         continue
-      # temperature
+      # /temperature [1.0]
       if tok[0] == 'temp' or tok[0] == 'temperature':
         if len(tok) > 1 and is_num(tok[1]):
           temperature = max(0.0, min(1.0, float(tok[1])))
         elif cmdEcho: printinfo('Temperature is now ' + str(temperature))
         continue
-      # top_p=1.0
+      # /top_p [1.0]
       if tok[0] == 'top_' or tok[0] == 'top_p':
         if len(tok) > 1 and is_num(tok[1]):
           top_p = max(0.0, min(1.0, float(tok[1])))
         elif cmdEcho: printinfo('Top_p is now ' + str(top_p))
         continue
-      # tokens=4096
+      # /tokens [4096]
       if tok[0] == 'toke' or tok[0] == 'tokens':
         if len(tok) > 1 and is_num(tok[1]):
           tokens = max(16, min(4096, int(tok[1])))
         elif cmdEcho: printinfo('Tokens is now ' + str(tokens))
         continue
-      # freq_pen=0.0
+      # /freq_pen [0.0]
       if tok[0] == 'freq' or tok[0] == 'freq_pen':
         if len(tok) > 1 and is_num(tok[1]):
           freq_pen = max(-2, min(2, float(tok[1])))
         elif cmdEcho: printinfo('Freq_pen is now ' + str(freq_pen))
         continue
-      # pres_pen=0.0
+      # /pres_pen [0.0]
       if tok[0] == 'pres' or tok[0] == 'pres_pen':
         if len(tok) > 1 and is_num(tok[1]):
           pres_pen = max(-2, min(2, float(tok[1])))
         elif cmdEcho: printinfo('Pres_pen is now ' + str(pres_pen))
         continue
 
-      # prompt [newprompt]
+      # /prompt [newprompt]
       if tok[0] == 'prom' or tok[0] == 'prompt':
         if len(tok) > 1:
           Prompt = ' '.join(tok[1:]).replace('\\n', '\n').strip()
         elif cmdEcho: printinfo(Prompt, prefix='')
         continue
 
-      # conversation [conversation]
+      # /conversation [conversation]
       if tok[0] == 'conv' or tok[0] == 'conversation':
         if len(tok) > 1:
           conversation.append(' '.join(tok[1:]).replace('\\n', '\n'))
@@ -629,13 +644,13 @@ if __name__ == '__main__':
         if len(tok) < 2: tok.append('all')
         rnge = int_list(tok[1:], 1, len(conversation), False)
         if not rnge: continue
-        for r in rnge:
-          text = conversation[r - 1].replace('<<USER_NAME>>', USER_NAME).replace('<<AI_NAME>>', AI_NAME)
+        for rindex in rnge:
+          text = conversation[rindex - 1].replace('<<USER_NAME>>', USER_NAME).replace('<<AI_NAME>>', AI_NAME)
           if text[0:len(USER_NAME) + 2] == USER_NAME + ': ':
-            printstd(f'{r:d}. {USER_NAME}:', color=Fore.YELLOW, style=Style.DIM)
+            printstd(f'{rindex:d}. {USER_NAME}:', color=Fore.YELLOW, style=Style.DIM)
             text = text[len(USER_NAME) + 2:]
           elif text[0:len(AI_NAME) + 2] == AI_NAME + ': ':
-            printstd(f'{r:d}. {AI_NAME}:', color=Fore.GREEN, style=Style.DIM)
+            printstd(f'{rindex:d}. {AI_NAME}:', color=Fore.GREEN, style=Style.DIM)
             text = text[len(AI_NAME) + 2:] + '\n\n'
           for _line in text.splitlines():
             if short:
@@ -644,31 +659,30 @@ if __name__ == '__main__':
             printinfo(textwrap.fill(_line, width=ScreenColumns), prefix='')
         continue
 
-      # clear
-      if tok[0] == 'clea' or tok[0] == 'clear':
-        conversation = []
-        continue
-
-      # delete [0-0]
-      if tok[0] == 'dele' or tok[0] == 'delete':
+      # /delete [0-0]
+      # /clear
+      if tok[0] in ['dele', 'delete', 'clea', 'clear']:
+        if tok[0:4] == 'clea':
+          conversation = []
+          continue
         if len(tok) < 2: continue
         rnge = int_list(tok[1:], 1, len(conversation), True)
         if not rnge: continue
         i = int(0)
-        for r in rnge:
-          del conversation[r - 1]
+        for rdel in rnge:
+          del conversation[rdel - 1]
           i += 1
         if cmdEcho: printinfo(f'{i:d} entries deleted')
         continue
 
-      # tldr [range]
+      # /tldr [range]
       if tok[0] == 'tldr' or tok[0] == 'tl;dr':
         if len(tok) < 2: tok.append(str(len(conversation)))
         rnge = int_list(tok[1:], 1, len(conversation), False)
         if not rnge: continue
-        i = 0
-        for r in rnge:
-          text = conversation[r - 1]
+        i = int(0)
+        for rtldr in rnge:
+          text = conversation[rtldr - 1]
           if text[0:13] != '<<AI_NAME>>: ': continue
           text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
           try:
@@ -683,7 +697,7 @@ if __name__ == '__main__':
           i += 1
         continue
 
-      # save [file]
+      # /save [script]
       if tok[0] == 'save':
         if len(tok) < 2: filename = ConvFile
         else: filename = tok[1].replace('"', '').replace('"', '')
@@ -720,14 +734,14 @@ if __name__ == '__main__':
           print(f'{env}={str(os.getenv(env))}')
         continue
 
-      # history
+      # /history [range]
       if tok[0] == 'hist' or tok[0] == 'history':
         if len(tok) > 1:
           if is_num(tok[1][0]):
             rnge = int_list(tok[1:], 1, readline.get_current_history_length(), False)
             if not rnge: continue
-            for r in rnge:
-              cmdTypeAhead.append(readline.get_history_item(int(r)))
+            for rhis in rnge:
+              cmdTypeAhead.append(readline.get_history_item(int(rhis)))
           else:
             printerr(f'Unknown parameter {tok[1]}.')
           continue
@@ -747,7 +761,7 @@ if __name__ == '__main__':
           print(i, readline.get_history_item(i))
         continue
 
-      # awesome gpt prompts
+      # /awesome [update]
       if tok[0] == 'awes' or tok[0] == 'awesome':
         curdir = os.getcwd()
         os.chdir(ScriptDir)
@@ -757,28 +771,28 @@ if __name__ == '__main__':
         print(awe_prompt)
         userInput = awe_prompt
 
-      # run
+      # /run [script]
       elif tok[0] == 'run':
         if len(tok) < 2:
-          file = selectFile(['.', dvHome], '*.dv', 'Select dvScript to Run: ')
-          if not file: continue
+          script = selectFile(['.', dvHome], '*.dv', 'Select Script to Run: ')
+          if not script: continue
         else:
-          file = find_dv_file(' '.join(tok[1:]), mustexist=True)
-          if len(file) == 0:
-            printerr(f'dvScript {file} does not exist.')
+          script = find_dv_file(' '.join(tok[1:]), mustexist=True)
+          if len(script) == 0:
+            printerr(f'dvScript {script} does not exist.')
             continue
         try:
           readline.write_history_file(historyFile)
-          read_dvfile(file)
-          ConvFile = file
+          read_dvfile(script)
+          ConvFile = script
           historyFile = initHistory(ConvFile)
         except Exception:
-          printerr(f'Run failed for {file}. Reloading {ConvFile}.')
+          printerr(f'Run failed for "{script}". Reloading "{ConvFile}".')
           read_dvfile(ConvFile)
           historyFile = initHistory(ConvFile)
         continue
 
-      # instruction [instruction]
+      # /instruction [instruction]
       elif tok[0] == 'inst' or tok[0] == 'instruction':
         if len(tok) > 1:
           userInput = ' '.join(tok[1:]).replace('\\n', '\n').strip()
@@ -796,7 +810,7 @@ if __name__ == '__main__':
           continue
         # proceed to gpt
 
-      # import file
+      # /import [filename]
       elif tok[0] == 'impo' or tok[0] == 'import':
         if len(tok) < 2:
           tmpfile = tempname('command', '.dv')
@@ -825,7 +839,6 @@ if __name__ == '__main__':
           if not userInput: continue
           print('\n' + userInput.strip())
         # proceed to gpt
-
         else:
           filename = tok[1]
           if not os.path.exists(filename):
@@ -835,8 +848,8 @@ if __name__ == '__main__':
           userInput = readfile(filename).strip() + '\n'
         # proceed to gpt
 
-      # summarise
-      elif tok[0] == 'summ' or tok[0] == 'summarize' or tok[0] == 'summarise':
+      # /summarise [conv|prompt|*all]
+      elif tok[0] in ['summ', 'summarize', 'summarise']:
         if len(tok) < 2: what = 'conversation'
         else: what = tok[1]
         if what[0:4] == 'prom' or what == 'prompt':
@@ -853,10 +866,10 @@ if __name__ == '__main__':
           continue
         # proceed to gpt
 
-      # invalid command
+      # Invalid command
       else:
-        printerr('Invalid command: /' + cmd)
-        if Verbose: printinfo("Enter '/help' for command help")
+        printerr('Invalid command: /' + command)
+        if Verbose: printinfo("/ or /help for command help.")
         continue
 
     # Prepend username to user input
@@ -883,6 +896,6 @@ if __name__ == '__main__':
       print(textwrap.fill(_line, width=ScreenColumns))
 
     # eg, devaju -x -c 'command'
-    if len(cmdTypeAhead) == 0 and cmdExit: sys.exit()
+    if len(cmdTypeAhead) == 0 and cmdExit: sys.exit(0)
 
 # end

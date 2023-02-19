@@ -1,16 +1,15 @@
 # This is a DéjàVu chatbot script.
 # Please edit in accordance with your preferences.
 # Lines beginning with # comments, and are ignored by the program.
-
-!autosave on
-!USER_NAME BIKSU
-!AI_NAME TENZO
-!engine text-davinci-003
-!temperature 0.2
-!top_p 1.0
-!tokens 4096
-!freq_pen 0.0
-!pres_pen 0.0
+/autosave on
+/USER_NAME BIKSU
+/AI_NAME TENZO
+/engine text-davinci-003
+/temperature 0.2
+/top_p 1.0
+/tokens 4096
+/freq_pen 0.0
+/pres_pen 0.0
 /prompt """
 INTRODUCTION
 

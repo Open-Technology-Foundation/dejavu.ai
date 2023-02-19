@@ -23,15 +23,15 @@ from colorama import init, deinit, Fore, Back, Style
 init()
 
 
-def has_color(stream) -> bool:
+def is_terminal(stream) -> bool:
   """ Is there a terminal attached? """
   if not hasattr(stream, 'isatty'): return False
   if not stream.isatty(): return False
   return True
 
 
-useColor = has_color(sys.stdout)
-def UseColor(color=None) -> bool:
+useColor = is_terminal(sys.stdout)
+def UseColor(color: bool=None) -> bool:
   """ Print in Color or Not flag. """
   global useColor
   if color is not None:
@@ -53,14 +53,7 @@ def getScreenRows() -> int:
   ScreenColumns, ScreenRows = get_terminal_size()
   return ScreenRows
 
-# def printerr(*args, **kwargs):
-#  """ Print to stderr with optional color. """
-#  output=kwargs.get('file', sys.stderr)
-#  if useColor:
-#    print(kwargs.get('back', Back.BLACK)+kwargs.get('color', Fore.RED) + kwargs.get('style', Style.NORMAL), end='', file=output)
-#  for arg in args:
-#    print(kwargs.get('prefix', '!!'), arg, end=kwargs.get('end', '\n'), file=output)
-#  if useColor: print(Style.RESET_ALL, end='', file=output)
+
 def printerr(*args, **kwargs):
   """
   printerr(*args, prefix='!!', sep='\n', end='', back=Black.BLACK,
@@ -106,18 +99,18 @@ def printstd(*args, **kwargs):
   if useColor: print(Style.RESET_ALL, sep='', end='')
 
 
-def readfile(filepath: str, encoding='utf-8') -> str:
+def readfile(filepath: str, encoding: str='utf-8') -> str:
   """ Read contents of filename into string. """
   with open(filepath, 'r', encoding=encoding) as infile:
     return infile.read()
 
-def writefile(filename: str, string: str, mode='w', encoding='utf-8'):
+def writefile(filename: str, string: str, mode: str='w', encoding: str='utf-8'):
   """ Write string to filename. """
   with open(filename, mode, encoding=encoding) as f:
     f.write(string)
 
 
-def tempname(label='tmp', ext='.tmp') -> str:
+def tempname(label: str='tmp', ext:str ='.tmp') -> str:
   """ Return a temporary dirname/filename located in TMPDIR or /tmp. """
   tmpdir = os.getenv('TMPDIR')
   if not tmpdir: tmpdir = '/tmp'
@@ -148,14 +141,14 @@ def url_split(url: str):
   return protocol, host, path
 
 
-def int_list(input_string, minVal: int, maxVal: int, revSort=False):
+def int_list(input_string, minVal: int, maxVal: int, revSort: bool=False):
   """ Return an ordered list of numbers. """
   range_list = []
-  if type(input_string) == list:
-    string = ' '.join(input_string).strip()
+  if isinstance(input_string, (list, tuple)):
+    string = ','.join(input_string).strip()
   else:
     string = input_string.strip()
-  string = string.replace(' ', ',').replace(',,', ',').lower()
+  string = string.replace(' ', ',').replace(',,', ',').strip(',').lower()
   try:
     numlist = string.split(',')
     for numC in numlist:
@@ -270,7 +263,7 @@ def getBrowser() -> str:
 getBrowser()
 
 
-def initHistory(filename: str, ext='.history') -> str:
+def initHistory(filename: str, ext: str='.history') -> str:
   """ readline() history file +atExit """
   historyFile = os.path.dirname(filename) + '/.' + os.path.basename(filename) + ext
   try:
@@ -282,7 +275,7 @@ def initHistory(filename: str, ext='.history') -> str:
   return historyFile
 
 
-def copy_files_recursive(src_dir: str, dest_dir: str, wildcard='*', **kwargs) -> bool:
+def copy_files_recursive(src_dir: str, dest_dir: str, wildcard: str='*', **kwargs) -> bool:
   """
   success = copy_files_recursive(src_dir, dest_dir, wildcard='*', **kwargs):
   Copy all files matching wildcard from src_dir to dest_dir,
@@ -310,7 +303,7 @@ def copy_files_recursive(src_dir: str, dest_dir: str, wildcard='*', **kwargs) ->
   return success
 
 
-def getfiles(dirs='.', globule='*', **kwargs):
+def getfiles(dirs: str='.', globule: str='*', **kwargs):
   """ get a list of files """
   shorten = kwargs.get('shorten', False)
   get_files = []
@@ -334,8 +327,9 @@ def getfiles(dirs='.', globule='*', **kwargs):
   get_files.sort()
   return get_files
 
+
 # pylint: disable=too-many-locals
-def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs) -> str:
+def selectFile(dirs: str, globule: str='*', selprompt: str='Select File: ', **kwargs) -> str:
   """ Select a file from a list. """
   dfiles = getfiles(dirs, globule, shorten=kwargs.get('shorten', True))
   if len(dfiles) == 0:
@@ -366,6 +360,7 @@ def selectFile(dirs, globule='*', selprompt='Select File: ', **kwargs) -> str:
     printerr('Select 1-' + str(len(dfiles)) + ', 0 to exit.'); continue
   if selection == 0: return ''
   return os.path.realpath(os.path.expanduser(dfiles[selection - 1]))
+
 
 def find_file(filename: str, **kwargs) -> str:
   """
@@ -404,7 +399,7 @@ def find_file(filename: str, **kwargs) -> str:
 
   try:
     filename = os.path.realpath(filename)
-    if mustexist and not sys.path.exists(filename): return ''
+    if mustexist and not os.path.exists(filename): return ''
     return filename
   except:
     return ''
