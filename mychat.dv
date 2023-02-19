@@ -1,15 +1,22 @@
 # This is a DéjàVu chatbot script.
 # Please edit in accordance with your preferences.
 # Lines beginning with # comments, and are ignored by the program.
+
 /autosave on
+
 /USER_NAME BIKSU
 /AI_NAME TENZO
+
 /engine text-davinci-003
-/temperature 0.2
+/tokens -1
+/temperature 0.3
 /top_p 1.0
-/tokens 4096
 /freq_pen 0.0
 /pres_pen 0.0
+
+# just in case there are existing conversations, /clear will delete them all.
+/clear
+
 /prompt """
 INTRODUCTION
 
@@ -32,21 +39,6 @@ He was born on the 9th of February, 1957, in the Year of the Rooster. He is 66 y
 CONVERSATION
 
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /conversation <<USER_NAME>>: How much do you know about Stephen Bachelor and his teachings?
 /conversation <<AI_NAME>>: I have a good understanding of Stephen Bachelor and his teachings. I am familiar with his philosophy of secular dharma, which is based on the idea that we should strive to be mindful and compassionate in all aspects of life. I also understand his views on the importance of living in the present moment, and his emphasis on developing a deeper understanding of one's self and the world around them. Finally, I am aware of his advice on how to cultivate inner peace and contentment.

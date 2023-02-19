@@ -6,7 +6,7 @@
 /engine text-davinci-003
 /temperature 0.6
 /top_p 1.0
-/tokens 4096
+/tokens 1000
 /freq_pen 0.0
 /pres_pen 0.0
 /prompt """

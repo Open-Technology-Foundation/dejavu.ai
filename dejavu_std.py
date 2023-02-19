@@ -303,6 +303,34 @@ def copy_files_recursive(src_dir: str, dest_dir: str, wildcard: str='*', **kwarg
   return success
 
 
+def selectList(itemlist, sel_prompt):
+  maxlen = max(len(x) for x in itemlist)
+  numpad = len(str(maxlen))
+  totalpad = maxlen + numpad + 3
+  ScreenColumns = getScreenColumns() - 1
+  numrows = math.ceil(len(itemlist) / int(ScreenColumns / totalpad))
+  output = [''] * numrows
+  row = 0
+  for index, file in enumerate(itemlist):
+    if row == numrows: row = 0
+    output[row] += (f'{index+1:{numpad}d}. {file}').ljust(totalpad, ' ')
+    row += 1
+  print('\n'.join(output))
+  selection = 0
+  while True:
+    try:
+      selection = int(input(sel_prompt))
+    except KeyboardInterrupt:
+      print('^C')
+      return ''
+    except Exception:
+      printerr('Select 1-' + str(len(itemlist)) + ', 0 to exit.'); continue
+    if 0 <= selection <= len(itemlist): break
+    printerr('Select 1-' + str(len(itemlist)) + ', 0 to exit.'); continue
+  if selection == 0: return ''
+  return itemlist[selection - 1]
+
+
 def getfiles(dirs: str='.', globule: str='*', **kwargs):
   """ get a list of files """
   shorten = kwargs.get('shorten', False)

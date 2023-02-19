@@ -1,0 +1,421 @@
+{
+  "data": [
+    {
+      "created": null,
+      "id": "babbage",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "davinci",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-embedding-ada-002",
+      "object": "engine",
+      "owner": "openai-internal",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "babbage-code-search-code",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-similarity-babbage-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "ada",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "curie-instruct-beta",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "babbage-code-search-text",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "babbage-similarity",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "curie-search-query",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-search-babbage-text-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-cushman-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-search-babbage-code-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "audio-transcribe-deprecated",
+      "object": "engine",
+      "owner": "openai-internal",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-ada-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-similarity-ada-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-insert-002",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "ada-code-search-code",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "ada-similarity",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-search-ada-text-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-ada-query-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-curie-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-edit-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "davinci-search-document",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "ada-code-search-text",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-ada-doc-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-davinci-edit-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "davinci-instruct-beta",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-similarity-curie-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-search-ada-code-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "ada-search-query",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-davinci-query-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-davinci-002",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-003",
+      "object": "engine",
+      "owner": "openai-internal",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "davinci-search-query",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-insert-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "babbage-search-document",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "ada-search-document",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-babbage-doc-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-002",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-curie-doc-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-curie-query-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "babbage-search-query",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-babbage-001",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-davinci-doc-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-search-babbage-query-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "curie-similarity",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "curie-search-document",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "curie",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-similarity-davinci-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "davinci-similarity",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    }
+  ],
+  "object": "list"
+}

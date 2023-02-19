@@ -85,7 +85,14 @@
     "",
     "Lists over a 100 prompt suggestions from prompts.chat.",
     "If no subcommand is specified, defaults to 'select'.",
-    "Updating occurs directly from prompts.chat github page"
+    "Updating occurs directly from the prompts.chat github page"
+  ],
+  [
+    "/syntax language statement|function",
+    "",
+    "For programmers, display full information for a 'statement'.",
+    "or 'function' in 'language'.",
+    "Eg: /syntax python subprocess"
   ],
   [
     "/import [file]",

@@ -10,19 +10,19 @@
 # To run this script:
 # 	$ dv -f example-script.dv
 #
-/engine				text-davinci-003
-/temperature	0.3
-/top_p				1.0
-/tokens				4096
-/freq_pen			0.0
-/pres_pen			0.0
-
 /AI_NAME			Philip B Corbett
 /USER_NAME		gary dean
 
+/engine				text-davinci-003
+/temperature	0.3
+/tokens				-1
+/top_p				1.0
+/freq_pen			0.0
+/pres_pen			0.0
+
 /prompt 			"""
 ROLE:
-You, <<AI_NAME>>, are the top copy editor at the New York Times. 
+You, <<AI_NAME>>, are the top copy editor at the New York Times. Your role is to edit news articles in the most professional way possible.
 
 
 ARTICLE:

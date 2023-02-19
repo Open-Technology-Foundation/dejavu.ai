@@ -19,6 +19,7 @@ import os
 import datetime
 import re
 import readline
+import signal
 import subprocess
 import sys
 import textwrap
@@ -225,9 +226,11 @@ while len(sys.argv) > 0:
     UseColor(False)
 
   elif sysargv in ['-h', '-?']:
-    dvUsage(); sys.exit()
+    dvUsage()
+    sys.exit()
   elif sysargv == '--help':
-    os.execvp('man', ['man', ScriptName]); sys.exit()
+    os.execvp('man', ['man', ScriptName])
+    sys.exit()
 
   # de-aggregate aggregated short options
   elif re.match(r'^-[caCfvqVhuxl]', sysargv):
@@ -276,17 +279,18 @@ def getOpenAIKeys() -> bool:
   return True
 getOpenAIKeys()
 
-engine      = 'text-davinci-003'
-temperature = 1
-top_p       = 1
-tokens      = 4096
-freq_pen    = 0.0
-pres_pen    = 0.0
-AI_NAME     = 'HAL-2021'
-USER_NAME   = 'DAVE'
-prompt      = ''
-Prompt      = prompt
-stop        = ''
+AI_NAME         = 'HAL-2021'
+USER_NAME       = 'DAVE'
+prompt          = ''
+Prompt          = prompt
+engine          = 'text-davinci-003'
+token_limit     = 4096 if engine == 'text-davinci-003' else 2048
+temperature     = 1
+top_p           = 1
+response_tokens = int(token_limit/2)
+freq_pen        = 0.0
+pres_pen        = 0.0
+stop            = ''
 
 if not read_dvfile(ConvFile):
   printerr('Error reading ' + ConvFile)
@@ -304,22 +308,28 @@ def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
   return num_tokens
 
 
-def gpt3_completion(prompt: str, engine: str, temperature: float, top_p: float, tokens: int, freq_pen: float, pres_pen: float, stop: list) -> str:
+def gpt3_completion(gprompt: str, gengine: str, gtemperature: float, gtop_p: float, gtokens: int, gfreq_pen: float, gpres_pen: float, gstop: list) -> str:
   """  GPT-3 Completion function ---------------------------------------------- """
-  used_tokens = num_tokens_from_string(prompt, 'gpt2')
-  if Verbose and cmdEcho: printinfo(f'{used_tokens} tokens in prompt')
-  prompt = prompt.encode(encoding='ASCII', errors='ignore').decode()
-#  tokens = max(16, int(4096 - (len(prompt.replace(' ',''))/4) - 100))
+  global token_limit, used_tokens
+  gprompt = gprompt.encode(encoding='ASCII', errors='ignore').decode()
+  used_tokens = num_tokens_from_string(gprompt, 'gpt2')
+  if gtokens <= 0:
+    gtokens = max(16, token_limit - used_tokens - 100)
+  if (gtokens + used_tokens) > token_limit:
+    printerr(f'Too many response tokens requested {gtokens}.', 'Try reducing /tokens, or deleting or summarising some of your conversation.') 
+    return ''
+  if Verbose and cmdEcho:
+    printinfo(f'{used_tokens} total tokens in prompt')
   try:
     gpt3_response = openai.Completion.create(
-        engine=engine,
-        prompt=prompt,
-        temperature=temperature,
-        max_tokens=max(16, 4096 - used_tokens - 100),
-        top_p=top_p,
-        frequency_penalty=freq_pen,
-        presence_penalty=pres_pen,
-        stop=stop,
+        engine=gengine,
+        prompt=gprompt,
+        temperature=gtemperature,
+        max_tokens=gtokens,
+        top_p=gtop_p,
+        frequency_penalty=gfreq_pen,
+        presence_penalty=gpres_pen,
+        stop=gstop,
         timeout=90)
   except Exception as gpte:
     printerr('GPT-3 experienced an error: ' + str(gpte))
@@ -356,28 +366,33 @@ def cmd_help():
 def cmdstatus(showall: bool = False):
   """ Print current parameters ----------------------------------------------- """
   # global Prompt, conversation
-  global UpdateCheck
+  global UpdateCheck, token_limit, used_tokens
   printinfo('DéjàVu GPT-3 Terminal vs ' + Version + ' |  Enter ! for help.')
 
   def pp(pref: str, suff: str):
-    printinfo(f'%13s: {suff}' % pref)
-  pp(   'Your Name',   USER_NAME)
-  pp(   'AI Name',     AI_NAME)
-  pp(   'Conversation',ConvFile.replace(HOME, '~'))
-  pp(   'AutoSave',    'On' if AutoSave else 'Off')
+    printinfo(f'%16s: {suff}' % pref)
+  pp(   'Your Name',        USER_NAME)
+  pp(   'AI Name',          AI_NAME)
+  pp(   'Conversation',     ConvFile.replace(HOME, '~'))
+  pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
-    pp( 'History',     historyFile.replace(HOME, '~'))
-    pp( 'AI Engine',   engine)
-    sx = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
-    pp( 'Tokens Used', int(sx))
-    pp( 'Tokens Left', int(4096 - sx))
-    pp( 'Temperature', temperature)
-    pp( 'Frequency',   freq_pen)
-    pp( 'Presence',    pres_pen)
-    pp( 'Cmd Echo',    'On' if cmdEcho else 'Off')
-    pp( 'Shell',       os.path.basename(SHELL))
-    pp( 'Editor',      os.path.basename(EDITOR))
-    pp( 'Browser',     os.path.basename(BROWSER))
+    token_limit = 4096 if engine == 'text-davinci-003' else 2048
+    used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
+    pp( 'Command History',  historyFile.replace(HOME, '~'))
+    pp( 'AI Engine',        engine)
+    pp( 'Token Limit',      token_limit)
+    pp( 'Response Tokens',  response_tokens)
+    pp( 'Tokens Used',      int(used_tokens))
+    pp( 'Tokens Left',      int(token_limit - used_tokens))
+    pp( 'Temperature',      temperature)
+    pp( 'Top_p',            top_p)
+    pp( 'Frequency',        freq_pen)
+    pp( 'Presence',         pres_pen)
+    pp( 'Stop',             str(stop))
+    pp( 'Command Echo',     'On' if cmdEcho else 'Off')
+    pp( 'Shell',            os.path.basename(SHELL))
+    pp( 'Editor',           os.path.basename(EDITOR))
+    pp( 'Browser',          os.path.basename(BROWSER))
   if not UpdateCheck:
     try:
       rstat = requests.get(REPOSITORY_VERSION, timeout=2, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
@@ -449,6 +464,8 @@ if __name__ == '__main__':
   while True:
     if len(cmdTypeAhead) == 0 and cmdExit: sys.exit(0)
     getScreenColumns()
+    used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
+
     if len(cmdTypeAhead) > 0:
       userInput = cmdTypeAhead.pop(0)
       if userInput[0].rstrip() == '#' or len(userInput.strip()) == 0: continue
@@ -478,13 +495,29 @@ if __name__ == '__main__':
       tok[0] = tok[0].lower()
 
       # /help|/?|/!|//
-      if tok[0] in ['help', '?', '!', '/']:
-        subprocess.run(['man', 'dv'], check=False)
+      if tok[0] in ['help', '?', '/']:
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        try:
+          subprocess.run(['man', 'dv'], check=False)
+        except KeyboardInterrupt:
+          pass
+        except Exception as e:
+          printerr('Error running man.', e)
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
         continue
 
       # /exit
       if tok[0] == 'exit' or tok[0] == 'quit':
         orderly_exit()
+        continue
+
+      # /syntax lang func
+      if tok[0] in ['synt', 'syntax']:
+        if len(tok) < 3:
+          printerr('Requires options')
+          printinfo('/syntax language cmd|function')
+          continue
+        cmdTypeAhead = [f'In {tok[1]}, list complete synopsis, syntax, parameters, options, keywords, and usage for "{tok[2]}", giving coded examples: ']
         continue
 
       # /echo [on|off]
@@ -539,8 +572,8 @@ if __name__ == '__main__':
             cmdTypeAhead = ['/run ' + ConvFile]
         continue
 
-      # /exec [program [args]]
-      if tok[0] == 'exec':
+      # /exec||!! [program [args]]
+      if tok[0] == 'exec' or tok[0] == '!':
         try:
           if len(tok) == 1:
             execstr = SHELL
@@ -570,7 +603,7 @@ if __name__ == '__main__':
             printerr('Invalid length in user_name "' + tmp + '". Min 4, Max 16.')
             continue
           USER_NAME = tmp
-        elif cmdEcho: printinfo('USER_NAME is now ' + USER_NAME)
+        if cmdEcho: printinfo('USER_NAME is now ' + USER_NAME)
         continue
       # /ai_name [name]
       if tok[0] == 'ai_n' or tok[0] == 'ai_name':
@@ -580,43 +613,79 @@ if __name__ == '__main__':
             printerr('Invalid length in ai_name "' + tmp + '". Min 4, Max 16.')
             continue
           AI_NAME = tmp
-        elif cmdEcho: printinfo('AI_NAME is now ' + AI_NAME)
+        if cmdEcho: printinfo('AI_NAME is now ' + AI_NAME)
         continue
-      # /engine [text-davinci-003]
-      if tok[0] == 'engi' or tok[0] == 'engine':
+      # /engine [list|engine|update]
+      if tok[0] in ['engi', 'engine', 'engines']:
         if len(tok) > 1:
-          engine = tok[1]
-        elif cmdEcho: printinfo('Engine is now ' + engine)
+          if tok[1] == 'list':
+            with open(f'{ScriptDir}/engines.json') as f:
+                data = json.load(f)
+            gptengines = []
+            for item in data['data']:
+                gptengines.append(item['id'])
+            gptengines.sort()
+            tmp = selectList(gptengines, 'Select GPT Engine: ')
+            gptengines = None
+            if len(tmp) > 0:
+              engine = tmp
+          elif tok[1] == 'update':
+            printinfo('Updating GPT engine list...')
+            tmpfile = tempname('engines.list')
+            enginesfile = f'{ScriptDir}/engines.json'
+            try:
+              subprocess.run(f'openai api engines.list',
+                  stdout=open(tmpfile, 'w'),
+                  shell=True, executable=SHELL, check=False)
+              os.rename(enginesfile, enginesfile+'~')
+              os.rename(tmpfile, enginesfile)
+              printinfo('GPT engine list updated.')
+            except:
+              printerr('GPT engine list not updated.')
+              pass
+            continue
+          else:
+            engine = tok[1]
+        token_limit = 4096 if engine == 'text-davinci-003' else 2048
+        if response_tokens > (token_limit-100):
+          response_tokens = int(token_limit/2)
+        if cmdEcho:
+          printinfo(f'Engine is now {engine}')
+          printinfo('Max Allowed Tokens: {token_limit}, Max Response Tokens: {response_tokens}')
         continue
       # /temperature [1.0]
       if tok[0] == 'temp' or tok[0] == 'temperature':
         if len(tok) > 1 and is_num(tok[1]):
           temperature = max(0.0, min(1.0, float(tok[1])))
-        elif cmdEcho: printinfo('Temperature is now ' + str(temperature))
+        if cmdEcho: printinfo('Temperature is now ' + str(temperature))
         continue
       # /top_p [1.0]
       if tok[0] == 'top_' or tok[0] == 'top_p':
         if len(tok) > 1 and is_num(tok[1]):
           top_p = max(0.0, min(1.0, float(tok[1])))
-        elif cmdEcho: printinfo('Top_p is now ' + str(top_p))
+        if cmdEcho: printinfo('Top_p is now ' + str(top_p))
         continue
-      # /tokens [4096]
+      # /tokens [number]
       if tok[0] == 'toke' or tok[0] == 'tokens':
         if len(tok) > 1 and is_num(tok[1]):
-          tokens = max(16, min(4096, int(tok[1])))
-        elif cmdEcho: printinfo('Tokens is now ' + str(tokens))
+          if int(tok[1]) > 0:
+            response_tokens = max(16, min(token_limit - used_tokens - 16, int(tok[1])))
+          else:
+            response_tokens = -1
+        if cmdEcho: 
+          printinfo('Max Tokens is now ' + str(response_tokens))
         continue
       # /freq_pen [0.0]
       if tok[0] == 'freq' or tok[0] == 'freq_pen':
         if len(tok) > 1 and is_num(tok[1]):
           freq_pen = max(-2, min(2, float(tok[1])))
-        elif cmdEcho: printinfo('Freq_pen is now ' + str(freq_pen))
+        if cmdEcho: printinfo('Frequency Penalty is now ' + str(freq_pen))
         continue
       # /pres_pen [0.0]
       if tok[0] == 'pres' or tok[0] == 'pres_pen':
         if len(tok) > 1 and is_num(tok[1]):
           pres_pen = max(-2, min(2, float(tok[1])))
-        elif cmdEcho: printinfo('Pres_pen is now ' + str(pres_pen))
+        if cmdEcho: printinfo('Presence Penalty is now ' + str(pres_pen))
         continue
 
       # /prompt [newprompt]
@@ -686,7 +755,15 @@ if __name__ == '__main__':
           if text[0:13] != '<<AI_NAME>>: ': continue
           text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
           try:
-            tldr_response = gpt3_completion(text + '\n\nTL;DR: ', engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+            tldr_response = gpt3_completion(
+                text + '\n\nTL;DR: ', 
+                engine, 
+                temperature, 
+                top_p, 
+                response_tokens, 
+                freq_pen, 
+                pres_pen, 
+                stop)
             if len(tldr_response) == 0: continue
           except:
             printerr('GPT-3 experienced an error. Possibly overloaded.')
@@ -880,7 +957,7 @@ if __name__ == '__main__':
     try:
       response = gpt3_completion(
           PromptReplace(text_block) + '\n' + AI_NAME + ': ',
-          engine, temperature, top_p, tokens, freq_pen, pres_pen, stop)
+          engine, temperature, top_p, response_tokens, freq_pen, pres_pen, stop)
       if len(response) == 0:
         conversation.pop()
         continue
