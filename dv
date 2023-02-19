@@ -182,7 +182,7 @@ while len(sys.argv) > 0:
   sysargv = sys.argv.pop(0).strip()
   if not sysargv: continue
   if sysargv in ['-u', '--upgrade', '--update']:
-    update = True
+    updateDV = True
   elif sysargv in ['-V', '--version']:
     print(f'{ScriptName} vs {Version}')
     sys.exit(0)
@@ -190,7 +190,6 @@ while len(sys.argv) > 0:
     Verbose = 1; cmdEcho = 1
   elif sysargv in ['-q', '--quiet']:
     Verbose = 0; cmdEcho = 0
-
   elif sysargv in ['-l', '--list']:
     printinfo(f'Dejavu conversation files in {dvHome}')
     for listfile in os.listdir(dvHome):
@@ -199,7 +198,6 @@ while len(sys.argv) > 0:
         modified_date = datetime.datetime.fromtimestamp(os.stat(dvHome + '/' + listfile).st_mtime).strftime('%Y-%m-%d %H:%M:%S')
         printstd(f'{listfile:12s} {filesize:7.2f}KB {modified_date:20s}')
     sys.exit(0)
-
   elif sysargv in ['-c', '--cmd']:
     if len(sys.argv) > 0:
       argvparam = sys.argv.pop(0).strip()
@@ -208,24 +206,19 @@ while len(sys.argv) > 0:
     else:
       printerr('Command was not specified for ' + sysargv)
       sys.exit(1)
-
   elif sysargv in ['-a', '--autosave']:
     AutoSave = 1
-
   elif sysargv in ['-x', '--exit']:
     Verbose = 0
     cmdExit = 1
-
   elif sysargv in ['-C', '--no-color']:
     UseColor(False)
-
   elif sysargv in ['-h', '-?']:
     dvUsage()
     sys.exit()
   elif sysargv == '--help':
     os.execvp('man', ['man', ScriptName])
     sys.exit()
-
   # de-aggregate aggregated short options
   elif re.match(r'^-[caCfvqVhuxl]', sysargv):
     sys.argv = [''] + [f'-{c}' for c in sysargv[1:]] + sys.argv
