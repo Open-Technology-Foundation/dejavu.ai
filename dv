@@ -177,18 +177,12 @@ Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
 """)
 
 # argv processing ---------------------------------------------------------------
+updateDV = False
 while len(sys.argv) > 0:
   sysargv = sys.argv.pop(0).strip()
   if not sysargv: continue
   if sysargv in ['-u', '--upgrade', '--update']:
-    tempdir_upgrade = tempname('upgrade', '')
-    os.makedirs(tempdir_upgrade, exist_ok=True); os.chdir(tempdir_upgrade)
-    qqq = '-v' if Verbose else '-q'
-    subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir_upgrade])
-    installcmd = f'{tempdir_upgrade}/{ScriptName}.install'
-    installargs = [installcmd, qqq, '-a' if qqq == '-q' else '']
-    os.execvp(installcmd, installargs)
-    sys.exit(0) # should never get here.
+    update = True
   elif sysargv in ['-V', '--version']:
     print(f'{ScriptName} vs {Version}')
     sys.exit(0)
@@ -243,6 +237,19 @@ while len(sys.argv) > 0:
     sys.exit(1)
   else:
     ConvFile = sysargv
+
+if updateDV:
+  tempdir_upgrade = tempname('upgrade', '')
+  os.makedirs(tempdir_upgrade, exist_ok=True)
+  os.chdir(tempdir_upgrade)
+  qqq = '-v' if Verbose else '-q'
+  subprocess.call(['git', 'clone', qqq, REPOSITORY, tempdir_upgrade])
+  installcmd = f'{tempdir_upgrade}/{ScriptName}.install'
+  installargs = [installcmd, qqq, '-a' if qqq == '-q' else '']
+  try:
+    os.execvp(installcmd, installargs)
+  except:
+    sys.exit(0) # should never get here.
 
 
 # Conversation script validation and default --------------------------------------
