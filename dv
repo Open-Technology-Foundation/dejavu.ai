@@ -732,13 +732,17 @@ if __name__ == '__main__':
             printinfo(textwrap.fill(_line, width=ScreenColumns), prefix='')
         continue
 
-      # /delete [0-0]
       # /clear
-      if tok[0] in ['dele', 'delete', 'clea', 'clear']:
-        if tok[0:4] == 'clea':
-          conversation = []
+      if tok[0] in ['clea', 'clear']:
+        conversation = []
+        printinfo('Conversation cleared.')
+        continue
+
+      # /delete [0-0]
+      if tok[0] in ['dele', 'delete']:
+        if len(tok) < 2:
+          printerr('Range not specified.')
           continue
-        if len(tok) < 2: continue
         rnge = int_list(tok[1:], 1, len(conversation), True)
         if not rnge: continue
         i = int(0)

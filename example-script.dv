@@ -14,8 +14,8 @@
 /USER_NAME		gary dean
 
 /engine				text-davinci-003
-/temperature	0.3
 /tokens				-1
+/temperature	0.3
 /top_p				1.0
 /freq_pen			0.0
 /pres_pen			0.0
@@ -58,7 +58,9 @@ Include a Datestamp at the top, then a Headline, then a By-line (if any), and pu
 
 /tldr
 
-# further instructions
+/list
+
+# further instructions if you wish...
 #/instruction """
 #Rewrite this re-written article and make it more sensational.
 #"""

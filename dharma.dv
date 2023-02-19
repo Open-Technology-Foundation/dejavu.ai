@@ -1,14 +1,17 @@
 # This is the default Dejavu conversation prompt file.
 # Please edit in accordance with your preferences.
 # Lines beginning with # comments, and are ignored by the program.
+
 /USER_NAME SYSADMIN
 /AI_NAME HAL-2021
+
 /engine text-davinci-003
+/tokens 1000
 /temperature 0.6
 /top_p 1.0
-/tokens 1000
 /freq_pen 0.0
 /pres_pen 0.0
+
 /prompt """
 <<USER_NAME>>: My name is <<USER_NAME>>, an Indonesian computer systems engineer with experience with Ubuntu Linux and open source software.
 
