@@ -54,6 +54,7 @@ UpdateCheck = False
 # Process command line and define ConvFile to use
 Version = readfile(f'{ScriptDir}/dejavu.version').strip()
 
+# ----------------------------------------------------------------------------
 def find_dv_file(dvfilename: str, **kwargs) -> str:
   """
   Finds/Creates fqfn for dv filename.
@@ -90,8 +91,9 @@ AutoSave      = False
 cmdExit       = 0
 Verbose       = True
 
+# ----------------------------------------------------------------------------
 def read_dvfile(dvfile: str) -> bool:
-  """  Read .dv script ------------------------------------------------------- """
+  """  Read .dv script """
   global cmdTypeAhead, argvTypeAhead, Instructions
   cmdTypeAhead = []; Instructions = []
   dvfile = find_dv_file(dvfile, mustexist=True, ext='.dv')
@@ -158,8 +160,9 @@ def read_dvfile(dvfile: str) -> bool:
     argvTypeAhead = []
   return True
 
+# ----------------------------------------------------------------------------
 def dvUsage():
-  """ dv short invocation help ----------------------------------------------- """
+  """ dv short invocation help """
   print('DéjàVu - GPT-3 Terminal and Chatbot vs ' + Version)
   print("Usage: " + ScriptName + """ [-vqlfxuV] [-c cmd] [dvfile]
 Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
@@ -176,7 +179,7 @@ Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
  --help         Full Help manpages.
 """)
 
-# argv processing ---------------------------------------------------------------
+# argv processing ------------------------------------------------------------
 updateDV = False
 while len(sys.argv) > 0:
   sysargv = sys.argv.pop(0).strip()
@@ -245,7 +248,7 @@ if updateDV:
     sys.exit(0) # should never get here.
 
 
-# Conversation script validation and default --------------------------------------
+# Conversation script validation and default ---------------------------------
 if len(ConvFile) == 0:
   ConvFile = dvHome + '/default.dv'
 try:
@@ -258,8 +261,9 @@ except Exception as e:
   sys.exit(1)
 ConvFileName = os.path.basename(ConvFile)
 
+# ----------------------------------------------------------------------------
 def getOpenAIKeys() -> bool:
-  """ # Get OpenAI API keys -------------------------------------------------- """
+  """ # Get OpenAI API keys  """
   try:
     openai.api_key = os.environ['OPENAI_API_KEY']
   except KeyError:
@@ -300,16 +304,16 @@ historyFile = initHistory(ConvFile)
 conversation = []
 text_block  = ''
 
-
+# ----------------------------------------------------------------------------
 def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
   """Returns the number of tokens in a text gpt string."""
   encoding = tiktoken.get_encoding(encoding_name)
   num_tokens = len(encoding.encode(gptstring))
   return num_tokens
 
-
+# ----------------------------------------------------------------------------
 def gpt3_completion(gprompt: str, gengine: str, gtemperature: float, gtop_p: float, gtokens: int, gfreq_pen: float, gpres_pen: float, gstop: list) -> str:
-  """  GPT-3 Completion function ---------------------------------------------- """
+  """  GPT-3 Completion function """
   global token_limit, used_tokens
   gprompt = gprompt.encode(encoding='ASCII', errors='ignore').decode()
   used_tokens = num_tokens_from_string(gprompt, 'gpt2')
@@ -336,9 +340,9 @@ def gpt3_completion(gprompt: str, gengine: str, gtemperature: float, gtop_p: flo
     return ''
   return gpt3_response['choices'][0]['text'].strip('\n')
 
-
+# ---------------------------------------------------------------------------
 def cmd_help():
-  """ dejavu command help ----------------------------------------------------- """
+  """ dejavu command help """
   printinfo('DéjàVu System Commands', style=Style.BRIGHT)
   json_data = json.loads(readfile(ScriptDir + '/dejavu-command-help.json'))
   rowcount = 1
@@ -363,8 +367,9 @@ def cmd_help():
       rowcount += 1
 
 
+# ---------------------------------------------------------------------------
 def cmdstatus(showall: bool = False):
-  """ Print current parameters ----------------------------------------------- """
+  """ Print current parameters """
   # global Prompt, conversation
   global UpdateCheck, token_limit, used_tokens
   printinfo('DéjàVu GPT-3 Terminal vs ' + Version + ' |  Enter ! for help.')
@@ -405,8 +410,9 @@ def cmdstatus(showall: bool = False):
       pass
 
 
+# ---------------------------------------------------------------------------
 def PromptReplace(conversationText: str, AIs: str = '<<AI_NAME>>', AIr: str = '', USs: str = '<<USER_NAME>>', USr: str = '') -> str:
-  """ ---------------------------------------------------------------------------
+  """
   Replace <<>> markers in prompt and conversation
   with the appropriate text
   """
@@ -418,9 +424,9 @@ def PromptReplace(conversationText: str, AIs: str = '<<AI_NAME>>', AIr: str = ''
   newp = newp.replace(USs, USr, -1)
   return newp.strip() + '\n'
 
-
+# ----------------------------------------------------------------------------
 def autoSave(dv_filename: str):
-  """ Autosave current chat -------------------------------------------------- """
+  """ Autosave current chat """
   # global conversation, Instructions
   printinfo('AutoSaving ' + dv_filename, end='')
   autosave_file = tempname('autosave', '.dv')
@@ -448,13 +454,16 @@ def autoSave(dv_filename: str):
   except Exception as saveerr:
     printerr(f'Error renaming {autosave_file} to {dv_filename}: {str(saveerr)}')
 
-
+# ----------------------------------------------------------------------------
 def orderly_exit():
-  """ Exit script nicely -----------------------------------------------------"""
+  """ Exit script nicely """
   # global AutoSave
-  if AutoSave: autoSave(ConvFile)
-  print(Style.RESET_ALL if UseColor() else '')
-  if Verbose: printinfo(f'Exiting {ScriptName} {ConvFile}')
+  if AutoSave:
+    autoSave(ConvFile)
+  if Verbose: 
+    print('\r\x1b[2K' if UseColor() else '', end='')
+    printinfo(f'Exiting {ScriptName} {ConvFile}')
+    print(Style.RESET_ALL if UseColor() else '', end='')
   sys.exit(0)
 
 
@@ -478,8 +487,8 @@ if __name__ == '__main__':
       try:
         userInput = input().lstrip()
       except KeyboardInterrupt:
-        print('^C', file=sys.stderr)
-        orderly_exit()
+        if input_key('Exit Dejavu?') == 'y': orderly_exit()
+        else: continue
 
     if len(userInput.strip()) == 0 or userInput[0].rstrip() == '#': continue
 
@@ -548,13 +557,13 @@ if __name__ == '__main__':
         else: printinfo('AutoSave is ' + str('On' if AutoSave else 'Off'))
         continue
 
-      # /files|/scripts
-      if tok[0] in ['file', 'files', 'scri', 'scripts']:
-        script = selectFile(['.', dvHome], '*.dv', 'Select Script to Edit: ')
+      # /scripts
+      if tok[0] in ['scri', 'scripts', 'file', 'files']:
+        script = selectFile(['.', dvHome], '*.dv', 'Select Script')
         if not script: continue
         try:
           subprocess.run(f'{EDITOR} "{script}"', shell=True, executable=SHELL, check=False)
-          if input(f'Run {script}? y/n ') != 'y': continue
+          if input_key(f'Run {script}?') != 'y': continue
           cmdTypeAhead = [f'/run {script}']
         except KeyboardInterrupt:
           print('^C', file=sys.stderr)
@@ -571,7 +580,7 @@ if __name__ == '__main__':
         except Exception as e:
           printerr('Edit error ' + str(e)); continue
         if modify_datestamp != os.path.getmtime(ConvFile):
-          if input(f'Re-Load {ConvFile}? y/n ') == 'y':
+          if input_key(f'Re-Load {ConvFile}?') == 'y':
             cmdTypeAhead = ['/run ' + ConvFile]
         continue
 
@@ -629,7 +638,7 @@ if __name__ == '__main__':
             for item in data['data']:
                 gptengines.append(item['id'])
             gptengines.sort()
-            tmp = selectList(gptengines, 'Select GPT Engine: ')
+            tmp = selectList(gptengines, 'Select GPT Engine')
             gptengines = None
             if len(tmp) > 0:
               engine = tmp
@@ -788,10 +797,8 @@ if __name__ == '__main__':
         else: filename = tok[1].replace('"', '').replace('"', '')
         filename = find_dv_file(filename, mustexist=False)
         if os.path.exists(filename):
-          try:
-            userInput = input(f'\n{filename} exists. Overwrite? (y/n) ')
-            if userInput != 'y': continue
-          except KeyboardInterrupt: continue
+          if input_key(f'\n{filename} exists. Overwrite?') != 'y':
+            continue
         p = f'engine={engine}\ntemperature={temperature:f}\ntop_p={top_p:f}\ntokens=4096\nfreq_pen={freq_pen:f}\npres_pen={pres_pen:f}\nAI_NAME={AI_NAME}\nUSER_NAME={USER_NAME}\n'
         try:
           writefile(filename,
@@ -859,7 +866,7 @@ if __name__ == '__main__':
       # /run [script]
       elif tok[0] == 'run':
         if len(tok) < 2:
-          script = selectFile(['.', dvHome], '*.dv', 'Select Script to Run: ')
+          script = selectFile(['.', dvHome], '*.dv', 'Select Script to Run')
           if not script: continue
         else:
           script = find_dv_file(' '.join(tok[1:]), mustexist=True)
@@ -908,11 +915,8 @@ if __name__ == '__main__':
               userInput = ''
               break
             userInput = readfile(tmpfile)
-            if not userInput: break
-            while True:
-              ynr = input(f'Execute instructions in {tmpfile}? yes/no/re-edit ').lower()
-              if ynr in ['y', 'n', 'r']: break
-              printerr('Valid input y, n, or r.')
+            if len(userInput) == 0: break
+            ynr = input_key(f'Execute instructions in {tmpfile}? Or re-edit?', ['y', 'n', 'r'], ['n'])
             if ynr == 'y': break
             if ynr == 'r': continue
             userInput = ''

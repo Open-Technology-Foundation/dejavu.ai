@@ -43,17 +43,17 @@ def key_values_list(json_str, key):
   return key_list
 
 
-def search_awesome_prompt(act: str):
-  """ search_awesome_prompt """
+def search_awesome_prompt(act: str) -> str:
+  """ search for awesome prompt with key """
   data = json.load(open(AWE_JSON_FILE))
   for item in data:
-    if item['act'] == act:
+    if act == item['act'].strip():
       return item['prompt']
   return ''
 
 
 def list_awesome_prompt():
-  """ list_awesome_prompt """
+  """ list awesome prompts """
   data = json.load(open(AWE_JSON_FILE))
   i = 0
   for item in data:
@@ -116,29 +116,7 @@ def select_awesome_prompt(aw_args) -> str:
     acts = key_values_list(readfile(AWE_JSON_FILE), 'act')
     awe_prompt = ''
     while True:
-      while True:
-        maxlen = max(len(x) for x in acts)
-        maxlen = min(chop_len, maxlen)
-        numpad = len(str(maxlen))
-        totalpad = maxlen + numpad + 3
-        numrows = math.ceil(len(acts) / int(getScreenColumns() / totalpad))
-        output = [''] * numrows
-        row = 0
-        for index, act in enumerate(acts):
-          if row == numrows: row = 0
-          output[row] += (f'{index+1:{numpad}d}. {act[0:maxlen-5]}').ljust(totalpad, ' ')
-          row += 1
-        print('\n'.join(output))
-        key = input(f'Select 1-{len(acts)}/q: ')
-        if key in ['0', 'q']:
-          key = 'q'
-          break
-        if not is_num(key): continue
-        nkey = int(str(key))
-        if nkey == 0: continue
-        key = acts[nkey - 1]
-        break
-
+      key = selectList(acts, 'Select Awesome Prompt', chop_len)
       if key == 'q':
         awe_prompt = ''
         break
@@ -148,7 +126,7 @@ def select_awesome_prompt(aw_args) -> str:
           printerr(f'{key} not found!')
           continue
         printinfo(f'{key}: {awe_prompt}', prefix='')
-      key = input('Proceed with this prompt? y/n/q: ')
+      key = input_key('Send this prompt to GPT?', ['y', 'n', 'q'])
       if key == 'q':
         awe_prompt = ''
         break

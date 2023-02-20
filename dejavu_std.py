@@ -325,31 +325,52 @@ def copy_files_recursive(src_dir: str, dest_dir: str, wildcard: str='*', **kwarg
   return success
 
 
-def selectList(itemlist, sel_prompt):
+def input_key(key_prompt, keys=['y', 'n'], abortwith=['n']):
+  """
+  script = 'text.dv'
+  key = input_key(f'Edit/Run {script}?', ['3-4', '6-9', 'e', 'r'], ['q','0'])
+  """
+  valid_keys = abortwith
+  for k in keys:
+    if '-' in k and (k[0] >= '0' and k[0] <= '9'):
+      min_val, max_val = k.split('-')
+      for n in range(int(min_val), int(max_val)+1):
+        valid_keys.append(str(n))
+    else:
+      valid_keys.append(k)
+  try:
+    while (
+        key_select := input(f'{key_prompt} {"/".join(keys)}: ')
+      ) not in valid_keys:
+      pass
+  except KeyboardInterrupt:
+    key_select = abortwith[0]
+    print('^C', file=sys.stderr)
+  except Exception as e:
+    printerr(e)
+    pass
+  return key_select
+
+
+def selectList(itemlist, sel_prompt, truncate=0):
   maxlen = max(len(x) for x in itemlist)
+  if truncate and maxlen > truncate:
+    maxlen = truncate
   numpad = len(str(maxlen))
   totalpad = maxlen + numpad + 3
   ScreenColumns = getScreenColumns() - 1
   numrows = math.ceil(len(itemlist) / int(ScreenColumns / totalpad))
   output = [''] * numrows
   row = 0
-  for index, file in enumerate(itemlist):
+  for index, item in enumerate(itemlist):
     if row == numrows: row = 0
-    output[row] += (f'{index+1:{numpad}d}. {file}').ljust(totalpad, ' ')
+    output[row] += (f'{index+1:{numpad}d}. {item[0:maxlen]}').ljust(totalpad, ' ')
     row += 1
   print('\n'.join(output))
   selection = 0
-  while True:
-    try:
-      selection = int(input(sel_prompt))
-    except KeyboardInterrupt:
-      print('^C', file=sys.stderr)
-      return ''
-    except Exception:
-      printerr('Select 1-' + str(len(itemlist)) + ', 0 to exit.'); continue
-    if 0 <= selection <= len(itemlist): break
-    printerr('Select 1-' + str(len(itemlist)) + ', 0 to exit.'); continue
-  if selection == 0: return ''
+  key = input_key(sel_prompt, [f'1-{len(itemlist)}', 'q'], ['q','0'])
+  if key in ['q', '0']: return ''
+  selection = int(key)
   return itemlist[selection - 1]
 
 
