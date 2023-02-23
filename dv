@@ -628,10 +628,11 @@ if __name__ == '__main__':
           AI_NAME = tmp
         if cmdEcho: printinfo('AI_NAME is now ' + AI_NAME)
         continue
+
       # /engine [list|engine|update]
       if tok[0] in ['engi', 'engine', 'engines']:
         if len(tok) > 1:
-          if tok[1] == 'list':
+          if tok[1] == 'list' or tok[1] == 'select':
             with open(f'{ScriptDir}/engines.json') as f:
                 data = json.load(f)
             gptengines = []
@@ -664,7 +665,7 @@ if __name__ == '__main__':
           response_tokens = int(token_limit/2)
         if cmdEcho:
           printinfo(f'Engine is now {engine}')
-          printinfo('Max Allowed Tokens: {token_limit}, Max Response Tokens: {response_tokens}')
+          printinfo(f'Max Allowed Tokens: {token_limit}, Max Response Tokens: {response_tokens}')
         continue
       # /temperature [1.0]
       if tok[0] in ['temp', 'temperature']:

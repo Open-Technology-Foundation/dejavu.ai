@@ -24,7 +24,7 @@
     "Exit DéjàVu.  Pressing ^C will also exit."
   ],
   [
-    "/status",
+    "/status [short|long]",
     "Show status of current environment."
   ],
   [
@@ -37,7 +37,7 @@
   ],
   [
     "/vars",
-    "Show current variables."
+    "Show current system variables."
   ],
   [
     "Conversations"
@@ -112,7 +112,7 @@
     "Set/Display AI name."
   ],
   [
-    "/engine [engine]",
+    "/engine [list|enginename]",
     "Set/Display GPT engine."
   ],
   [
