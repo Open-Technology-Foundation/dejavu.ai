@@ -117,7 +117,8 @@ main() {
 	cd "$SHAREDIR"
 
 	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/awesome* "$PRGDIR"/*.json "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/awesome-gpt-prompts.json "$PRGDIR"/awesome_prompts.py "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/engines.json "$PRGDIR"/dejavu-command-help.json "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
 	sudo rsync -al "$PRGDIR"/*.dv "$SHAREDIR"/
