@@ -376,14 +376,13 @@ def cmdstatus(showall: bool = False):
 
   def pp(pref: str, suff: str):
     printinfo(f'%16s: {suff}' % pref)
-  pp(   'Your Name',        USER_NAME)
-  pp(   'AI Name',          AI_NAME)
-  pp(   'Conversation',     ConvFile.replace(HOME, '~'))
+  pp(   'Agent',            ConvFile.replace(HOME, '~'))
+  pp(   'User Name',        USER_NAME)
+  pp(   'Assistant Name',   AI_NAME)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
     token_limit = 4096 if engine == 'text-davinci-003' else 2048
     used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
-    pp( 'Command History',  historyFile.replace(HOME, '~'))
     pp( 'AI Engine',        engine)
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
@@ -393,11 +392,12 @@ def cmdstatus(showall: bool = False):
     pp( 'Top_p',            top_p)
     pp( 'Frequency',        freq_pen)
     pp( 'Presence',         pres_pen)
-    pp( 'Stop',             str(stop))
+    pp( 'Stop',             str(stop) if len(stop) else 'None')
     pp( 'Command Echo',     'On' if cmdEcho else 'Off')
     pp( 'Shell',            os.path.basename(SHELL))
     pp( 'Editor',           os.path.basename(EDITOR))
     pp( 'Browser',          os.path.basename(BROWSER))
+    pp( 'Command History',  historyFile.replace(HOME, '~'))
   if not UpdateCheck:
     try:
       rstat = requests.get(REPOSITORY_VERSION, timeout=2, headers={'User-Agent': 'Wget/1.21.2', 'Accept': '*/*', 'Accept-Encoding': 'identity', 'Connection': 'Keep-Alive'})
