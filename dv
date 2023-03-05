@@ -963,7 +963,7 @@ if __name__ == '__main__':
         continue
 
     # Prepend username to user input
-    conversation.append(f'<<USER_NAME>>/run: {userInput}')
+    conversation.append(f'<<USER_NAME>>: {userInput}')
     # Aggregate the entire conversation
     text_block = ('\n'.join(conversation)).strip()
     # Send the entire conversation to GPT-3
