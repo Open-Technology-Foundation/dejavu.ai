@@ -289,8 +289,8 @@ prompt          = ''
 Prompt          = prompt
 engine          = 'text-davinci-003'
 token_limit     = 4096 if engine == 'text-davinci-003' else 2048
-temperature     = 1
-top_p           = 1
+temperature     = 1.0
+top_p           = 1.0
 response_tokens = int(token_limit/2)
 freq_pen        = 0.0
 pres_pen        = 0.0
