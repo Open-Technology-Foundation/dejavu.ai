@@ -113,6 +113,7 @@ def select_awesome_prompt(aw_args) -> str:
         pass
       else:
         pass
+    
     acts = key_values_list(readfile(AWE_JSON_FILE), 'act')
     awe_prompt = ''
     while True:
@@ -126,6 +127,7 @@ def select_awesome_prompt(aw_args) -> str:
           printerr(f'{key} not found!')
           continue
         printinfo(f'{key}: {awe_prompt}', prefix='')
+
       key = input_key('Send this prompt to GPT?', ['y', 'n', 'q'])
       if key == 'q':
         awe_prompt = ''

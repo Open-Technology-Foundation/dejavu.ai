@@ -1,4 +1,4 @@
-# DéjàVu - GPT-3 Terminal and Chatbot vs 0.9
+# DéjàVu - GPT Terminal Chatbot and Scripting vs 0.9
 
 ## SYNOPSIS
 **dejavu [-vqlxuV] [-c cmd] [dvfile]**
@@ -10,12 +10,12 @@ The default `dvfile` is `~/.dv/default.dv`.  This can/should be edited
 to suit your own personality and requirements.  By default, `dv` conversation files are located and created in `~/.dv/` with the extension `.dv`.
 
 ## DESCRIPTION
-DéjàVu is a GPT-3 Terminal and Chatbot program.  It brings the power of GPT-3 directly to your terminal command-line.  You may never Google search anything ever again :) ...
+DéjàVu is a GPT Terminal Chatbot program with interesting scripting capabilities.  It brings the power of GPT-3 and GPT-3.5 directly to your terminal command-line.  You may never Google search anything ever again :) ...
 
 Remembers context and history.  You and your AI can have multiple 'personalities' or subject chatfiles.
 
 ### Requirements
-For the moment, `DéjàVu GPT-3 Terminal` has only been tested on Ubuntu Linux 22.04.  Other platforms may require adjustments to the Python source code. 
+For the moment, `DéjàVu GPT Terminal` has only been tested on Ubuntu Linux 22.04.  Other platforms may require adjustments to the Python source code. 
 
 Before starting, you will also need to obtain an API key from [openAI](https://openai.com/api/) in order to run this program.  See ENVIRONMENT.
 
@@ -174,27 +174,27 @@ Scripts
 ```
 
 ### Prompt Engineering
-Prompt Engineering is a critial part of getting the most out of DéjàVu and GPT-3.  Here are some guidelines:
+Prompt Engineering is a critial part of getting the most out of DéjàVu and GPT models.  Here are some guidelines:
 
 #### 1: Understand the importance of “context”
-The most important factor to consider when designing a prompt is context.  Making sure the context is relevant is crucial for getting coherent and accurate responses from GPT-3.
+The most important factor to consider when designing a prompt is context.  Making sure the context is relevant is crucial for getting coherent and accurate responses from GPT.
 
-Without sufficient context, GPT-3 may generate responses that are off-topic, irrelevant, or inconsistent with the goal of the prompt.  To ensure the prompt has an adequate amount of context, include all relevant background information.
+Without sufficient context, GPT may generate responses that are off-topic, irrelevant, or inconsistent with the goal of the prompt.  To ensure the prompt has an adequate amount of context, include all relevant background information.
 
 #### 2: Define a clear task
-After providing context, the next step to designing an effective prompt is to define a clear instruction for GPT-3.
+After providing context, the next step to designing an effective prompt is to define a clear instruction for GPT.
 
 This requires that you have a clear understanding of the task to be completed, and the task definition should be specific, concise, and avoid ambiguity or vagueness.
 
 #### 3: Be specific
-When designing a prompt make sure the prompt is specific.  The more details and precision included in the prompt, the more likely it is that the GPT-3 will generate a targeted and accurate response.
+When designing a prompt make sure the prompt is specific.  The more details and precision included in the prompt, the more likely it is that the GPT will generate a targeted and accurate response.
 
 This includes important details such as what the goal is, the starting and ending points, characters involved, or any relevant background information.  If the prompt is too vague, it will result in off-topic, irrelevant, or inconsistent responses.
 
 #### 4: Iterate
 Iteration is an effective way of designing an effective prompt.  Prompt design is often an iterative process that involves multiple attempts and cycles of design, testing, and evaluation.
 
-Each iteration offers an opportunity to refine or improve the prompt.  For example, if GPT-3 generates an off-topic response, you could add more specific instructions or additional context to the prompt.
+Each iteration offers an opportunity to refine or improve the prompt.  For example, if GPT generates an off-topic response, you could add more specific instructions or additional context to the prompt.
 
 The iterative approach it allows for continuous improvement and optimization of the generated content.
 

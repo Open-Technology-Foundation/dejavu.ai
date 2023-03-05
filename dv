@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-DéjàVu GPT-3 Terminal Interface for GPT-3
+DéjàVu GPT Terminal Chatbot and Scripting
 Gary Dean garydean@okusi.id
 https://github.com/GaryDean/dejavu.ai.git
 
@@ -163,7 +163,7 @@ def read_dvfile(dvfile: str) -> bool:
 # ----------------------------------------------------------------------------
 def dvUsage():
   """ dv short invocation help """
-  print('DéjàVu - GPT-3 Terminal and Chatbot vs ' + Version)
+  print('DéjàVu - GPT Terminal vs ' + Version)
   print("Usage: " + ScriptName + """ [-vqlfxuV] [-c cmd] [dvfile]
 Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
  -l|--list      List dv scripts in '~/.dv/'.
@@ -336,7 +336,7 @@ def gpt3_completion(gprompt: str, gengine: str, gtemperature: float, gtop_p: flo
         stop=gstop,
         timeout=90)
   except Exception as gpte:
-    printerr('GPT-3 experienced an error: ' + str(gpte))
+    printerr('GPT experienced an error: ' + str(gpte))
     return ''
   return gpt3_response['choices'][0]['text'].strip('\n')
 
@@ -372,7 +372,7 @@ def cmdstatus(showall: bool = False):
   """ Print current parameters """
   # global Prompt, conversation
   global UpdateCheck, token_limit, used_tokens
-  printinfo('DéjàVu GPT-3 Terminal vs ' + Version + ' |  Enter ! for help.')
+  printinfo('DéjàVu GPT Terminal vs ' + Version + ' |  Enter ! for help.')
 
   def pp(pref: str, suff: str):
     printinfo(f'%16s: {suff}' % pref)
@@ -784,7 +784,7 @@ if __name__ == '__main__':
                 stop)
             if len(tldr_response) == 0: continue
           except:
-            printerr('GPT-3 experienced an error. Possibly overloaded.')
+            printerr('GPT experienced an error. Possibly overloaded.')
             continue
           printstd(AI_NAME + ' TL;DR' + ('' if len(rnge) == 1 else '[' + str(i + 1) + ']') + ':', color=Fore.GREEN)
           printinfo(tldr_response, prefix='')
@@ -975,7 +975,7 @@ if __name__ == '__main__':
         conversation.pop()
         continue
     except:
-      printerr('GPT-3 experienced an error. Possibly overloaded.')
+      printerr('GPT experienced an error. Possibly overloaded.')
       conversation.pop()
       continue
     # Add the response to the conversation list

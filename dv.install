@@ -1,7 +1,7 @@
 #!/bin/bash
 #!shellcheck disable=SC0000
-# DéjàVu GPT-3 Terminal Installation
-# Linux terminal interface for GPT-3
+# DéjàVu GPT Terminal Interface and Scripting
+# Linux terminal interface for OpenAI GPTs
 # Gary Dean garydean@okusi.id
 # https://github.com/GaryDean/dejavu.ai.git
 set -e
@@ -19,7 +19,7 @@ dejavu_help() {
 cat <<-EOT
 	Name    : $PRGNAME vs $Version Installation
 	Script  : $PRG
-	Desc    : Installation Script for $PRGNAME GPT-3 Terminal
+	Desc    : Installation Script for $PRGNAME GPT Terminal
 	        : - Requires root/sudo to install.
 	        : - apt update and upgrade will be executed before
 	        :   installation of python 3, pip and git.
