@@ -427,29 +427,81 @@ def PromptReplace(conversationText: str, AIs: str = '<<AI_NAME>>', AIr: str = ''
 # ----------------------------------------------------------------------------
 def autoSave(dv_filename: str):
   """ Autosave current chat """
-  # global conversation, Instructions
+  # global conversation, Instructions,
   printinfo('AutoSaving ' + dv_filename, end='')
   autosave_file = tempname('autosave', '.dv')
+  writefile(autosave_file, '', 'w')
+  for instr in Instructions:
+    # comments or blank lines, just insert now
+    if len(instr) == 0 or instr[0] == '#':
+      writefile(autosave_file, f'{instr}\n', 'a')
+      continue
+
+    # !cmd forgiveness, standardize on /cmd
+    if instr[0] == '!': instr = '/' + instr[1:]
+
+    instr_tok = tokenize(instr)
+    if len(instr_tok) == 0:
+      writefile(autosave_file, '\n', 'a')
+      continue
+    if instr_tok[0].startswith('/temp'):
+      writefile(autosave_file, f'/temperature {temperature}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/engi'):
+      writefile(autosave_file, f'/engine {engine}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/ai_n'):
+      writefile(autosave_file, f'/ai_name {AI_NAME}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/user'):
+      writefile(autosave_file, f'/user_name {USER_NAME}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/top_p'):
+      writefile(autosave_file, f'/top_p {top_p}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/freq'):
+      writefile(autosave_file, f'/freq_pen {freq_pen}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/pres'):
+      writefile(autosave_file, f'/pres_pen {pres_pen}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/auto'):
+      writefile(autosave_file, f'/autosave {("On" if AutoSave else "Off")}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/echo'):
+      writefile(autosave_file, f'/echo {("On" if cmdEcho else "Off")}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/stop'):
+      writefile(autosave_file, f'/stop {str(stop)}\n', 'a')
+      continue
+    if instr_tok[0].startswith('/prom') or instr_tok[0].startswith('!prom'):
+      instr = '/prompt """\n' \
+              + ' '.join(instr_tok[1:]).replace('\\n', '\n') \
+              + '"""\n'
+      writefile(autosave_file, instr, 'a')
+      continue
+    # ignore /conversation for now in Instructions Section
+    if instr_tok[0].startswith('/conv') or instr_tok[0].startswith('!conv'):
+      continue
+    # an explcit instruction to gpt
+    if instr_tok[0].startswith('/inst'):
+      instr = '/instruction \"\"\"\n' \
+              + ' '.join(instr_tok[1:]).replace('\\n', '\n') \
+              + '\"\"\"\n'
+      writefile(autosave_file, instr, 'a')
+      continue
+    # a generic instruction or other /command
+    writefile(autosave_file, instr + '\n', 'a')
+
+  # now write out the complete new conversation
+  for instr in conversation:
+    writefile(autosave_file, '/conversation ' + instr.replace('\n', '\\n') + '\n', 'a')
+  
   try:
-    writefile(autosave_file, '', 'w')
-    for instr in Instructions:
-      if instr[0:8] == '/prompt ' or instr[0:8] == '!prompt ':
-        instr = '/prompt """\n' + \
-            instr[8:].replace('\\n', '\n')
-        writefile(autosave_file, instr, 'a')
-        writefile(autosave_file, '"""\n', 'a')
-        continue
-      # ignore /conversation in Instructions
-      if instr[0:14] == '/conversation ' or instr[0:14] == '!conversation ':
-        continue
-      if instr[0:13] == '/instruction ':
-        instr = '/instruction """\n' + \
-            instr[13:].replace('\\n', '\n') + '\n' + \
-            '"""'
-      writefile(autosave_file, instr + '\n', 'a')
-    for instr in conversation:
-      writefile(autosave_file, '/conversation ' + instr.replace('\n', '\\n') + '\n', 'a')
-    if os.path.exists(dv_filename): os.replace(dv_filename, dv_filename + '~')
+    # rename files
+    if os.path.exists(dv_filename):
+      os.replace(dv_filename, dv_filename + '~')
+    # replace current script with new script    
     os.rename(autosave_file, dv_filename)
   except Exception as saveerr:
     printerr(f'Error renaming {autosave_file} to {dv_filename}: {str(saveerr)}')
@@ -557,8 +609,8 @@ if __name__ == '__main__':
         else: printinfo('AutoSave is ' + str('On' if AutoSave else 'Off'))
         continue
 
-      # /scripts
-      if tok[0] in ['scri', 'scripts', 'file', 'files']:
+      # /scripts /agents /files
+      if tok[0] in ['scri', 'scripts', 'file', 'files', 'agen', 'agents']:
         script = selectFile(['.', dvHome], '*.dv', 'Select Script')
         if not script: continue
         try:
@@ -718,7 +770,7 @@ if __name__ == '__main__':
             printinfo(tmp, prefix='')
         continue
 
-      # list [0-0]
+      # /list [0-0]
       if tok[0] == 'list':
         short = False
         if len(tok) > 1:
@@ -800,18 +852,10 @@ if __name__ == '__main__':
         if os.path.exists(filename):
           if input_key(f'\n{filename} exists. Overwrite?') != 'y':
             continue
-        p = f'engine={engine}\ntemperature={temperature:f}\ntop_p={top_p:f}\ntokens=4096\nfreq_pen={freq_pen:f}\npres_pen={pres_pen:f}\nAI_NAME={AI_NAME}\nUSER_NAME={USER_NAME}\n'
-        try:
-          writefile(filename,
-                    p + 'prompt=\n'
-                    + PromptReplace('\n'.join(conversation), AI_NAME, '<<AI_NAME>>', USER_NAME, '<<USER_NAME>>').strip()
-                    + '\n')
-        except Exception as e:
-          printerr('Error writing to ' + filename, str(e))
-          continue
+        autoSave(filename)
         if cmdEcho: printinfo('Session saved to ' + filename)
         continue
-
+      # /vars | /locals
       if tok[0] in ['vars', 'locals']:
         varsearch = tok[1] if len(tok) > 1 else ''
         locals_list = [(key, value) for key, value in locals().items() if not callable(value)]
@@ -875,6 +919,7 @@ if __name__ == '__main__':
             printerr(f'dvScript {script} does not exist.')
             continue
         try:
+          if AutoSave: autoSave(ConvFile)
           readline.write_history_file(historyFile)
           read_dvfile(script)
           ConvFile = script
@@ -965,7 +1010,7 @@ if __name__ == '__main__':
     # Prepend username to user input
     conversation.append(f'<<USER_NAME>>: {userInput}')
     # Aggregate the entire conversation
-    text_block = ('\n'.join(conversation)).strip()
+    text_block = ('\n'.join(conversation)).strip('\n')
     # Send the entire conversation to GPT-3
     try:
       response = gpt3_completion(
