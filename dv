@@ -287,7 +287,7 @@ AI_NAME         = 'HAL-2021'
 USER_NAME       = 'DAVE'
 prompt          = ''
 Prompt          = prompt
-engine          = 'text-davinci-003'
+engine          = 'gpt-3.5-turbo'
 token_limit     = 4096 if engine == 'text-davinci-003' else 2048
 temperature     = 1.0
 top_p           = 1.0
@@ -310,6 +310,80 @@ def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
   encoding = tiktoken.get_encoding(encoding_name)
   num_tokens = len(encoding.encode(gptstring))
   return num_tokens
+
+
+# ----------------------------------------------------------------------------
+def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
+  global token_limit, used_tokens
+  gengine     = kwargs.get('engine', 'text-davinci-003')
+  gtemperature= max(0.0, min(1.0, kwargs.get('temperature', 0.7)))
+  gtop_p      = max(0.0, min(1.0, kwargs.get('top_p', 0.9)))
+  gtokens     = max(16, min(token_limit, kwargs.get('tokens', -1)))
+  gfreq_pen   = max(-2.0, min(2.0, kwargs.get('freq_pen', 0.2)))
+  gpres_pen   = max(-2.0, min(2.0, kwargs.get('pres_pen', 0.65)))
+  gstop       = kwargs.get('stop', [])
+  gtimeout    = max(2, min(4420, kwargs.get('timeout', -1)))
+
+  used_tokens = num_tokens_from_string(gprompt, 'gpt2')
+  if gtokens <= 0:
+    gtokens = max(16, token_limit - used_tokens - 100)
+  if (gtokens + used_tokens) > token_limit:
+    printerr(f'Too many response tokens requested {gtokens}.', 'Try reducing /tokens, or deleting or summarising some of your conversation.') 
+    return ''
+  if Verbose and cmdEcho:
+    printinfo(f'{used_tokens} total tokens in prompt')
+
+  gprompt     = gprompt.encode(encoding='ASCII', errors='ignore').decode()
+
+  if gengine == 'gpt-3.5-turbo' and len(gconversation) > 0:
+    messages = []
+    messages.append({"role": "system", "content": gprompt})
+    for conv in gconversation:
+      if conv.startswith('<<AI_NAME>>:'):
+        who = 'assistant'
+        conv = conv[12:].lstrip()
+      elif conv.startswith('<<USER_NAME>>:'):
+        who = 'user'
+        conv = conv[14:].lstrip()
+      else:
+        who = 'system'
+      messages.append({"role": who, "content": conv})
+    #printlog(json.dumps(messages))
+    try:
+      response = openai.ChatCompletion.create(
+          model=gengine,
+          messages=messages,
+          temperature=gtemperature,
+          max_tokens=gtokens,
+          top_p=gtop_p,
+          frequency_penalty=gfreq_pen,
+          presence_penalty=gpres_pen,
+          stop=gstop,
+          timeout=gtimeout)
+    except Exception as gpte:
+      printerr('GPT experienced an error.', str(gpte))
+      return ''
+    for choice in response.choices:
+      if "text" in choice: return choice.text
+    # If no response with text is found, return the first response's content (which may be empty)
+    return response.choices[0].message.content
+  else:
+    try:
+      gpt3_response = openai.Completion.create(
+          engine=gengine,
+          prompt=gprompt,
+          temperature=gtemperature,
+          max_tokens=gtokens,
+          top_p=gtop_p,
+          frequency_penalty=gfreq_pen,
+          presence_penalty=gpres_pen,
+          stop=gstop,
+          timeout=90)
+    except Exception as gpte:
+      printerr('GPT experienced an error.', str(gpte))
+      return ''
+    return gpt3_response['choices'][0]['text'].strip('\n')
+
 
 # ----------------------------------------------------------------------------
 def gpt3_completion(gprompt: str, gengine: str, gtemperature: float, gtop_p: float, gtokens: int, gfreq_pen: float, gpres_pen: float, gstop: list) -> str:
@@ -377,13 +451,13 @@ def cmdstatus(showall: bool = False):
   def pp(pref: str, suff: str):
     printinfo(f'%16s: {suff}' % pref)
   pp(   'Agent',            ConvFile.replace(HOME, '~'))
+  pp(   'AI Engine',        engine)
   pp(   'User Name',        USER_NAME)
   pp(   'Assistant Name',   AI_NAME)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
     token_limit = 4096 if engine == 'text-davinci-003' else 2048
     used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
-    pp( 'AI Engine',        engine)
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
     pp( 'Tokens Used',      int(used_tokens))
@@ -411,7 +485,7 @@ def cmdstatus(showall: bool = False):
 
 
 # ---------------------------------------------------------------------------
-def PromptReplace(conversationText: str, AIs: str = '<<AI_NAME>>', AIr: str = '', USs: str = '<<USER_NAME>>', USr: str = '') -> str:
+def PromptReplace(conversationText: str='', AIs: str = '<<AI_NAME>>', AIr: str = '', USs: str = '<<USER_NAME>>', USr: str = '') -> str:
   """
   Replace <<>> markers in prompt and conversation
   with the appropriate text
@@ -419,7 +493,8 @@ def PromptReplace(conversationText: str, AIs: str = '<<AI_NAME>>', AIr: str = ''
   # global Prompt, AI_NAME, USER_NAME
   if not AIr: AIr = AI_NAME
   if not USr: USr = USER_NAME
-  newp = Prompt + ('\n' if Prompt[-1] != '\n' else '') + conversationText
+  newp = Prompt + ('\n' if Prompt[-1] != '\n' else '') \
+          + conversationText
   newp = newp.replace(AIs, AIr, -1)
   newp = newp.replace(USs, USr, -1)
   return newp.strip() + '\n'
@@ -437,7 +512,7 @@ def autoSave(dv_filename: str):
       writefile(autosave_file, f'{instr}\n', 'a')
       continue
 
-    # !cmd forgiveness, standardize on /cmd
+    # !cmd forgiveness, but standardize on /cmd.
     if instr[0] == '!': instr = '/' + instr[1:]
 
     instr_tok = tokenize(instr)
@@ -509,9 +584,8 @@ def autoSave(dv_filename: str):
 # ----------------------------------------------------------------------------
 def orderly_exit():
   """ Exit script nicely """
-  # global AutoSave
-  if AutoSave:
-    autoSave(ConvFile)
+  # global AutoSave, Verbose
+  if AutoSave: autoSave(ConvFile)
   if Verbose: 
     print('\r\x1b[2K' if UseColor() else '', end='')
     printinfo(f'Exiting {ScriptName} {ConvFile}')
@@ -540,7 +614,7 @@ if __name__ == '__main__':
         userInput = input().lstrip()
       except KeyboardInterrupt:
         if input_key('Exit Dejavu?') == 'y': orderly_exit()
-        else: continue
+        continue
 
     if len(userInput.strip()) == 0 or userInput[0].rstrip() == '#': continue
 
@@ -565,7 +639,7 @@ if __name__ == '__main__':
           print('^C', file=sys.stderr)
           pass
         except Exception as e:
-          printerr('Error running man.', e)
+          printerr('Error running `man`.', e)
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         continue
 
@@ -578,7 +652,7 @@ if __name__ == '__main__':
       if tok[0] in ['synt', 'syntax']:
         if len(tok) < 3:
           printerr('Requires options')
-          printinfo('/syntax language cmd|function')
+          printinfo('/syntax language cmd|function', 'eg, /syntax php strpos')
           continue
         cmdTypeAhead = [f'In {tok[1]}, list complete synopsis, syntax, parameters, options, keywords, and usage for "{tok[2]}", giving coded examples: ']
         continue
@@ -683,6 +757,7 @@ if __name__ == '__main__':
 
       # /engine [list|engine|update]
       if tok[0] in ['engi', 'engine', 'engines']:
+        if tok[0] == 'engines' and len(tok) == 1: tok.append('list')
         if len(tok) > 1:
           if tok[1] == 'list' or tok[1] == 'select':
             with open(f'{ScriptDir}/engines.json') as f:
@@ -800,7 +875,7 @@ if __name__ == '__main__':
         printinfo('Conversation cleared.')
         continue
 
-      # /delete [0-0]
+      # /delete 0-0
       if tok[0] in ['dele', 'delete']:
         if len(tok) < 2:
           printerr('Range not specified.')
@@ -988,7 +1063,7 @@ if __name__ == '__main__':
         if len(tok) < 2: what = 'conversation'
         else: what = tok[1]
         if what[0:4] == 'prom' or what == 'prompt':
-          userInput = PromptReplace('') \
+          userInput = PromptReplace() \
               + f'\n\n{USER_NAME}: Write a detailed summary of all the above: '
         elif what[0:4] == 'conv' or what == 'conversation':
           userInput = text_block \
@@ -999,6 +1074,7 @@ if __name__ == '__main__':
         else:
           printerr('Invalid option. Valid options for /summarize are prompt|conv|all.')
           continue
+
         # proceed to gpt
 
       # Invalid command
@@ -1010,17 +1086,24 @@ if __name__ == '__main__':
     # Prepend username to user input
     conversation.append(f'<<USER_NAME>>: {userInput}')
     # Aggregate the entire conversation
-    text_block = ('\n'.join(conversation)).strip('\n')
+    text_block = ('\n'.join(conversation)).strip('\n') \
+                 + '\n' + AI_NAME + ': '
+
     # Send the entire conversation to GPT-3
     try:
-      response = gpt3_completion(
-          PromptReplace(text_block) + '\n' + AI_NAME + ': ',
-          engine, temperature, top_p, response_tokens, freq_pen, pres_pen, stop)
+      response = gpt35_completion(
+          (PromptReplace(text_block) if engine != 'gpt-3.5-turbo' else PromptReplace()), 
+          conversation,
+          engine=engine, temperature=temperature, top_p=top_p, 
+          tokens=response_tokens, freq_pen=freq_pen, pres_pen=pres_pen, stop=stop)
+#      response = gpt3_completion(
+#          PromptReplace(text_block) + '\n' + AI_NAME + ': ',
+#          engine, temperature, top_p, response_tokens, freq_pen, pres_pen, stop)
       if len(response) == 0:
         conversation.pop()
         continue
-    except:
-      printerr('GPT experienced an error. Possibly overloaded.')
+    except Exception as e:
+      printerr('GPT experienced an error. Possibly overloaded.', e)
       conversation.pop()
       continue
     # Add the response to the conversation list

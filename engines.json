@@ -18,7 +18,15 @@
     },
     {
       "created": null,
-      "id": "text-embedding-ada-002",
+      "id": "gpt-3.5-turbo-0301",
+      "object": "engine",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "text-davinci-003",
       "object": "engine",
       "owner": "openai-internal",
       "permissions": null,
@@ -82,9 +90,17 @@
     },
     {
       "created": null,
-      "id": "curie-search-query",
+      "id": "gpt-3.5-turbo",
       "object": "engine",
-      "owner": "openai-dev",
+      "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-davinci-002",
+      "object": "engine",
+      "owner": "openai",
       "permissions": null,
       "ready": true
     },
@@ -98,9 +114,25 @@
     },
     {
       "created": null,
+      "id": "text-embedding-ada-002",
+      "object": "engine",
+      "owner": "openai-internal",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
       "id": "code-cushman-001",
       "object": "engine",
       "owner": "openai",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "whisper-1",
+      "object": "engine",
+      "owner": "openai-internal",
       "permissions": null,
       "ready": true
     },
@@ -266,17 +298,9 @@
     },
     {
       "created": null,
-      "id": "code-davinci-002",
+      "id": "curie-search-query",
       "object": "engine",
-      "owner": "openai",
-      "permissions": null,
-      "ready": true
-    },
-    {
-      "created": null,
-      "id": "text-davinci-003",
-      "object": "engine",
-      "owner": "openai-internal",
+      "owner": "openai-dev",
       "permissions": null,
       "ready": true
     },
@@ -314,6 +338,14 @@
     },
     {
       "created": null,
+      "id": "text-search-curie-query-001",
+      "object": "engine",
+      "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
       "id": "text-search-babbage-doc-001",
       "object": "engine",
       "owner": "openai-dev",
@@ -330,7 +362,7 @@
     },
     {
       "created": null,
-      "id": "text-search-curie-doc-001",
+      "id": "curie-search-document",
       "object": "engine",
       "owner": "openai-dev",
       "permissions": null,
@@ -338,7 +370,7 @@
     },
     {
       "created": null,
-      "id": "text-search-curie-query-001",
+      "id": "text-search-curie-doc-001",
       "object": "engine",
       "owner": "openai-dev",
       "permissions": null,
@@ -379,14 +411,6 @@
     {
       "created": null,
       "id": "curie-similarity",
-      "object": "engine",
-      "owner": "openai-dev",
-      "permissions": null,
-      "ready": true
-    },
-    {
-      "created": null,
-      "id": "curie-search-document",
       "object": "engine",
       "owner": "openai-dev",
       "permissions": null,

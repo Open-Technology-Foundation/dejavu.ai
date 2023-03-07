@@ -99,12 +99,29 @@ def printstd(*args, **kwargs):
   if useColor: print(Style.RESET_ALL, sep='', end='')
 
 
+def printlog(*args, **kwargs):
+  """
+  printlog(*args, prefix='', sep='\n', end='', back=Black.BLACK,
+      color=Fore.WHITE, style=Style.NORMAL)
+  """
+  # global useColor, ScriptDir, ScriptName
+  import time
+  file = kwargs.get('file', f'{os.path.realpath(__file__)}.log')
+  prefix = kwargs.get('prefix', str(time.time())+': ')
+  sep = kwargs.get('sep', '\n')
+  for arg in args:
+    if prefix: 
+      #print(prefix, end='')
+      writefile(file, prefix, 'a', 'utf-8')
+    #print(arg, sep, end='')
+    writefile(file, arg+sep, 'a', 'utf-8')
+
 def readfile(filepath: str, encoding: str='utf-8') -> str:
   """ Read contents of filename into string. """
   with open(filepath, 'r', encoding=encoding) as infile:
     return infile.read()
 
-def writefile(filename: str, string: str, mode: str='w', encoding: str='utf-8'):
+def writefile(filename: str, string: str, mode: str='w', encoding: str='utf-8') -> str:
   """ Write string to filename. """
   with open(filename, mode, encoding=encoding) as f:
     f.write(string)
