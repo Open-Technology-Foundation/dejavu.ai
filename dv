@@ -288,7 +288,8 @@ USER_NAME       = 'DAVE'
 prompt          = ''
 Prompt          = prompt
 engine          = 'gpt-3.5-turbo'
-token_limit     = 4096 if engine == 'text-davinci-003' else 2048
+#token_limit     = 4096 if engine == 'text-davinci-003' else 2048
+token_limit     = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo']) else 2048
 temperature     = 1.0
 top_p           = 1.0
 response_tokens = int(token_limit/2)
@@ -315,14 +316,14 @@ def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
 # ----------------------------------------------------------------------------
 def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
   global token_limit, used_tokens
-  gengine     = kwargs.get('engine', 'text-davinci-003')
-  gtemperature= max(0.0, min(1.0, kwargs.get('temperature', 0.7)))
-  gtop_p      = max(0.0, min(1.0, kwargs.get('top_p', 0.9)))
-  gtokens     = max(16, min(token_limit, kwargs.get('tokens', -1)))
-  gfreq_pen   = max(-2.0, min(2.0, kwargs.get('freq_pen', 0.2)))
-  gpres_pen   = max(-2.0, min(2.0, kwargs.get('pres_pen', 0.65)))
+  gengine     = kwargs.get('engine', 'gpt-3.5-turbo')
+  gtemperature= float(max(0.0, min(1.0, kwargs.get('temperature', 0.7))))
+  gtop_p      = float(max(0.0, min(1.0, kwargs.get('top_p', 0.9))))
+  gtokens     = int(max(16, min(token_limit, kwargs.get('tokens', -1))))
+  gfreq_pen   = float(max(-2.0, min(2.0, kwargs.get('freq_pen', 0.2))))
+  gpres_pen   = float(max(-2.0, min(2.0, kwargs.get('pres_pen', 0.65))))
   gstop       = kwargs.get('stop', [])
-  gtimeout    = max(2, min(4420, kwargs.get('timeout', -1)))
+  gtimeout    = int(max(2, min(99420, kwargs.get('timeout', -1))))
 
   used_tokens = num_tokens_from_string(gprompt, 'gpt2')
   if gtokens <= 0:
@@ -334,7 +335,7 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
     printinfo(f'{used_tokens} total tokens in prompt')
 
   gprompt     = gprompt.encode(encoding='ASCII', errors='ignore').decode()
-
+  # chats for chat QA models have to be structured differently
   if gengine == 'gpt-3.5-turbo' and len(gconversation) > 0:
     messages = []
     messages.append({"role": "system", "content": gprompt})
@@ -348,7 +349,7 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
       else:
         who = 'system'
       messages.append({"role": who, "content": conv})
-    #printlog(json.dumps(messages))
+    printlog(json.dumps(messages))
     try:
       response = openai.ChatCompletion.create(
           model=gengine,
@@ -456,7 +457,7 @@ def cmdstatus(showall: bool = False):
   pp(   'Assistant Name',   AI_NAME)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
-    token_limit = 4096 if engine == 'text-davinci-003' else 2048
+    token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo']) else 2048
     used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
@@ -787,7 +788,8 @@ if __name__ == '__main__':
             continue
           else:
             engine = tok[1]
-        token_limit = 4096 if engine == 'text-davinci-003' else 2048
+        token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo']) else 2048
+        #token_limit = 4096 if engine == 'text-davinci-003' else 2048
         if response_tokens > (token_limit-100):
           response_tokens = int(token_limit/2)
         if cmdEcho:
