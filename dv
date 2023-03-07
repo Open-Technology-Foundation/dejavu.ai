@@ -87,9 +87,9 @@ cmdTypeAhead  = []
 argvTypeAhead = []
 Instructions  = []
 cmdEcho       = True
-AutoSave      = False
-cmdExit       = 0
 Verbose       = True
+cmdExit       = False
+AutoSave      = False
 
 # ----------------------------------------------------------------------------
 def read_dvfile(dvfile: str) -> bool:
@@ -210,10 +210,10 @@ while len(sys.argv) > 0:
       printerr('Command was not specified for ' + sysargv)
       sys.exit(1)
   elif sysargv in ['-a', '--autosave']:
-    AutoSave = 1
+    AutoSave = True
   elif sysargv in ['-x', '--exit']:
-    Verbose = 0
-    cmdExit = 1
+    Verbose = False
+    cmdExit = True
   elif sysargv in ['-C', '--no-color']:
     UseColor(False)
   elif sysargv in ['-h', '-?']:
@@ -289,7 +289,7 @@ prompt          = ''
 Prompt          = prompt
 engine          = 'gpt-3.5-turbo'
 #token_limit     = 4096 if engine == 'text-davinci-003' else 2048
-token_limit     = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo']) else 2048
+token_limit     = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
 temperature     = 1.0
 top_p           = 1.0
 response_tokens = int(token_limit/2)
@@ -386,35 +386,6 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
     return gpt3_response['choices'][0]['text'].strip('\n')
 
 
-# ----------------------------------------------------------------------------
-def gpt3_completion(gprompt: str, gengine: str, gtemperature: float, gtop_p: float, gtokens: int, gfreq_pen: float, gpres_pen: float, gstop: list) -> str:
-  """  GPT-3 Completion function """
-  global token_limit, used_tokens
-  gprompt = gprompt.encode(encoding='ASCII', errors='ignore').decode()
-  used_tokens = num_tokens_from_string(gprompt, 'gpt2')
-  if gtokens <= 0:
-    gtokens = max(16, token_limit - used_tokens - 100)
-  if (gtokens + used_tokens) > token_limit:
-    printerr(f'Too many response tokens requested {gtokens}.', 'Try reducing /tokens, or deleting or summarising some of your conversation.') 
-    return ''
-  if Verbose and cmdEcho:
-    printinfo(f'{used_tokens} total tokens in prompt')
-  try:
-    gpt3_response = openai.Completion.create(
-        engine=gengine,
-        prompt=gprompt,
-        temperature=gtemperature,
-        max_tokens=gtokens,
-        top_p=gtop_p,
-        frequency_penalty=gfreq_pen,
-        presence_penalty=gpres_pen,
-        stop=gstop,
-        timeout=90)
-  except Exception as gpte:
-    printerr('GPT experienced an error: ' + str(gpte))
-    return ''
-  return gpt3_response['choices'][0]['text'].strip('\n')
-
 # ---------------------------------------------------------------------------
 def cmd_help():
   """ dejavu command help """
@@ -451,13 +422,13 @@ def cmdstatus(showall: bool = False):
 
   def pp(pref: str, suff: str):
     printinfo(f'%16s: {suff}' % pref)
-  pp(   'Agent',            ConvFile.replace(HOME, '~'))
+  pp(   'Agent',            (ConvFile.replace(HOME, '~')) if showall else os.path.basename(ConvFile))
   pp(   'AI Engine',        engine)
   pp(   'User Name',        USER_NAME)
   pp(   'Assistant Name',   AI_NAME)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
-    token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo']) else 2048
+    token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
     used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
@@ -501,10 +472,11 @@ def PromptReplace(conversationText: str='', AIs: str = '<<AI_NAME>>', AIr: str =
   return newp.strip() + '\n'
 
 # ----------------------------------------------------------------------------
-def autoSave(dv_filename: str):
+def autoSave(dv_filename: str, auto=True):
   """ Autosave current chat """
   # global conversation, Instructions,
-  printinfo('AutoSaving ' + dv_filename, end='')
+  if cmdEcho: printinfo(('Auto' if auto else '') + 'Saving ' + dv_filename, end='')
+  autofound = False
   autosave_file = tempname('autosave', '.dv')
   writefile(autosave_file, '', 'w')
   for instr in Instructions:
@@ -520,6 +492,7 @@ def autoSave(dv_filename: str):
     if len(instr_tok) == 0:
       writefile(autosave_file, '\n', 'a')
       continue
+    instr_tok[0] = instr_tok[0].lower()
     if instr_tok[0].startswith('/temp'):
       writefile(autosave_file, f'/temperature {temperature}\n', 'a')
       continue
@@ -543,6 +516,7 @@ def autoSave(dv_filename: str):
       continue
     if instr_tok[0].startswith('/auto'):
       writefile(autosave_file, f'/autosave {("On" if AutoSave else "Off")}\n', 'a')
+      autofound = True
       continue
     if instr_tok[0].startswith('/echo'):
       writefile(autosave_file, f'/echo {("On" if cmdEcho else "Off")}\n', 'a')
@@ -568,6 +542,9 @@ def autoSave(dv_filename: str):
       continue
     # a generic instruction or other /command
     writefile(autosave_file, instr + '\n', 'a')
+
+  if not autofound:
+    writefile(autosave_file, f'/autosave {("On" if AutoSave else "Off")}\n', 'a')
 
   # now write out the complete new conversation
   for instr in conversation:
@@ -788,8 +765,7 @@ if __name__ == '__main__':
             continue
           else:
             engine = tok[1]
-        token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo']) else 2048
-        #token_limit = 4096 if engine == 'text-davinci-003' else 2048
+        token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
         if response_tokens > (token_limit-100):
           response_tokens = int(token_limit/2)
         if cmdEcho:
@@ -874,7 +850,7 @@ if __name__ == '__main__':
       # /clear
       if tok[0] in ['clea', 'clear']:
         conversation = []
-        printinfo('Conversation cleared.')
+        if cmdEcho: printinfo('All conversation has been cleared.')
         continue
 
       # /delete 0-0
@@ -899,23 +875,25 @@ if __name__ == '__main__':
         i = int(0)
         for rtldr in rnge:
           text = conversation[rtldr - 1]
-          if text[0:13] != '<<AI_NAME>>: ': continue
+          #if text[0:13] != '<<AI_NAME>>: ': continue
           text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
           try:
-            tldr_response = gpt3_completion(
-                text + '\n\nTL;DR: ', 
-                engine, 
-                temperature, 
-                top_p, 
-                response_tokens, 
-                freq_pen, 
-                pres_pen, 
-                stop)
+            tldr_response = gpt35_completion(
+                text + '\n\nTL;DR: ',
+                [], 
+                engine='text-davinci-003', 
+                temperature=temperature, 
+                top_p=top_p, 
+                tokens=response_tokens, 
+                freq_pen=freq_pen, 
+                pres_pen=pres_pen, 
+                stop=stop)
             if len(tldr_response) == 0: continue
           except:
             printerr('GPT experienced an error. Possibly overloaded.')
             continue
-          printstd(AI_NAME + ' TL;DR' + ('' if len(rnge) == 1 else '[' + str(i + 1) + ']') + ':', color=Fore.GREEN)
+          printstd(AI_NAME  + ':', color=Fore.GREEN)
+          tldr_response = 'TLDR'+ ('' if len(rnge) == 1 else f'[{str(i+1)}]') + ': ' + tldr_response
           printinfo(tldr_response, prefix='')
           conversation.append(f'<<AI_NAME>>: {tldr_response}')
           i += 1
@@ -929,9 +907,10 @@ if __name__ == '__main__':
         if os.path.exists(filename):
           if input_key(f'\n{filename} exists. Overwrite?') != 'y':
             continue
-        autoSave(filename)
+        autoSave(filename, False)
         if cmdEcho: printinfo('Session saved to ' + filename)
         continue
+
       # /vars | /locals
       if tok[0] in ['vars', 'locals']:
         varsearch = tok[1] if len(tok) > 1 else ''
@@ -1098,9 +1077,6 @@ if __name__ == '__main__':
           conversation,
           engine=engine, temperature=temperature, top_p=top_p, 
           tokens=response_tokens, freq_pen=freq_pen, pres_pen=pres_pen, stop=stop)
-#      response = gpt3_completion(
-#          PromptReplace(text_block) + '\n' + AI_NAME + ': ',
-#          engine, temperature, top_p, response_tokens, freq_pen, pres_pen, stop)
       if len(response) == 0:
         conversation.pop()
         continue

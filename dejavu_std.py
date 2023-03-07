@@ -106,15 +106,13 @@ def printlog(*args, **kwargs):
   """
   # global useColor, ScriptDir, ScriptName
   import time
-  file = kwargs.get('file', f'{os.path.realpath(__file__)}.log')
+  file = os.path.realpath(__file__)
+  file = os.path.dirname(file) + '/dv.log'
+  file = kwargs.get('file', file)
   prefix = kwargs.get('prefix', str(time.time())+': ')
   sep = kwargs.get('sep', '\n')
   for arg in args:
-    if prefix: 
-      #print(prefix, end='')
-      writefile(file, prefix, 'a', 'utf-8')
-    #print(arg, sep, end='')
-    writefile(file, arg+sep, 'a', 'utf-8')
+    writefile(file, prefix+arg+sep, 'a', 'utf-8')
 
 def readfile(filepath: str, encoding: str='utf-8') -> str:
   """ Read contents of filename into string. """
