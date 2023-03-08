@@ -340,6 +340,20 @@ def copy_files_recursive(src_dir: str, dest_dir: str, wildcard: str='*', **kwarg
   return success
 
 
+def get_directories(path:str='./', recursive=False) ->list:
+  directories = []
+  try:
+    for item in os.listdir(path):
+      item_path = os.path.join(path, item)
+      if os.path.isdir(item_path):
+          directories.append(item_path)
+          if recursive:
+            directories.extend(get_directories(item_path))
+  except:
+    pass
+  return sorted(directories)
+
+
 def input_key(key_prompt, keys=['y', 'n'], abortwith=['n']):
   """
   script = 'text.dv'

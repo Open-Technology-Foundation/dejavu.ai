@@ -649,6 +649,26 @@ if __name__ == '__main__':
         orderly_exit()
         continue
 
+      # /chdir|/cd
+      if tok[0] in ['cd', 'chdir', 'chdi']:
+        if len(tok) > 1:
+          if tok[1] == 'list':
+            while True:
+              directories = get_directories()
+              directories.append('..')
+              tmp = selectList(directories, 'ChDir ')
+              if not tmp: break
+              try: os.chdir(tmp)
+              except Exception as e:
+                printerr(f'Could not change directory into "{tmp}"', e)
+          else:
+            try: os.chdir(' '.join(tok[1:]))
+            except Exception as e: 
+              printerr(f'Could not change directory into "{" ".join(tok[1:])}"', e)
+        if cmdEcho: 
+          printinfo('Current directory is ' + os.getcwd())
+        continue
+
       # /syntax lang func
       if tok[0] in ['synt', 'syntax']:
         if len(tok) < 3:
