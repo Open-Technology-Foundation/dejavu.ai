@@ -136,7 +136,7 @@ def tempname(label: str='tmp', ext:str ='.tmp') -> str:
   return f"{tmpdir}/{base}-{label}-{rand}{ext}"
 
 
-def tokenize(cmd_line: str) -> list:
+def tokenize(cmd_line: str, sep=[' ','\t']) -> list:
   """ command line tokenizer """
   tokens = []
   curr_token = ''
@@ -149,7 +149,7 @@ def tokenize(cmd_line: str) -> list:
         q_mark = None
       else:
         curr_token += c
-    elif c in [' ', ',', '\t'] and q_mark is None:
+    elif c in sep and q_mark is None:
       if curr_token:
         tokens.append(curr_token)
         curr_token = ''

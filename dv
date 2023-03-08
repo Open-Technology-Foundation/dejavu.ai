@@ -93,8 +93,8 @@ AutoSave      = False
 
 # ----------------------------------------------------------------------------
 def read_dvfile(dvfile: str) -> bool:
-  """  Read .dv script """
-  global cmdTypeAhead, argvTypeAhead, Instructions
+  """  Read .dv agent script """
+  global cmdTypeAhead, argvTypeAhead, Instructions, SYSTEM_NAME
   cmdTypeAhead = []; Instructions = []
   dvfile = find_dv_file(dvfile, mustexist=True, ext='.dv')
   if len(dvfile) == 0:
@@ -158,6 +158,7 @@ def read_dvfile(dvfile: str) -> bool:
   if len(argvTypeAhead) > 0:
     for lne in argvTypeAhead: cmdTypeAhead.append(lne)
     argvTypeAhead = []
+  SYSTEM_NAME = os.path.splitext(os.path.basename(dvfile))[0].replace(' ', '_').upper()
   return True
 
 # ----------------------------------------------------------------------------
@@ -283,12 +284,12 @@ def getOpenAIKeys() -> bool:
   return True
 getOpenAIKeys()
 
-AI_NAME         = 'HAL-2021'
-USER_NAME       = 'DAVE'
+SYSTEM_NAME     = 'SYSTEM_AGENT'
+USER_NAME       = 'AGENT_USER'
+AI_NAME         = 'AI_ASSISTANT'
 prompt          = ''
 Prompt          = prompt
 engine          = 'gpt-3.5-turbo'
-#token_limit     = 4096 if engine == 'text-davinci-003' else 2048
 token_limit     = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
 temperature     = 1.0
 top_p           = 1.0
@@ -319,7 +320,7 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
   gengine     = kwargs.get('engine', 'gpt-3.5-turbo')
   gtemperature= float(max(0.0, min(1.0, kwargs.get('temperature', 0.7))))
   gtop_p      = float(max(0.0, min(1.0, kwargs.get('top_p', 0.9))))
-  gtokens     = int(max(16, min(token_limit, kwargs.get('tokens', -1))))
+  gtokens     = int(kwargs.get('tokens', -1))
   gfreq_pen   = float(max(-2.0, min(2.0, kwargs.get('freq_pen', 0.2))))
   gpres_pen   = float(max(-2.0, min(2.0, kwargs.get('pres_pen', 0.65))))
   gstop       = kwargs.get('stop', [])
@@ -333,22 +334,29 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
     return ''
   if Verbose and cmdEcho:
     printinfo(f'{used_tokens} total tokens in prompt')
-
-  gprompt     = gprompt.encode(encoding='ASCII', errors='ignore').decode()
-  # chats for chat QA models have to be structured differently
+  printlog(f'gtokens={gtokens}, engine={engine}, conv={len(gconversation)}')
+  
+  gprompt = role_tag_replace(gprompt.encode(encoding='ASCII', errors='ignore').decode())
+  # chats for chatQA models have to be structured differently
   if gengine == 'gpt-3.5-turbo' and len(gconversation) > 0:
-    messages = []
-    messages.append({"role": "system", "content": gprompt})
+    messages = [{"role": "system", "name": SYSTEM_NAME, "content": gprompt}]
     for conv in gconversation:
       if conv.startswith('<<AI_NAME>>:'):
-        who = 'assistant'
+        role = 'assistant'
+        name = AI_NAME
         conv = conv[12:].lstrip()
       elif conv.startswith('<<USER_NAME>>:'):
-        who = 'user'
+        role = 'user'
+        name = USER_NAME
         conv = conv[14:].lstrip()
+      elif conv.startswith('<<SYSTEM>>:'):
+        role = 'system'
+        name = SYSTEM_NAME
+        conv = conv[11:].lstrip()
       else:
-        who = 'system'
-      messages.append({"role": who, "content": conv})
+        role = 'system'
+        name = SYSTEM_NAME
+      messages.append({"role": role, "name": name, "content": role_tag_replace(conv)})
     printlog(json.dumps(messages))
     try:
       response = openai.ChatCompletion.create(
@@ -418,14 +426,13 @@ def cmdstatus(showall: bool = False):
   """ Print current parameters """
   # global Prompt, conversation
   global UpdateCheck, token_limit, used_tokens
-  printinfo('DéjàVu GPT Terminal vs ' + Version + ' |  Enter ! for help.')
-
+  printinfo(f'DéjàVu GPT Terminal vs {Version} |  Enter ! for help.')
   def pp(pref: str, suff: str):
     printinfo(f'%16s: {suff}' % pref)
-  pp(   'Agent',            (ConvFile.replace(HOME, '~')) if showall else os.path.basename(ConvFile))
-  pp(   'AI Engine',        engine)
+  pp(   'Agent',            (SYSTEM_NAME + (' '+ConvFile.replace(HOME, '~')) if showall else SYSTEM_NAME))
   pp(   'User Name',        USER_NAME)
   pp(   'Assistant Name',   AI_NAME)
+  pp(   'AI Engine',        engine)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
     token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
@@ -456,19 +463,35 @@ def cmdstatus(showall: bool = False):
       pass
 
 
+def role_tag_replace(text: str) -> str:
+  """
+  Replace role tag with role name. 
+  global SYSTEM_NAME, AI_NAME, USER_NAME
+  """
+  return text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME).replace('<<SYSTEM_NAME>>', SYSTEM_NAME)
+
+def role_name_replace(text: str) -> str:
+  """
+  Replace role name with role tag. 
+  global SYSTEM_NAME, AI_NAME, USER_NAME
+  """
+  return text.replace(AI_NAME, '<<AI_NAME>>').replace(USER_NAME, '<<USER_NAME>>').replace(SYSTEM_NAME, '<<SYSTEM_NAME>>')
+
+
 # ---------------------------------------------------------------------------
-def PromptReplace(conversationText: str='', AIs: str = '<<AI_NAME>>', AIr: str = '', USs: str = '<<USER_NAME>>', USr: str = '') -> str:
+def PromptReplace(conversationText: str='', AIs: str='<<AI_NAME>>', AIr: str='', USs: str='<<USER_NAME>>', USr: str='', SYs: str='<<SYSTEM_NAME>>', SYr: str='') -> str:
   """
   Replace <<>> markers in prompt and conversation
   with the appropriate text
   """
   # global Prompt, AI_NAME, USER_NAME
+  if not SYr: SYr = SYSTEM_NAME
   if not AIr: AIr = AI_NAME
+
   if not USr: USr = USER_NAME
   newp = Prompt + ('\n' if Prompt[-1] != '\n' else '') \
           + conversationText
-  newp = newp.replace(AIs, AIr, -1)
-  newp = newp.replace(USs, USr, -1)
+  newp = newp.replace(AIs, AIr, -1).replace(USs, USr, -1).replace(SYs, SYr, -1)
   return newp.strip() + '\n'
 
 # ----------------------------------------------------------------------------
@@ -518,9 +541,9 @@ def autoSave(dv_filename: str, auto=True):
       writefile(autosave_file, f'/autosave {("On" if AutoSave else "Off")}\n', 'a')
       autofound = True
       continue
-    if instr_tok[0].startswith('/echo'):
-      writefile(autosave_file, f'/echo {("On" if cmdEcho else "Off")}\n', 'a')
-      continue
+#    if instr_tok[0].startswith('/echo'):
+#      writefile(autosave_file, f'/echo {("On" if cmdEcho else "Off")}\n', 'a')
+#      continue
     if instr_tok[0].startswith('/stop'):
       writefile(autosave_file, f'/stop {str(stop)}\n', 'a')
       continue
@@ -875,8 +898,7 @@ if __name__ == '__main__':
         i = int(0)
         for rtldr in rnge:
           text = conversation[rtldr - 1]
-          #if text[0:13] != '<<AI_NAME>>: ': continue
-          text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME)
+          text = text.replace('<<AI_NAME>>', AI_NAME).replace('<<USER_NAME>>', USER_NAME).replace('<<SYSTEM_NAME>>', SYSTEM_NAME)
           try:
             tldr_response = gpt35_completion(
                 text + '\n\nTL;DR: ',
@@ -892,7 +914,7 @@ if __name__ == '__main__':
           except:
             printerr('GPT experienced an error. Possibly overloaded.')
             continue
-          printstd(AI_NAME  + ':', color=Fore.GREEN)
+          printstd(AI_NAME  + ': ', color=Fore.GREEN)
           tldr_response = 'TLDR'+ ('' if len(rnge) == 1 else f'[{str(i+1)}]') + ': ' + tldr_response
           printinfo(tldr_response, prefix='')
           conversation.append(f'<<AI_NAME>>: {tldr_response}')
@@ -1073,7 +1095,7 @@ if __name__ == '__main__':
     # Send the entire conversation to GPT-3
     try:
       response = gpt35_completion(
-          (PromptReplace(text_block) if engine != 'gpt-3.5-turbo' else PromptReplace()), 
+          (PromptReplace(text_block) if engine not in [ 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301' ] else PromptReplace()), 
           conversation,
           engine=engine, temperature=temperature, top_p=top_p, 
           tokens=response_tokens, freq_pen=freq_pen, pres_pen=pres_pen, stop=stop)
