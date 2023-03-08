@@ -90,22 +90,6 @@
     },
     {
       "created": null,
-      "id": "gpt-3.5-turbo",
-      "object": "engine",
-      "owner": "openai",
-      "permissions": null,
-      "ready": true
-    },
-    {
-      "created": null,
-      "id": "code-davinci-002",
-      "object": "engine",
-      "owner": "openai",
-      "permissions": null,
-      "ready": true
-    },
-    {
-      "created": null,
       "id": "code-search-babbage-text-001",
       "object": "engine",
       "owner": "openai-dev",
@@ -133,6 +117,14 @@
       "id": "whisper-1",
       "object": "engine",
       "owner": "openai-internal",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "gpt-3.5-turbo",
+      "object": "engine",
+      "owner": "openai",
       "permissions": null,
       "ready": true
     },
@@ -397,6 +389,14 @@
       "id": "text-search-davinci-doc-001",
       "object": "engine",
       "owner": "openai-dev",
+      "permissions": null,
+      "ready": true
+    },
+    {
+      "created": null,
+      "id": "code-davinci-002",
+      "object": "engine",
+      "owner": "openai",
       "permissions": null,
       "ready": true
     },
