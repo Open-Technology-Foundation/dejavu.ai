@@ -159,6 +159,12 @@
     "of available scripts."
   ],
   [
+    "/cd [list|[dirname]]",
+    "/cd list: Display a list of directories.",
+    "/cd dirname: Change into dirname",
+    "/cd: Display current directory",
+  ],
+  [
     "/instruction string",
     "",
     "Insert 'string' as an instruction. Usually only used in scripts."
