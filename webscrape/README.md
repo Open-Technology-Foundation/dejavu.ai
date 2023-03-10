@@ -15,7 +15,7 @@ For the moment, `webscraper` has only been tested on Ubuntu Linux 22.04.  Other 
 
 ## OPTIONS
 *-s*, *--scraper* [profile] 
-If `profile` not specified, lists available  
+:If `profile` not specified, lists available  
 scraper profiles.  `profile` defaults to the 
 generic profile if a pre-defined profile is  
 not found.  The profiles json file can be viewed/edited  
