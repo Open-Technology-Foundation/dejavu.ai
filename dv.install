@@ -116,7 +116,7 @@ main() {
 	sudo chmod 775 "$SHAREDIR"
 	cd "$SHAREDIR"
 
-	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$SHAREDIR"/
+	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$PRGDIR"/webscrape.1.gz "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/awesome-gpt-prompts.json "$PRGDIR"/awesome_prompts.py "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/engines.json "$PRGDIR"/dejavu-command-help.json "$SHAREDIR"/
 	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
@@ -141,6 +141,7 @@ main() {
   sudo rm -f /usr/local/man/man1/dv.1.gz /usr/local/man/man1/dejavu.1.gz
   sudo cp -p "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dv.1.gz
   sudo cp -p "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dejavu.1.gz
+  sudo cp -p "$SHAREDIR"/webscrape.1.gz /usr/local/man/man1/webscrape.1.gz
   sudo mandb -sq
 
 	# ~/.bashrc /etc/bash.bashrc
@@ -170,9 +171,8 @@ main() {
 	if ((verbose_)); then
 		echo
 		echo "$PRGNAME is installed."
-		echo "To run, enter 'dv'"
+		echo "To run, enter 'dv' or 'dejavu'"
 		echo "Want to help develop $PRGNAME? Go here: $REPOSITORY"
-		echo 'Have fun!'
 	fi
 }
 

@@ -1,0 +1,21 @@
+[10-Mar-2023 22:16:25 Australia/Melbourne] PHP Warning:  Uncaught TypeError: Illegal offset type in unset in php shell code:1
+Stack trace:
+#0 {main}
+  thrown in php shell code on line 1
+[10-Mar-2023 22:17:05 Australia/Melbourne] PHP Warning:  Uncaught TypeError: Illegal offset type in php shell code:1
+Stack trace:
+#0 {main}
+  thrown in php shell code on line 1
+[10-Mar-2023 22:18:00 Australia/Melbourne] PHP Warning:  Uncaught TypeError: Illegal offset type in php shell code:1
+Stack trace:
+#0 {main}
+  thrown in php shell code on line 1
+[10-Mar-2023 22:18:17 Australia/Melbourne] PHP Warning:  Uncaught TypeError: Illegal offset type in unset in php shell code:1
+Stack trace:
+#0 {main}
+  thrown in php shell code on line 1
+[10-Mar-2023 22:19:07 Australia/Melbourne] PHP Warning:  Uncaught TypeError: array_map(): Argument #1 ($callback) must be a valid callback or null, function "unset" not found or invalid function name in php shell code:1
+Stack trace:
+#0 php shell code(1): array_map()
+#1 {main}
+  thrown in php shell code on line 1

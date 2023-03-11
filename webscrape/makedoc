@@ -1,0 +1,73 @@
+#!/bin/bash
+#!shellcheck disable=SC0000
+#@ Script  : makedoc
+#@ Version : $(version.set)
+#@ Desc    : 
+#@ Synopsis: $PRG [Options]
+#@ Options : -|--           
+#@         : -|--           
+#@         : -v|--verbose   Msg verbose on. (default)
+#@         : -q|--quiet     Msg verbose off.
+#@         : -V|--version   Print version.
+#@ Examples:
+#@ Requires:
+#@ See Also: 
+set -e
+. e new
+
+main() {
+	cd "$PRGDIR"
+
+	projectname="DéjàVu Webscraper"
+	output=webscrape
+	input_orig=README.md
+	input=/tmp/$PRG-README-$RANDOM.md
+
+#	echo "[$PS1] | [$-]"
+#	if [[ -n $PS1 ]] && [[ $- == *"hB"* ]]; then
+		echo "Welcome to $projectname."
+		echo "This script will create help/man files for \`$output\`."
+		read -r -p 'Would you like to continue? (y/n)'
+		if [[ ${REPLY,,} != 'y' ]]; then
+			echo "I agree. Let's have a little think about this."
+			exit
+		fi
+#	fi
+	
+	sudo rm -f 	"$input" "$output".1 "$output".1.gz \
+							/usr/local/man/man1/"$output".1.gz /usr/local/man/man1/"$output".gz
+
+	version=$(cat ../dejavu.version)	
+
+	cp -p "$input_orig" "$input"
+	( cat <<-EOT	
+			% WEBSCRAPE(1) ${projectname} | Version ${version}
+			% Gary Dean
+			% December 2022
+
+			# NAME
+			**${projectname}**
+		EOT
+		tail -n +2 "$input_orig"
+	)	>"$input"
+	tmp="$(cat "$input")"
+	tmp="${tmp//$'\n'##/$'\n'#}"
+	
+	echo "$tmp" > "$input"	
+
+	# Convert the GitHub Markup file to a manpage
+	pandoc -f gfm+backtick_code_blocks -t man "$input" -o "$output".1
+	pandoc "$input" -s -t man -o "$output".1
+
+	sudo cp "$output".1 /usr/local/man/man1
+	sudo gzip /usr/local/man/man1/"$output".1
+	sudo mandb -sq
+
+	sudo chown sysadmin: "$output".1
+	sudo gzip "$output".1
+	sudo chown sysadmin: "$output".1.gz
+	sudo cp -p "$output".1.gz ../
+}
+
+main "$@"
+#fin
