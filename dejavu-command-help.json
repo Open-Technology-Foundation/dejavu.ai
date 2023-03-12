@@ -162,7 +162,7 @@
     "/cd [list|[dirname]]",
     "/cd list: Display a list of directories.",
     "/cd dirname: Change into dirname",
-    "/cd: Display current directory",
+    "/cd: Display current directory"
   ],
   [
     "/instruction string",
