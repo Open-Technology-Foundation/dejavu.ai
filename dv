@@ -363,7 +363,7 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
   # If gtokens (aka max_tokens, or response_tokens) is <=0, 
   # then gtokens is calculated to max amount.
   if gtokens <= 0:
-    gtokens = max(16, (token_limit - 100) - used_tokens)
+    gtokens = max(16, (token_limit - 200) - used_tokens)
   if (gtokens + used_tokens) > token_limit:
     printerr(f'Too many response tokens requested ({gtokens}).', 'Try reducing /tokens, or deleting or summarising some of your conversation.') 
     return ''
