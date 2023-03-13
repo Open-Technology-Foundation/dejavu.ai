@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 """
 DéjàVu GPT Terminal Chatbot and Scripting
-Gary Dean garydean@okusi.id
-https://github.com/GaryDean/dejavu.ai.git
+Gary Dean garydean@yatti.id
+https://github.com/Open-Technology-Foundation/dejavu.ai
 
-#: git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu \
+#: git clone https://github.com/Open-Technology-Foundation/dejavu.ai /tmp/dejavu \
     && /tmp/dejavu/dv.install
 """
 # pylint: disable=global-statement
@@ -284,16 +284,48 @@ def getOpenAIKeys() -> bool:
   return True
 getOpenAIKeys()
 
+
+"""
+#!/usr/bin/python3
+import os
+import sys
+class Agent:
+  SYSTEM_NAME = 'SYSTEM_AGENT'
+  USER_NAME   = 'AGENT_USER'
+  AI_NAME     = 'AI_ASSISTANT'
+  prompt      = ''
+  engine      = 'gpt-3.5-turbo'
+  token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
+  temperature = 1.0
+  top_p       = 1.0
+  response_tokens = int(token_limit/2)
+  freq_pen    = 0.0
+  pres_pen    = 0.0
+  stop        = []
+  def __init__(self):
+    pass
+  def assign(self, **kwargs):
+    for key, value in kwargs.items():
+      if hasattr(self, key):
+        setattr(self, key, value)
+      else:
+        print(f'{str(key)} is not a valid attribute of the `Agent` class.', file=sys.stderr)
+agent = Agent()
+agent.assign(engine='text-davinci-003', temperature=0.8)
+print(agent.engine) # Output: text-davinci-003
+print(agent.temperature) # Output: 0.8
+agent.assign(invalid_key='test')
+"""
 SYSTEM_NAME     = 'SYSTEM_AGENT'
 USER_NAME       = 'AGENT_USER'
 AI_NAME         = 'AI_ASSISTANT'
 prompt          = ''
 Prompt          = prompt
 engine          = 'gpt-3.5-turbo'
-token_limit     = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
+token_limit     = 4096
+response_tokens = int(token_limit/2)
 temperature     = 1.0
 top_p           = 1.0
-response_tokens = int(token_limit/2)
 freq_pen        = 0.0
 pres_pen        = 0.0
 stop            = ''
@@ -307,7 +339,7 @@ conversation = []
 text_block  = ''
 
 # ----------------------------------------------------------------------------
-def num_tokens_from_string(gptstring: str, encoding_name: str) -> int:
+def num_tokens_from_string(gptstring: str, encoding_name: str='gpt2') -> int:
   """Returns the number of tokens in a text gpt string."""
   encoding = tiktoken.get_encoding(encoding_name)
   num_tokens = len(encoding.encode(gptstring))
@@ -326,17 +358,20 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
   gstop       = kwargs.get('stop', [])
   gtimeout    = int(max(2, min(99420, kwargs.get('timeout', -1))))
 
-  used_tokens = num_tokens_from_string(gprompt, 'gpt2')
+  gprompt = role_tag_replace(gprompt.encode(encoding='ASCII', errors='ignore').decode())
+  used_tokens = num_tokens_from_string(gprompt)
+  # If gtokens (aka max_tokens, or response_tokens) is <=0, 
+  # then gtokens is calculated to max amount.
   if gtokens <= 0:
-    gtokens = max(16, token_limit - used_tokens - 100)
+    gtokens = max(16, (token_limit - 100) - used_tokens)
   if (gtokens + used_tokens) > token_limit:
-    printerr(f'Too many response tokens requested {gtokens}.', 'Try reducing /tokens, or deleting or summarising some of your conversation.') 
+    printerr(f'Too many response tokens requested ({gtokens}).', 'Try reducing /tokens, or deleting or summarising some of your conversation.') 
     return ''
   if Verbose and cmdEcho:
     printinfo(f'{used_tokens} total tokens in prompt')
   printlog(f'gtokens={gtokens}, engine={engine}, conv={len(gconversation)}')
   
-  gprompt = role_tag_replace(gprompt.encode(encoding='ASCII', errors='ignore').decode())
+#  gprompt = role_tag_replace(gprompt.encode(encoding='ASCII', errors='ignore').decode())
   # chats for chatQA models have to be structured differently
   if gengine == 'gpt-3.5-turbo' and len(gconversation) > 0:
     messages = [{"role": "system", "name": SYSTEM_NAME, "content": gprompt}]
@@ -436,7 +471,7 @@ def cmdstatus(showall: bool = False):
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
     token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
-    used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
+    used_tokens = num_tokens_from_string(Prompt + ''.join(conversation))
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
     pp( 'Tokens Used',      int(used_tokens))
@@ -600,7 +635,7 @@ if __name__ == '__main__':
   while True:
     if len(cmdTypeAhead) == 0 and cmdExit: sys.exit(0)
     getScreenColumns()
-    used_tokens = num_tokens_from_string(Prompt + ''.join(conversation), 'gpt2')
+    used_tokens = num_tokens_from_string(Prompt + ''.join(conversation))
 
     if len(cmdTypeAhead) > 0:
       userInput = cmdTypeAhead.pop(0)

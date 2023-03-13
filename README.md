@@ -23,7 +23,7 @@ Before starting, you will also need to obtain an API key from [openAI](https://o
 Installation One-Liner, if you're in a hurry:
 
 ```
-git clone https://github.com/GaryDean/dejavu.ai.git /tmp/dejavu && /tmp/dejavu/dv.install
+git clone https://github.com/Open-Technology-Foundation/dejavu.ai /tmp/dejavu && /tmp/dejavu/dv.install
 ```
 
 `dejavu.install` will detect these variables during installation.  If  it doesn't, check your environment.
@@ -202,17 +202,17 @@ The iterative approach it allows for continuous improvement and optimization of 
 Python 3, pip, git, openai API key/s, apt install access
 
 ## REPORTING BUGS
-Report bugs and deficiencies on the [DéjàVu github page](https://github.com/GaryDean/dejavu.ai.git)
+Report bugs and deficiencies on the [DéjàVu github page](https://github.com/Open-Technology-Foundation/dejavu.ai)
 
 ## COPYRIGHT
-Copyright  ©  2023  Okusi Associates.  License GPLv3+: GNU GPL version 3 or 
+Copyright  ©  2022-2023  [Indonesian Open Technology Foundation](https://yatti.id).  License GPLv3+: GNU GPL version 3 or 
 later [GNU Licences](https://gnu.org/licenses/gpl.html).
 This is free software: you are free to change and redistribute it.  There is 
 NO WARRANTY, to the extent permitted by law.
 
 ## SEE ALSO
-  [openAI API](https://openai.com/api/)
+  [openAI api](https://openai.com/api/)
 
-  [DéjàVu github](https://github.com/GaryDean/dejavu.ai.git)
+  [DéjàVu github](https://github.com/Open-Technology-Foundation/dejavu.ai)
 
-  [DéjàVu web](https://okusiassociates.com/dejavu/)
+  [DéjàVu web](https://yatti.id/dejavu/)
