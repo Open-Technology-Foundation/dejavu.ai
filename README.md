@@ -211,8 +211,15 @@ This is free software: you are free to change and redistribute it.  There is
 NO WARRANTY, to the extent permitted by law.
 
 ## SEE ALSO
-  [openAI api](https://openai.com/api/)
 
-  [DéjàVu github](https://github.com/Open-Technology-Foundation/dejavu.ai)
+  [DéjàVu github](https://github.com/Open-Technology-Foundation/dejavu.ai.git)
 
-  [DéjàVu web](https://yatti.id/dejavu/)
+  [DéjàVu Webscrape github](https://github.com/Open-Technology-Foundation/dejavu.ai/tree/master/webscrape)
+
+  [DéjàVu webapp](https://yatti.id/dejavu/)
+  
+  [YaTTI github](https://github.com/Open-Technology-Foundation/)
+
+  [openAI API](https://openai.com/api/)
+
+  [Gary Dean github](https://github.com/GaryDean/dejavu.ai.git)

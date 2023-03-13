@@ -34,17 +34,21 @@ Python 3
 Report bugs and deficiencies, and get involved, on the [DéjàVu Webscrape github page](https://github.com/GaryDean/dejavu.ai/tree/master/webscrape)
 
 ## COPYRIGHT
-Copyright  ©  2023  Okusi Associates.  License GPLv3+: GNU GPL version 3 or 
+Copyright  ©  2022-2023  [Indonesian Open Technology Foundation](https://yatti.id/).  License GPLv3+: GNU GPL version 3 or 
 later [GNU Licences](https://gnu.org/licenses/gpl.html).
 This is free software: you are free to change and redistribute it.  There is 
 NO WARRANTY, to the extent permitted by law.
 
 ## SEE ALSO
-  [DéjàVu Webscrape github](https://github.com/GaryDean/dejavu.ai/tree/master/webscrape)
 
-  [DéjàVu github](https://github.com/GaryDean/dejavu.ai.git)
+  [DéjàVu Webscrape github](https://github.com/Open-Technology-Foundation/dejavu.ai/tree/master/webscrape)
 
-  [DéjàVu Web](https://okusiassociates.com/dejavu/)
+  [DéjàVu github](https://github.com/Open-Technology-Foundation/dejavu.ai.git)
+
+  [DéjàVu webapp](https://yatti.id/dejavu/)
+  
+  [YaTTI github](https://github.com/Open-Technology-Foundation/)
 
   [openAI API](https://openai.com/api/)
 
+  [Gary Dean github](https://github.com/GaryDean/dejavu.ai.git)
