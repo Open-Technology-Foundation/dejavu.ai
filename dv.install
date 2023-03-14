@@ -2,15 +2,15 @@
 #!shellcheck disable=SC0000
 # DéjàVu GPT Terminal Interface and Scripting
 # Linux terminal interface for OpenAI GPTs
-# Gary Dean garydean@okusi.id
-# https://github.com/GaryDean/dejavu.ai.git
+# Gary Dean garydean@yatti.id
+# https://github.com/Open-Technology-Foundation/dejavu.ai
 set -e
 _ent_0=$(readlink -fn -- "$0") || _ent_0=''
 PRG=${_ent_0##*/} 
 PRGDIR=${_ent_0%/*}
 PRGNAME="DéjàVu"
 SHAREDIR=/usr/share/dejavu.ai
-REPOSITORY='https://github.com/GaryDean/dejavu.ai.git'
+REPOSITORY='https://github.com/Open-Technology-Foundation/dejavu.ai.git'
 Version=$(cat "$PRGDIR/dejavu.version")
 doApt=1
 doUpgrade=0

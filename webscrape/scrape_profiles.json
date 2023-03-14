@@ -214,5 +214,25 @@
         "div dcr-1wf840d",
         "div dcr-ygowzy",
         "a href=\"#top"
+    ],
+    "okusiassociates.com": [
+        "okusiassociates.id"
+    ],
+    "okusi.id": [
+        "okusiassociates.id"
+    ],
+    "okusiassociates.id": [
+        "head",
+        "style",
+        "script",
+        "nav",
+        "button",
+        "picture",
+        "figure",
+        "figcaption",
+        "svg",
+        "aside",
+        "noscript",
+        "footer"
     ]
-}
+ }
