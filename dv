@@ -34,6 +34,8 @@ if ScriptDir not in sys.path: sys.path.append(ScriptDir)
 from dejavu_std import *
 from awesome_prompts import *
 
+RawOutput = False
+
 dvHome = f'{HOME}/.{ScriptName}'
 os.makedirs(dvHome, exist_ok=True)
 # Create dvHome dir contents if dvHome/default.dv does not exist.
@@ -216,7 +218,8 @@ while len(sys.argv) > 0:
     Verbose = False
     cmdExit = True
   elif sysargv in ['-C', '--no-color']:
-    UseColor(False)
+    useColor = False
+    RawOutput=True
   elif sysargv in ['-h', '-?']:
     dvUsage()
     sys.exit()
@@ -1163,10 +1166,13 @@ if __name__ == '__main__':
       continue
     # Add the response to the conversation list
     conversation.append(f'<<AI_NAME>>: {response}')
-    # Print the response from GPT-3
-    printstd(f'{len(conversation):d}. {AI_NAME}:', color=Fore.GREEN)
-    for _line in response.splitlines():
-      print(textwrap.fill(_line, width=ScreenColumns))
+    if RawOutput:
+      print(conversation[-1], end='\n')
+    else:
+      # Print the response from GPT-3
+      printstd(f'{len(conversation):d}. {AI_NAME}:', color=Fore.GREEN)
+      for _line in response.splitlines():
+        print(textwrap.fill(_line, width=ScreenColumns))
 
     # eg, devaju -x -c 'command'
     if len(cmdTypeAhead) == 0 and cmdExit: sys.exit(0)
