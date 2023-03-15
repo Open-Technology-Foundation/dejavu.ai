@@ -730,7 +730,7 @@ if __name__ == '__main__':
         continue
 
       # /rawoutput [on|off*]
-      if tok[0] == 'rawo' or tok[0] == '/rawoutput':
+      if tok[0] in ['rawo', '/rawoutput']:
         if len(tok) > 1:
           tok[1] = tok[1].lower()
           if tok[1] in ['1', 'on', 'true']:
@@ -739,7 +739,7 @@ if __name__ == '__main__':
             RawOutput = False
           else:
             printerr('Invalid argument')
-        else: print('Raw Output is ' + str('On' if RawOutput else 'Off'), end='\n')
+        else: print('# Raw Output is ' + str('On' if RawOutput else 'Off'), end='\n')
         continue
 
       # /autosave [on|off]
