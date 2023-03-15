@@ -729,6 +729,19 @@ if __name__ == '__main__':
         else: printinfo('Command Echo is ' + str('On' if cmdEcho else 'Off'))
         continue
 
+      # /rawoutput [on|off*]
+      if tok[0] == 'rawo' or tok[0] == '/rawoutput':
+        if len(tok) > 1:
+          tok[1] = tok[1].lower()
+          if tok[1] in ['1', 'on', 'true']:
+            RawOutput = True
+          elif tok[1] in ['0', 'off', 'false']:
+            RawOutput = False
+          else:
+            printerr('Invalid argument')
+        else: print('Raw Output is ' + str('On' if RawOutput else 'Off'), end='\n')
+        continue
+
       # /autosave [on|off]
       if tok[0] in ['auto', 'autosave']:
         if len(tok) > 1:
@@ -1167,7 +1180,7 @@ if __name__ == '__main__':
     # Add the response to the conversation list
     conversation.append(f'<<AI_NAME>>: {response}')
     if RawOutput:
-      print(conversation[-1], end='\n')
+      print(response, end='\n')
     else:
       # Print the response from GPT-3
       printstd(f'{len(conversation):d}. {AI_NAME}:', color=Fore.GREEN)
