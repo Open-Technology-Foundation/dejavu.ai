@@ -11,6 +11,7 @@ import urllib
 import html
 import requests
 import json
+import subprocess
 
 script_version  = '1.0'
 script_name     = os.path.realpath(sys.argv.pop(0))
@@ -18,7 +19,9 @@ script_dir      = os.path.dirname(script_name)
 if script_dir not in sys.path: sys.path.append(script_dir)
 script_name     = os.path.basename(script_name)
 
-from dejavu_std import printerr, printstd, printinfo, UseColor, readfile
+from dejavu_std import printerr, printstd, printinfo, UseColor, readfile, getEditor, EDITOR, getShell, SHELL
+getEditor()
+getShell()
 
 try:
   with open(f'{script_dir}/scrape_profiles.json', 'r') as f:
@@ -183,6 +186,7 @@ def webscrape_help():
       '                   generic profile if a pre-defined profile is ',
       '                   not found.  Profile file is ',
       '                   ' + script_dir + '/scrape_profiles.json',
+      '    -e|--edit      Edit scrape_profiles using ' + os.path.basename(EDITOR),
       '    -v|--verbose   Increase verbosity.',
       '    -q|--quiet     No verbosity.',
       '    -V|--version   Print version.'
@@ -205,6 +209,13 @@ if __name__ == '__main__':
       verbose += 1
     elif arg in ['-q', '--quiet']:
       verbose = 0
+    elif arg in ['-e', '--edit']:
+      try:
+        subprocess.run(f'{os.environ.get("EDITOR")} {script_dir}/scrape_profiles.json',
+                  shell=True, executable=SHELL, check=False)
+      except Exception as e:
+        printerr(e)
+      sys.exit(0)
     elif arg in ['-s', '--scraper']:
       if len(sys.argv):
         profile = sys.argv.pop(0)
