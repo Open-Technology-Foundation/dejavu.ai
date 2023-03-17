@@ -325,7 +325,7 @@ AI_NAME         = 'AI_ASSISTANT'
 prompt          = ''
 Prompt          = prompt
 engine          = 'gpt-3.5-turbo'
-token_limit     = 4096
+token_limit     = 4000
 response_tokens = int(token_limit/2)
 temperature     = 1.0
 top_p           = 1.0
@@ -473,7 +473,7 @@ def cmdstatus(showall: bool = False):
   pp(   'AI Engine',        engine)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
-    token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
+    token_limit = 4000 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2000
     used_tokens = num_tokens_from_string(Prompt + ''.join(conversation))
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
@@ -588,7 +588,7 @@ def autoSave(dv_filename: str, auto=True):
     if instr_tok[0].startswith('/prom') or instr_tok[0].startswith('!prom'):
       instr = '/prompt """\n' \
               + ' '.join(instr_tok[1:]).replace('\\n', '\n') \
-              + '"""\n'
+              + '\n"""\n'
       writefile(autosave_file, instr, 'a')
       continue
     # ignore /conversation for now in Instructions Section
@@ -596,9 +596,9 @@ def autoSave(dv_filename: str, auto=True):
       continue
     # an explcit instruction to gpt
     if instr_tok[0].startswith('/inst'):
-      instr = '/instruction \"\"\"\n' \
+      instr = '/instruction """\n' \
               + ' '.join(instr_tok[1:]).replace('\\n', '\n') \
-              + '\"\"\"\n'
+              + '\n"""\n'
       writefile(autosave_file, instr, 'a')
       continue
     # a generic instruction or other /command
@@ -859,7 +859,7 @@ if __name__ == '__main__':
             continue
           else:
             engine = tok[1]
-        token_limit = 4096 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2048
+        token_limit = 4000 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2000
         if response_tokens > (token_limit-100):
           response_tokens = int(token_limit/2)
         if cmdEcho:
@@ -901,10 +901,24 @@ if __name__ == '__main__':
         if cmdEcho: printinfo('Presence Penalty is now ' + str(pres_pen))
         continue
 
-      # /prompt [newprompt]
+      # /system [/append*|/insert|/replace prompt]
+      if tok[0] in ['syst', 'system']:
+        tok[0] = '/prompt'
+      # /prompt [/append*|/insert|/replace prompt]
       if tok[0] in ['prom', 'prompt']:
         if len(tok) > 1:
-          Prompt = ' '.join(tok[1:]).replace('\\n', '\n').strip()
+          if tok[1].startswith('/appe') or tok[1].startswith('/add'):
+            Prompt = Prompt + '\n' \
+                      + ' '.join(tok[2:]).replace('\\n', '\n').strip()
+          elif tok[1].startswith('/inse') or tok[1].startswith('/insert'):
+            Prompt = ' '.join(tok[2:]).replace('\\n', '\n').strip() \
+                      + '\n' + Prompt
+          elif tok[1].startswith('/repl') or tok[1].startswith('/replace'):
+            Prompt = ' '.join(tok[2:]).replace('\\n', '\n').strip() 
+          else:
+            Prompt = Prompt + '\n' \
+                      + ' '.join(tok[1:]).replace('\\n', '\n').strip()
+
         elif cmdEcho: printinfo(Prompt, prefix='')
         continue
 
