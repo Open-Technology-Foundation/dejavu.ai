@@ -55,8 +55,8 @@
     "Delete conversation items in 'range'."
   ],
   [
-    "/clear",
-    "Clear all conversation.  Same as /delete 1-"
+    "/clear [conversation*|prompt|all]", "",
+    "Clear the conversation or prompt, or both."
   ],
   [
     "/tldr [range]",

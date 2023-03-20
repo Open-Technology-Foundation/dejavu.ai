@@ -955,10 +955,20 @@ if __name__ == '__main__':
             printinfo(textwrap.fill(_line, width=ScreenColumns), prefix='')
         continue
 
-      # /clear
+      # /clear [conversation*|prompt|all]
       if tok[0] in ['clea', 'clear']:
-        conversation = []
-        if cmdEcho: printinfo('All conversation has been cleared.')
+        if len(tok) == 1 or (tok[1] in ['conv', 'conversation']):
+          conversation = []
+          if cmdEcho: printinfo('All conversation has been cleared.')
+        elif tok[1] in ['prom', 'prompt']:
+          prompt = ''
+          Prompt = ''
+          if cmdEcho: printinfo('Prompt has been cleared.')
+        elif tok[1] == 'all':
+          prompt = ''
+          Prompt = ''
+          conversation = []
+          if cmdEcho: printinfo('Prompt and conversation have been cleared.')
         continue
 
       # /delete 0-0
