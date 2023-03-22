@@ -17,6 +17,8 @@ https://github.com/Open-Technology-Foundation/dejavu.ai
 
 import os
 import datetime
+import pytz
+import time
 import re
 import readline
 import signal
@@ -899,6 +901,16 @@ if __name__ == '__main__':
         if len(tok) > 1 and is_num(tok[1]):
           pres_pen = max(-2, min(2, float(tok[1])))
         if cmdEcho: printinfo('Presence Penalty is now ' + str(pres_pen))
+        continue
+
+      # /spacetime [location]
+      if tok[0] in ['spac', 'spacetime']:
+        temp = f"Today's date is {datetime.datetime.today().strftime('%Y-%m-%d')}, and current {USER_NAME} local time is {datetime.datetime.now((time.tzname[0] if time.timezone >= 0 else time.tzname[1])).strftime('%H:%M %Z')}."
+        if len(tok) > 1:
+          temp += f" Current {USER_NAME} location is {tok[1:]}."
+        Prompt = Prompt + '\n\n## SPACETIME\n\n' + temp + '\n'
+        # Add the response to the conversation list
+        conversation.append(f'<<AI_NAME>>: I acknowledge: {temp}')
         continue
 
       # /system [/append*|/insert|/replace prompt]
