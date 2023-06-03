@@ -96,10 +96,6 @@ main() {
 	key="$OPENAI_ORGANIZATION_ID"
 	if ((verbose_)); then
 		read -rep "Your openai Organization ID (if required): " -i "$key" key
-		if [[ $key == '' ]]; then
-			echo 2> "You will require an API key from openai.com to run $PRG"
-			exit
-		fi 
 		echo
 	fi
 	OPENAI_ORGANIZATION_ID="$key"

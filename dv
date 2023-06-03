@@ -378,7 +378,7 @@ def gpt35_completion(gprompt: str, gconversation: list=[], **kwargs):
   
 #  gprompt = role_tag_replace(gprompt.encode(encoding='ASCII', errors='ignore').decode())
   # chats for chatQA models have to be structured differently
-  if gengine == 'gpt-3.5-turbo' and len(gconversation) > 0:
+  if gengine in ['gpt-3.5-turbo', 'gpt-4'] and len(gconversation) > 0:
     messages = [{"role": "system", "name": SYSTEM_NAME, "content": gprompt}]
     for conv in gconversation:
       if conv.startswith('<<AI_NAME>>:'):
@@ -475,7 +475,7 @@ def cmdstatus(showall: bool = False):
   pp(   'AI Engine',        engine)
   pp(   'AutoSave',         'On' if AutoSave else 'Off')
   if showall:
-    token_limit = 4000 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2000
+    token_limit = 4000 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-4']) else 2000
     used_tokens = num_tokens_from_string(Prompt + ''.join(conversation))
     pp( 'Token Limit',      token_limit)
     pp( 'Response Tokens',  response_tokens)
@@ -861,7 +861,7 @@ if __name__ == '__main__':
             continue
           else:
             engine = tok[1]
-        token_limit = 4000 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301']) else 2000
+        token_limit = 4000 if (engine in [ 'text-davinci-003', 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-4']) else 2000
         if response_tokens > (token_limit-100):
           response_tokens = int(token_limit/2)
         if cmdEcho:
@@ -1202,7 +1202,7 @@ if __name__ == '__main__':
     # Send the entire conversation to GPT-3
     try:
       response = gpt35_completion(
-          (PromptReplace(text_block) if engine not in [ 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301' ] else PromptReplace()), 
+          (PromptReplace(text_block) if engine not in [ 'gpt-3.5-turbo', 'gpt-3.5-turbo-0301', 'gpt-4' ] else PromptReplace()), 
           conversation,
           engine=engine, temperature=temperature, top_p=top_p, 
           tokens=response_tokens, freq_pen=freq_pen, pres_pen=pres_pen, stop=stop)

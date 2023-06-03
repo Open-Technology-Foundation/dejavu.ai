@@ -148,15 +148,16 @@ Conversations
 
 GPT Settings
   /user_name [name] Set/Display user name.
-  /ai_name [name]  Set/Display AI name.
-  /engine [engine] Set/Display GPT engine.
-  /temperature [f] Set/Display temperature (0.0-1.0).
-  /top_p [f]       Set/Display top_p (0.0-1.0).
-  /tokens [n]      Set/Display tokens to use.
-  /freq_pen        Set/Display frequency penalty (-2-2).
-  /pres_pen        Set/Display presence penalty (-2-2).
-  /prompt [prompt] Display current conversation set-up information.
-                   If "prompt" is specified, set the new conversion prompt.
+  /ai_name [name]   Set/Display AI name.
+  /engine [list|engine|update] 
+                    Set/Display GPT engine.
+  /temperature [f]  Set/Display temperature (0.0-1.0).
+  /top_p [f]        Set/Display top_p (0.0-1.0).
+  /tokens [n]       Set/Display tokens to use.
+  /freq_pen         Set/Display frequency penalty (-2-2).
+  /pres_pen         Set/Display presence penalty (-2-2).
+  /prompt [prompt]  Display current conversation set-up information.
+                    If "prompt" is specified, set the new conversion prompt.
 
 Scripts
   /files           Display conversation scripts in current and user home
