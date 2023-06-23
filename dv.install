@@ -164,6 +164,9 @@ main() {
 				|| { echo 2> "'$tmpfile' could not be moved to '$file'!"; exit 1; }
 	done
 		
+	sudo touch "$SHAREDIR"/dv.log
+	sudo chmod 666 "$SHAREDIR"/dv.log
+
 	if ((verbose_)); then
 		echo
 		echo "$PRGNAME is installed."
