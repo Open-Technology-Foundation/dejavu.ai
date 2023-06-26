@@ -223,4 +223,4 @@ NO WARRANTY, to the extent permitted by law.
 
   [openAI API](https://openai.com/api/)
 
-  [Gary Dean github](https://github.com/GaryDean/dejavu.ai.git)
+  [Gary Dean github](https://github.com/Open-Technology-Foundation/dejavu.ai.git)

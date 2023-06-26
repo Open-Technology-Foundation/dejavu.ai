@@ -51,8 +51,8 @@ if not os.path.exists(dvHome + '/default.dv'):
   string = re.sub(r'\n/USER_NAME \S+', '\n/USER_NAME ' + USER.upper(), string)
   writefile(dvHome + '/default.dv', string)
 
-REPOSITORY = 'https://github.com/GaryDean/dejavu.ai.git'
-REPOSITORY_VERSION = 'https://raw.githubusercontent.com/GaryDean/dejavu.ai/master/dejavu.version?xyz=123'
+REPOSITORY = 'https://github.com/Open-Technology-Foundation/dejavu.ai.git'
+REPOSITORY_VERSION = 'https://raw.githubusercontent.com/Open-Technology-Foundation/master/dejavu.version?xyz=123'
 UpdateCheck = False
 
 # Process command line and define ConvFile to use
