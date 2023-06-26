@@ -17,124 +17,124 @@ doUpgrade=0
 
 dejavu_help() {
 cat <<-EOT
-	Name    : $PRGNAME vs $Version Installation
-	Script  : $PRG
-	Desc    : Installation Script for $PRGNAME GPT Terminal
-	        : - Requires root/sudo to install.
-	        : - apt update and upgrade will be executed before
-	        :   installation of python 3, pip and git.
-	        : - ~/.bashrc and /etc/bash.bashrc will be modified
-	        :   to include openai environment variables. 
-	        : - program files are stored in $SHAREDIR
-	        : - executable 'dejavu' is installed in /usr/local/bin/
-	        : - a symlink 'dv' is created for 'dejavu' in
-	        :   /usr/local/bin if file does not already exist.
-	Synopsis: $PRG [-vqaVh]
-	Options : -v|--verbose   Verbose on (default)
-	        : -q|--quiet     Verbose off. 
-	        :                If environment key OPENAI_API_KEY
-	        :                has already been set you will not 
-	        :                be prompted to input it.
-	        : -a|--no-apt    Do not execute apt during installation.
-	        : -u|--upgrade   Upgrade $PRGNAME from git repository.
-	        : -V|--version   Print $PRGNAME version.
-	Requires: python 3, pip, git, openai API key/s, root access for 
-	        : installation.
-	See Also: https://openai.com/api/, $REPOSITORY
+  Name    : $PRGNAME vs $Version Installation
+  Script  : $PRG
+  Desc    : Installation Script for $PRGNAME GPT Terminal
+          : - Requires root/sudo to install.
+          : - apt update and upgrade will be executed before
+          :   installation of python 3, pip and git.
+          : - ~/.bashrc and /etc/bash.bashrc will be modified
+          :   to include openai environment variables. 
+          : - program files are stored in $SHAREDIR
+          : - executable 'dejavu' is installed in /usr/local/bin/
+          : - a symlink 'dv' is created for 'dejavu' in
+          :   /usr/local/bin if file does not already exist.
+  Synopsis: $PRG [-vqaVh]
+  Options : -v|--verbose   Verbose on (default)
+          : -q|--quiet     Verbose off. 
+          :                If environment key OPENAI_API_KEY
+          :                has already been set you will not 
+          :                be prompted to input it.
+          : -a|--no-apt    Do not execute apt during installation.
+          : -u|--upgrade   Upgrade $PRGNAME from git repository.
+          : -V|--version   Print $PRGNAME version.
+  Requires: python 3, pip, git, openai API key/s, root access for 
+          : installation.
+  See Also: https://openai.com/api/, $REPOSITORY
 EOT
 }
 
 main() {
-	if ((UID)); then
-		if [[ " $(id -Gn) " != *" sudo "* ]]; then
-			echo 2> "Installation of $PRGNAME requires root access."
-			dejavu_help
-			exit
-		fi
-	fi
+  if ((UID)); then
+    if [[ " $(id -Gn) " != *" sudo "* ]]; then
+      echo 2> "Installation of $PRGNAME requires root access."
+      dejavu_help
+      exit
+    fi
+  fi
 
-	cd "$PRGDIR"
-	
-	local verbose_=1 quiet_='' tempdir
-	while (($#)); do case "$1" in
-		-u|--upgrade|--update)
-										doUpgrade=1 ;;
-		-a|--no-apt)		doApt=0 ;;
-		-v|--verbose)		verbose_=1; quiet_='' ;;
-		-q|--quiet)			verbose_=0; quiet_='qq' ;;
-		-V|--version)		echo "$PRGNAME vs $Version"; return 0 ;;
-		-h|--help)			dejavu_help; return 0 ;;
-		-N|--no-op)			;;
-		-[uavqVhN]*)		#shellcheck disable=SC2046 # de-aggregate aggregated short options
-										set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
-		-?|--*)					echo 2> "Invalid option '$1'" ;;
-		*)							echo 2> "Invalid argument '$1'" ;;
-	esac; shift; done
+  cd "$PRGDIR"
+  
+  local verbose_=1 quiet_='' tempdir
+  while (($#)); do case "$1" in
+    -u|--upgrade|--update)
+                    doUpgrade=1 ;;
+    -a|--no-apt)    doApt=0 ;;
+    -v|--verbose)   verbose_=1; quiet_='' ;;
+    -q|--quiet)     verbose_=0; quiet_='qq' ;;
+    -V|--version)   echo "$PRGNAME vs $Version"; return 0 ;;
+    -h|--help)      dejavu_help; return 0 ;;
+    -N|--no-op)     ;;
+    -[uavqVhN]*)    #shellcheck disable=SC2046 # de-aggregate aggregated short options
+                    set -- '' $(printf -- "-%c " $(grep -o . <<<"${1:1}")) "${@:2}";;
+    -?|--*)         echo 2> "Invalid option '$1'" ;;
+    *)              echo 2> "Invalid argument '$1'" ;;
+  esac; shift; done
 
-	if ((doUpgrade)); then
-		tempdir="/tmp/$PRG-upgrade-$RANDOM"
-		git clone "$REPOSITORY" "$tempdir" || exit
-		exec "$tempdir/$PRG" \
-				-"$( ((verbose_)) && echo 'v' || echo 'q')" \
-				-"$( ((doApt)) && echo 'a' || echo 'N')"
-		exit
-	fi
+  if ((doUpgrade)); then
+    tempdir="/tmp/$PRG-upgrade-$RANDOM"
+    git clone "$REPOSITORY" "$tempdir" || exit
+    exec "$tempdir/$PRG" \
+        -"$( ((verbose_)) && echo 'v' || echo 'q')" \
+        -"$( ((doApt)) && echo 'a' || echo 'N')"
+    exit
+  fi
 
-	((verbose_)) && { echo "$PRGNAME vs $Version"; echo ''; }
-		
-	key="$OPENAI_API_KEY"
-	if [[ -z $key ]] || ((verbose_)); then
-		read -rep "Your openai API Key: " -i "$key" key
-		if [[ $key == '' ]]; then
-			echo 2> "You will require an API key from openai.com to run $PRG"
-			exit
-		fi 
-		echo
-	fi
-	OPENAI_API_KEY="$key"
+  ((verbose_)) && { echo "$PRGNAME vs $Version"; echo ''; }
+    
+  key="$OPENAI_API_KEY"
+  if [[ -z $key ]] || ((verbose_)); then
+    read -rep "Your openai API Key: " -i "$key" key
+    if [[ $key == '' ]]; then
+      echo 2> "You will require an API key from openai.com to run $PRG"
+      exit
+    fi 
+    echo
+  fi
+  OPENAI_API_KEY="$key"
 
-	key="$OPENAI_ORGANIZATION_ID"
-	if ((verbose_)); then
-		read -rep "Your openai Organization ID (if required): " -i "$key" key
-		echo
-	fi
-	OPENAI_ORGANIZATION_ID="$key"
+  key="$OPENAI_ORGANIZATION_ID"
+  if ((verbose_)); then
+    read -rep "Your openai Organization ID (if required): " -i "$key" key
+    echo
+  fi
+  OPENAI_ORGANIZATION_ID="$key"
 
-	if ((doApt)); then
-		sudo apt update -q"$quiet_"
-		sudo apt upgrade -q"$quiet_"
-		sudo apt install -q"$quiet_" python3 pip git
-	fi
-	sudo pip install -qq"$quiet_" --upgrade --no-color pip
-	sudo pip install -qq"$quiet_" --upgrade --no-color -r "$PRGDIR"/requirements.txt
+  if ((doApt)); then
+    sudo apt update -q"$quiet_"
+    sudo apt upgrade -q"$quiet_"
+    sudo apt install -q"$quiet_" python3 pip git
+  fi
+  sudo pip install -qq"$quiet_" --upgrade --no-color pip
+  sudo pip install -qq"$quiet_" --upgrade --no-color -r "$PRGDIR"/requirements.txt
 
-	sudo mkdir -p "$SHAREDIR"
-	sudo chmod 775 "$SHAREDIR"
-	cd "$SHAREDIR"
+  sudo mkdir -p "$SHAREDIR"
+  sudo chmod 775 "$SHAREDIR"
+  cd "$SHAREDIR"
 
 set +e
-	sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$PRGDIR"/webscrape.1.gz "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/awesome-gpt-prompts.json "$PRGDIR"/awesome_prompts.py "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/engines.json "$PRGDIR"/dejavu-command-help.json "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
-	sudo rsync -al "$PRGDIR"/*.dv "$SHAREDIR"/
-	sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
+  sudo cp -p "$PRGDIR"/LICENCE "$PRGDIR"/README.md "$PRGDIR"/dejavu.1.gz "$PRGDIR"/webscrape.1.gz "$SHAREDIR"/
+  sudo cp -p "$PRGDIR"/awesome-gpt-prompts.json "$PRGDIR"/awesome_prompts.py "$SHAREDIR"/
+  sudo cp -p "$PRGDIR"/engines.json "$PRGDIR"/dejavu-command-help.json "$SHAREDIR"/
+  sudo cp -p "$PRGDIR"/dejavu.version "$SHAREDIR"/
+  sudo cp -p "$PRGDIR"/requirements.txt "$SHAREDIR"/
+  sudo rsync -al "$PRGDIR"/*.dv "$SHAREDIR"/
+  sudo cp -p "$PRGDIR"/dv "$PRGDIR"/dv.install "$PRGDIR"/dejavu_std.py "$SHAREDIR"/
 set -e
-	sudo chmod 775 "$PRGDIR"/dv
-	
-	sudo mkdir -p $SHAREDIR/webscrape
-	sudo rsync -al --exclude="*.html" "$PRGDIR"/webscrape "$SHAREDIR"/
+  sudo chmod 775 "$PRGDIR"/dv
+  
+  sudo mkdir -p $SHAREDIR/webscrape
+  sudo rsync -al --exclude="*.html" "$PRGDIR"/webscrape "$SHAREDIR"/
 
-	sudo mkdir -p -m 755 /usr/local/bin
-	cd /usr/local/bin
-	sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
-	sudo ln -s --force "$SHAREDIR"/dv dv
-	sudo ln -s --force "$SHAREDIR"/dv dejavu
-	sudo ln -s --force "$SHAREDIR"/webscrape/webscrape webscrape
+  sudo mkdir -p -m 755 /usr/local/bin
+  cd /usr/local/bin
+  sudo rm -f /usr/local/bin/dv /usr/local/bin/dejavu
+  sudo ln -s --force "$SHAREDIR"/dv dv
+  sudo ln -s --force "$SHAREDIR"/dv dejavu
+  sudo ln -s --force "$SHAREDIR"/webscrape/webscrape webscrape
 
-	# manpages
-	cd "$SHAREDIR"
+  # manpages
+  cd "$SHAREDIR"
   sudo mkdir -p -m 0755 /usr/local/share/man/man1
   sudo rm -f /usr/local/man/man1/dv.1.gz /usr/local/man/man1/dejavu.1.gz
   sudo cp -p "$SHAREDIR"/dejavu.1.gz /usr/local/man/man1/dv.1.gz
@@ -142,39 +142,39 @@ set -e
   sudo cp -p "$SHAREDIR"/webscrape.1.gz /usr/local/man/man1/webscrape.1.gz
   sudo mandb -sq
 
-	# ~/.bashrc /etc/bash.bashrc
-	local tmpfile file
-	tmpfile="/tmp/$PRG-$RANDOM"
-	for file in "$HOME/.bashrc" /etc/bash.bashrc; do
-		((verbose_)) && echo "Modifying '$file'"
-		if [[ ! -f "$file" ]]; then
-			echo "# This file created by $PRG ($PRGNAME)" > "$file"
-			chmod 664 "$file"
-		fi
-		grep -v '^[[:blank:]]*OPENAI_API_KEY=\|^[[:blank:]]*OPENAI_ORGANIZATION_ID=\|^[[:blank:]]*export OPENAI_' "$file" \
-				>"$tmpfile"
-		(	echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" 
-			echo "export OPENAI_API_KEY"
-			if [[ -n $OPENAI_ORGANIZATION_ID ]]; then
-				echo "OPENAI_ORGANIZATION_ID=\"$OPENAI_ORGANIZATION_ID\""
-				echo "export OPENAI_ORGANIZATION_ID" 
-			fi	
-		) >>"$tmpfile"
-		sudo chmod --reference="$file" "$tmpfile"
-		sudo chown --reference="$file" "$tmpfile"
-		sudo mv --backup "$tmpfile" "$file" \
-				|| { echo 2> "'$tmpfile' could not be moved to '$file'!"; exit 1; }
-	done
-		
-	sudo touch "$SHAREDIR"/dv.log
-	sudo chmod 666 "$SHAREDIR"/dv.log
+  # ~/.bashrc /etc/bash.bashrc
+  local tmpfile file
+  tmpfile="/tmp/$PRG-$RANDOM"
+  for file in "$HOME/.bashrc" /etc/bash.bashrc; do
+    ((verbose_)) && echo "Modifying '$file'"
+    if [[ ! -f "$file" ]]; then
+      echo "# This file created by $PRG ($PRGNAME)" > "$file"
+      chmod 664 "$file"
+    fi
+    grep -v '^[[:blank:]]*OPENAI_API_KEY=\|^[[:blank:]]*OPENAI_ORGANIZATION_ID=\|^[[:blank:]]*export OPENAI_' "$file" \
+        >"$tmpfile"
+    ( echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" 
+      echo "export OPENAI_API_KEY"
+      if [[ -n $OPENAI_ORGANIZATION_ID ]]; then
+        echo "OPENAI_ORGANIZATION_ID=\"$OPENAI_ORGANIZATION_ID\""
+        echo "export OPENAI_ORGANIZATION_ID" 
+      fi  
+    ) >>"$tmpfile"
+    sudo chmod --reference="$file" "$tmpfile"
+    sudo chown --reference="$file" "$tmpfile"
+    sudo mv --backup "$tmpfile" "$file" \
+        || { echo 2> "'$tmpfile' could not be moved to '$file'!"; exit 1; }
+  done
+    
+  sudo touch "$SHAREDIR"/dv.log
+  sudo chmod 666 "$SHAREDIR"/dv.log
 
-	if ((verbose_)); then
-		echo
-		echo "$PRGNAME is installed."
-		echo "To run, exit this shell, reenter, then type 'dv' or 'dejavu'"
-		echo "Want to help develop $PRGNAME? Go here: $REPOSITORY"
-	fi
+  if ((verbose_)); then
+    echo
+    echo "$PRGNAME is installed."
+    echo "To run, exit this shell, reenter, then type 'dv' or 'dejavu'"
+    echo "Want to help develop $PRGNAME? Go here: $REPOSITORY"
+  fi
 }
 
 main "$@"
