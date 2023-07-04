@@ -179,11 +179,12 @@ def read_dvfile(dvfile: str) -> bool:
 def dvUsage():
   """ dv short invocation help """
   print('DéjàVu - GPT Terminal vs ' + Version)
-  print("Usage: " + ScriptName + """ [-vqlfxuV] [-c cmd] [dvfile]
-Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
- -l|--list      List dv scripts in '~/.dv/'.
+  print("Usage: " + ScriptName + f""" [-vqlfxuV] [-c cmd] [dvfile]
+Where 'dvfile' is a DéjàVu script file.dv. 
+Defaults to '~/.dv/default.dv'
+ -l|--list      List all DéjàVu scripts in '~/.dv/'.
  -a|--autosave on|off
-                On exit, save conversation to current dv script. Default is off.
+                If on, upon exit, append current conversation to current dv script. Default is off.
  -c|--cmd 'cmd' Execute 'cmd' on entry to DéjàVu.
  -x|--exit      Immediately exit DéjàVu after first command has been executed.
  -v|--verbose   Verbose on. Default is on.
@@ -191,6 +192,8 @@ Where 'dvfile' is a conversation script. Default '~/.dv/default.dv'
  -V|--version   Print DéjàVu version.
  -C|--no-color  Do not use color. Default is to use color.
  -u|--upgrade   Upgrade DéjàVu from git repository.
+                Git repository is set to:
+                  {REPOSITORY}
  --help         Full Help manpages.
 """)
 

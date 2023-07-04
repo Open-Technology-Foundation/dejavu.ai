@@ -172,8 +172,10 @@ set -e
   if ((verbose_)); then
     echo
     echo "$PRGNAME is installed."
-    echo "To run, exit this shell, reenter, then type 'dv' or 'dejavu'"
-    echo "Want to help develop $PRGNAME? Go here: $REPOSITORY"
+    echo "To run $PRGNAME, exit this shell, re-enter, then"
+    echo "  type 'dv' or 'dejavu'"
+    echo "Want to help develop $PRGNAME? Join here:"
+    echo "  $REPOSITORY"
   fi
 }
 
