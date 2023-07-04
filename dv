@@ -19,6 +19,7 @@ import os
 import datetime
 import pytz
 import time
+import random
 import re
 import readline
 import signal
@@ -29,18 +30,25 @@ import openai
 import tiktoken
 from colorama import Fore, Style
 
+"""
+Script name and directory is derived from actual basename of this script (argv0).
+"""
 ScriptName  = os.path.realpath(sys.argv.pop(0))
 ScriptDir   = os.path.dirname(ScriptName)
 ScriptName  = os.path.basename(ScriptName)
+""" If the script direcory is not present in the current PATH, then append it. """
 if ScriptDir not in sys.path: sys.path.append(ScriptDir)
 from dejavu_std import *
 from awesome_prompts import *
 
+""" Raw stdout Output flag; True == no color, default is False. """
 RawOutput = False
 
+""" The local user home directory is HOME+/.+ScriptName. It is created unconditionally.  """
 dvHome = f'{HOME}/.{ScriptName}'
 os.makedirs(dvHome, exist_ok=True)
-# Create dvHome dir contents if dvHome/default.dv does not exist.
+""" If the file dvHome/default.dv does not exist, then use this as a flag 
+that the directory is empty and copy all example .dv scripts to this directory. """
 if not os.path.exists(dvHome + '/default.dv'):
   printinfo(f'Welcome to DéjàVu, {USER.title()}.')
   if not copy_files_recursive(ScriptDir, dvHome, '*.dv', verbose=True):
@@ -51,8 +59,10 @@ if not os.path.exists(dvHome + '/default.dv'):
   string = re.sub(r'\n/USER_NAME \S+', '\n/USER_NAME ' + USER.upper(), string)
   writefile(dvHome + '/default.dv', string)
 
+""" Define cannonical repository URLs for dejavu """
 REPOSITORY = 'https://github.com/Open-Technology-Foundation/dejavu.ai.git'
-REPOSITORY_VERSION = "https://raw.githubusercontent.com/Open-Technology-Foundation/dejavu.ai/master/dejavu.version?xyz=420${RANDOM}"
+REPOSITORY_VERSION = f'https://raw.githubusercontent.com/Open-Technology-Foundation/dejavu.ai/master/dejavu.version?xyz=420{int(random.random()*1000000)}'
+""" Dejavu Version Check Flag, default False.  When set, this flag will trigger an install/upgrade process from the above repository URL. """
 UpdateCheck = False
 
 # Process command line and define ConvFile to use
@@ -61,11 +71,10 @@ Version = readfile(f'{ScriptDir}/dejavu.version').strip()
 # ----------------------------------------------------------------------------
 def find_dv_file(dvfilename: str, **kwargs) -> str:
   """
-  Finds/Creates fqfn for dv filename.
-
+  Finds/Creates fqfn for filenames with extension .dv.
   If not mustexist and file does not exist
-  then defaults to sys.path[0]+'/'+filename.ext
-  and creates file with contents of /usr/share/dejavu.ai/default.dv.
+    then defaults to sys.path[0]+'/'+filename.ext
+    and creates file with contents of /usr/share/dejavu.ai/default.dv.
 
   Return '' if fail.
   """
@@ -86,6 +95,7 @@ def find_dv_file(dvfilename: str, **kwargs) -> str:
     printinfo('New dv script ' + dvfilename + ' created.')
   return dvfilename
 
+
 ConvFile      = ''
 cmdTypeAhead  = []
 argvTypeAhead = []
@@ -97,7 +107,7 @@ AutoSave      = False
 
 # ----------------------------------------------------------------------------
 def read_dvfile(dvfile: str) -> bool:
-  """  Read .dv agent script """
+  """  Read a .dv script file. """
   global cmdTypeAhead, argvTypeAhead, Instructions, SYSTEM_NAME
   cmdTypeAhead = []; Instructions = []
   dvfile = find_dv_file(dvfile, mustexist=True, ext='.dv')
@@ -199,7 +209,7 @@ while len(sys.argv) > 0:
   elif sysargv in ['-q', '--quiet']:
     Verbose = 0; cmdEcho = 0
   elif sysargv in ['-l', '--list']:
-    printinfo(f'Dejavu conversation files in {dvHome}')
+    printinfo(f'Dejavu script files in {dvHome}')
     for listfile in os.listdir(dvHome):
       if listfile.endswith('.dv'):
         filesize = os.stat(f'{dvHome}/{listfile}').st_size / 1024
@@ -240,6 +250,11 @@ while len(sys.argv) > 0:
   else:
     ConvFile = sysargv
 
+""" 
+Intercept update instruction from command line 
+and update this program from the repository. 
+Exit after finishing.
+"""
 if updateDV:
   tempdir_upgrade = tempname('upgrade', '')
   os.makedirs(tempdir_upgrade, exist_ok=True)
@@ -255,6 +270,10 @@ if updateDV:
 
 
 # Conversation script validation and default ---------------------------------
+"""
+If a Conversation .dv Script has not been specified on the command line, 
+then ConvFile defaults to the file default.dv in the dvHome directory.
+"""
 if len(ConvFile) == 0:
   ConvFile = dvHome + '/default.dv'
 try:
@@ -265,6 +284,7 @@ try:
 except Exception as e:
   printerr(f'DéjàVu script "{ConvFile}" could not be created.', str(e))
   sys.exit(1)
+""" The ConvFile basename. """
 ConvFileName = os.path.basename(ConvFile)
 
 # ----------------------------------------------------------------------------
