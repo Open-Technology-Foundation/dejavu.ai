@@ -1,3 +1,7 @@
+   NOTE: THIS REPOSITORY IS NOW DEPRECATED.
+   
+   USE INSTEAD `dv2` at [dejavu2](https://github.com/Open-Technology-Foundation/dejavu2)
+
 # DéjàVu - GPT Terminal Chatbot and Scripting vs 0.9
 
 ## SYNOPSIS
